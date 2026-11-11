@@ -31,6 +31,7 @@ class Retrieved:
     attribution: str
     rrf_score: float
     rerank_score: float = 0.0
+    reranked: bool = True
     citation_id: int = 0
 
     @property
@@ -97,9 +98,22 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
             {**candidate.__dict__, "rerank_score": candidate.rrf_score}
             for candidate in candidates
         ]
-    kept = [item for item in reranked if item["rerank_score"] >= settings.min_rerank_score][
-        : settings.rerank_top_k
-    ]
+    # One passage per document: a second chunk of the same page wastes a citation
+    # slot and lowers precision without adding evidence.
+    seen_documents: set[str] = set()
+    deduped: list[dict[str, Any]] = []
+    for item in reranked:
+        document_id = str(item["document_id"])
+        if document_id in seen_documents:
+            continue
+        seen_documents.add(document_id)
+        deduped.append(item)
+
+    kept = [
+        item
+        for item in deduped
+        if item["rerank_score"] >= settings.min_rerank_score
+    ][: settings.rerank_top_k]
     if not kept:
         return RetrievalResult()
 
@@ -120,14 +134,22 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
                 attribution=item["attribution"],
                 rrf_score=float(item.get("rrf_score", 0.0)),
                 rerank_score=float(item.get("rerank_score", 0.0)),
+                reranked=bool(item.get("reranked", True)),
                 citation_id=index,
             )
         )
 
     top = retrieved[0].rerank_score
-    if top >= settings.min_answer_score + 2:
+    if retrieved[0].reranked:
+        if top >= settings.min_answer_score + 2:
+            confidence = "high"
+        elif top >= settings.min_answer_score:
+            confidence = "medium"
+        else:
+            confidence = "low"
+    elif top >= settings.rrf_high_score:
         confidence = "high"
-    elif top >= settings.min_answer_score:
+    elif top >= settings.rrf_medium_score:
         confidence = "medium"
     else:
         confidence = "low"

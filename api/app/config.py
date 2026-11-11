@@ -31,14 +31,20 @@ class Settings(BaseSettings):
     reranker_model: str = "cross-encoder/ms-marco-TinyBERT-L-2-v2"
 
     # Retrieval knobs. Kept explicit so the evaluation report can cite them.
-    # The free instance has 512 MB. Two ONNX models plus the interpreter
-    # can cross that line, so the cross-encoder is switchable per host.
-    rerank_enabled: bool = False
+    # With bge-small the encoder peaks near 110 MB, so the TinyBERT cross-encoder
+    # fits inside 512 MB again and precision matters more than the saving.
+    rerank_enabled: bool = True
 
-    candidate_limit: int = 30
-    rerank_top_k: int = 6
-    min_rerank_score: float = -6.0
-    min_answer_score: float = -4.0
+    candidate_limit: int = 40
+    # Three citations keeps the answer tight; six was diluting citation precision.
+    rerank_top_k: int = 3
+    # Cross-encoder logits, roughly -11..+11 on this TinyBERT.
+    min_rerank_score: float = -8.0
+    min_answer_score: float = -2.0
+    # Reciprocal-rank fusion never exceeds 2/61, so the hybrid fallback needs its
+    # own scale instead of comparing against cross-encoder logits.
+    rrf_high_score: float = 0.032
+    rrf_medium_score: float = 0.016
 
     # Rate limits (per user, sliding window in Postgres).
     rate_limit_requests: int = 20

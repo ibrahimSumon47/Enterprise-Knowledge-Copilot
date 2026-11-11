@@ -26,10 +26,9 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
-      # 512 MB cannot hold the encoder and the cross-encoder at once.
-      # Set to 1 on an instance with more memory to restore full reranking.
+      # bge-small leaves room for the TinyBERT cross-encoder inside 512 MB.
       - key: EKC_RERANK_ENABLED
-        value: "0"
+        value: "1"
       - key: SUPABASE_JWT_AUD
         value: authenticated
       - key: ALLOWED_ORIGINS

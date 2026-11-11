@@ -98,7 +98,10 @@ def _rrf_fallback(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     and the response still carries citations either way.
     """
     ordered = sorted(candidates, key=lambda item: item.get("rrf_score", 0.0), reverse=True)
-    return [{**candidate, "rerank_score": float(candidate.get("rrf_score", 0.0))} for candidate in ordered]
+    return [
+        {**candidate, "rerank_score": float(candidate.get("rrf_score", 0.0)), "reranked": False}
+        for candidate in ordered
+    ]
 
 
 def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) -> list[dict[str, Any]]:
@@ -114,7 +117,7 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
     if hasattr(model, "predict"):  # injected encoder in tests
         scores = model.predict([(question, _rerank_text(candidate)) for candidate in candidates])
         scored = [
-            {**candidate, "rerank_score": float(score)}
+            {**candidate, "rerank_score": float(score), "reranked": True}
             for candidate, score in zip(candidates, scores, strict=True)
         ]
         scored.sort(key=lambda item: item["rerank_score"], reverse=True)
@@ -131,7 +134,7 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
         return _rrf_fallback(candidates)
     by_index = {int(item["id"]): float(item["score"]) for item in ranked}
     scored = [
-        {**candidate, "rerank_score": by_index.get(index, float("-inf"))}
+        {**candidate, "rerank_score": by_index.get(index, float("-inf")), "reranked": True}
         for index, candidate in enumerate(candidates)
     ]
     scored.sort(key=lambda item: item["rerank_score"], reverse=True)

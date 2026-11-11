@@ -31,18 +31,25 @@ export default function ChatPage() {
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [busy, setBusy] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const supabase = supabaseBrowser();
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        router.replace("/login");
-        return;
-      }
-      setToken(data.session.access_token);
-      setEmail(data.session.user.email ?? null);
-    });
+    try {
+      const supabase = supabaseBrowser();
+      supabase.auth.getSession().then(({ data }) => {
+        if (!data.session) {
+          router.replace("/login");
+          return;
+        }
+        setToken(data.session.access_token);
+        setEmail(data.session.user.email ?? null);
+      });
+    } catch (caught) {
+      setConfigError(
+        caught instanceof Error ? caught.message : "Supabase is not configured on this deployment",
+      );
+    }
   }, [router]);
 
   useEffect(() => {
@@ -97,6 +104,14 @@ export default function ChatPage() {
             <LogOut size={14} /> Sign out
           </button>
         </header>
+
+        {configError ? (
+          <p className="mt-4 rounded-lg border border-[var(--warn)] px-3 py-2 text-xs leading-6 text-[var(--warn)]">
+            <AlertTriangle className="mr-1 inline" size={13} />
+            {configError}. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to this
+            deployment, then reload.
+          </p>
+        ) : null}
 
         <div className="panel mt-5 flex-1 space-y-5 overflow-y-auto p-5">
           {turns.length === 0 ? (

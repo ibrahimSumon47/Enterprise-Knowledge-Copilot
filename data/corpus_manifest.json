@@ -1,0 +1,18 @@
+{
+  "documents": 754,
+  "synthetic": 12,
+  "by_access_level": {
+    "public": 499,
+    "department": 243,
+    "confidential": 12
+  },
+  "by_department": {
+    "engineering": 9,
+    "security": 194,
+    "people": 4,
+    "finance": 48
+  },
+  "words": 871422,
+  "source": "GitLab Handbook (public, CC BY-SA 4.0)",
+  "notice": "Access labels are assigned by this project to demonstrate access control."
+}

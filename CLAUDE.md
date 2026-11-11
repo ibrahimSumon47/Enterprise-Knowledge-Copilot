@@ -1,0 +1,1 @@
+Read `AGENTS.md` first. It is the single source of truth for rules, stack, commands and the definition of done. Nothing in this file overrides it.

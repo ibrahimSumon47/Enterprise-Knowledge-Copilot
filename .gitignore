@@ -5,7 +5,6 @@ node_modules/
 # next
 .next/
 out/
-next-env.d.ts
 
 # env
 .env
@@ -17,8 +16,12 @@ next-env.d.ts
 # vercel
 .vercel
 
-# supabase CLI cache
+# supabase CLI cache, local corpus checkout
 supabase/.temp/
+.corpus-src/
+.venv/
+__pycache__/
+*.pyc
 
 # agent / editor
 .freebuff/
@@ -27,11 +30,8 @@ supabase/.temp/
 .DS_Store
 Thumbs.db
 
-# python (FastAPI service comes later)
-__pycache__/
-.venv/
-venv/
-*.pyc
-
-# logs
+# logs and test output
 *.log
+coverage/
+.pytest_cache/
+.ruff_cache/

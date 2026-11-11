@@ -1,0 +1,158 @@
+"""Permission-aware retrieval: query embedding, hybrid SQL search, rerank, grade."""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any
+
+from . import db
+from .config import Settings
+from .embeddings import embed_query, rerank
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Retrieved:
+    """A chunk that survived retrieval and reranking."""
+
+    chunk_id: str
+    document_id: str
+    title: str
+    heading: str | None
+    content: str
+    access_level: str
+    department: str | None
+    is_synthetic: bool
+    source_url: str | None
+    license: str
+    attribution: str
+    rrf_score: float
+    rerank_score: float = 0.0
+    citation_id: int = 0
+
+    @property
+    def label(self) -> str:
+        parts = [self.title]
+        if self.heading:
+            parts.append(self.heading)
+        if self.is_synthetic:
+            parts.append("synthetic")
+        return " · ".join(parts)
+
+
+@dataclass
+class RetrievalResult:
+    candidates: list[Retrieved] = field(default_factory=list)
+    top_score: float | None = None
+    confidence: str = "low"
+
+    @property
+    def usable(self) -> bool:
+        return bool(self.candidates)
+
+
+async def retrieve(question: str, role: str, department: str | None, settings: Settings) -> RetrievalResult:
+    """Run the full retrieval path. The access predicate is applied by SQL."""
+    embedding = embed_query(question, settings)
+    rows = await db.search_chunks(
+        embedding=embedding,
+        query_text=question,
+        role=role,
+        department=department,
+        limit=settings.candidate_limit,
+    )
+
+    candidates = [
+        Retrieved(
+            chunk_id=str(row["chunk_id"]),
+            document_id=str(row["document_id"]),
+            title=str(row["title"]),
+            heading=row["heading"],
+            content=str(row["content"]),
+            access_level=str(row["access_level"]),
+            department=row["department"],
+            is_synthetic=bool(row["is_synthetic"]),
+            source_url=row["source_url"],
+            license=str(row["license"]),
+            attribution=str(row["attribution"]),
+            rrf_score=float(row["rrf_score"]),
+        )
+        for row in rows
+    ]
+
+    if not candidates:
+        return RetrievalResult()
+
+    reranked = rerank(question, [candidate.__dict__ for candidate in candidates], settings)
+    kept = [item for item in reranked if item["rerank_score"] >= settings.min_rerank_score][
+        : settings.rerank_top_k
+    ]
+    if not kept:
+        return RetrievalResult()
+
+    retrieved: list[Retrieved] = []
+    for index, item in enumerate(kept, start=1):
+        retrieved.append(
+            Retrieved(
+                chunk_id=item["chunk_id"],
+                document_id=item["document_id"],
+                title=item["title"],
+                heading=item.get("heading"),
+                content=item["content"],
+                access_level=item["access_level"],
+                department=item.get("department"),
+                is_synthetic=bool(item.get("is_synthetic")),
+                source_url=item.get("source_url"),
+                license=item["license"],
+                attribution=item["attribution"],
+                rrf_score=float(item.get("rrf_score", 0.0)),
+                rerank_score=float(item.get("rerank_score", 0.0)),
+                citation_id=index,
+            )
+        )
+
+    top = retrieved[0].rerank_score
+    if top >= settings.min_answer_score + 2:
+        confidence = "high"
+    elif top >= settings.min_answer_score:
+        confidence = "medium"
+    else:
+        confidence = "low"
+
+    return RetrievalResult(candidates=retrieved, top_score=top, confidence=confidence)
+
+
+def build_context(candidates: list[Retrieved], max_chars: int = 5200) -> str:
+    """Number the passages so the model can cite them as [n]."""
+    lines: list[str] = []
+    used = 0
+    for candidate in candidates:
+        block = (
+            f"[{candidate.citation_id}] {candidate.label}\n"
+            f"{(candidate.content or '').strip()[:1600]}\n"
+        )
+        if used + len(block) > max_chars:
+            break
+        lines.append(block)
+        used += len(block)
+    return "\n".join(lines)
+
+
+def citation_payload(candidate: Retrieved) -> dict[str, Any]:
+    """Shape returned to the web app and stored on the message."""
+    return {
+        "id": candidate.citation_id,
+        "title": candidate.title,
+        "heading": candidate.heading,
+        "document_id": candidate.document_id,
+        "chunk_id": candidate.chunk_id,
+        "snippet": (candidate.content or "")[:400],
+        "source_url": candidate.source_url,
+        "license": candidate.license,
+        "attribution": candidate.attribution,
+        "access_level": candidate.access_level,
+        "is_synthetic": candidate.is_synthetic,
+        "score": round(candidate.rerank_score, 3),
+    }

@@ -1,0 +1,7 @@
+project_id = "enterprise-knowledge-copilot"
+
+[db]
+major_version = 17
+
+[db.pooler]
+enabled = false

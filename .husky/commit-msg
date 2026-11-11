@@ -1,0 +1,8 @@
+#!/bin/sh
+# Strips attribution trailers the brief forbids. Runs on every commit.
+msg_file="$1"
+tmp="$(mktemp)"
+grep -viE '^(co-authored-by|signed-off-by|generated with|🤖)' "$msg_file" > "$tmp" || true
+# collapse trailing blank lines left behind
+printf '%s\n' "$(cat "$tmp")" > "$msg_file"
+rm -f "$tmp"

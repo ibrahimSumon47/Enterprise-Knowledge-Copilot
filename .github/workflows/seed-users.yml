@@ -1,0 +1,74 @@
+name: Seed role accounts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
+    steps:
+      - name: Create the seven role accounts (idempotent)
+        run: |
+          set -euo pipefail
+          if [ -z "${EKC_DEMO_PASSWORD:-}" ]; then
+            echo "EKC_DEMO_PASSWORD secret is missing" >&2
+            exit 1
+          fi
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+
+          url = os.environ["SUPABASE_URL"].rstrip("/")
+          key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+          password = os.environ["EKC_DEMO_PASSWORD"]
+          accounts = [
+              ("guest@ekc.local", "Guest Reviewer", "guest", None),
+              ("employee@ekc.local", "Employee Reviewer", "employee", None),
+              ("engineering@ekc.local", "Engineering Reviewer", "engineering", "engineering"),
+              ("security@ekc.local", "Security Reviewer", "security", "security"),
+              ("hr@ekc.local", "People Reviewer", "hr", "people"),
+              ("finance@ekc.local", "Finance Reviewer", "finance", "finance"),
+              ("admin@ekc.local", "Administrator", "admin", None),
+          ]
+
+          for email, name, role, department in accounts:
+              payload = json.dumps({
+                  "email": email,
+                  "password": password,
+                  "email_confirm": True,
+                  "user_metadata": {"full_name": name},
+              }).encode()
+              req = urllib.request.Request(
+                  f"{url}/auth/v1/admin/users",
+                  data=payload,
+                  method="POST",
+                  headers={"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as res:
+                      print(email, "created", res.status)
+              except urllib.error.HTTPError as exc:
+                  body = exc.read().decode()[:200]
+                  print(email, "exists or error", exc.code, body[:80])
+          PY
+      - name: Promote roles in profiles
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          update public.profiles set role = 'guest', department = null where email = 'guest@ekc.local';
+          update public.profiles set role = 'employee', department = null where email = 'employee@ekc.local';
+          update public.profiles set role = 'engineering', department = 'engineering' where email = 'engineering@ekc.local';
+          update public.profiles set role = 'security', department = 'security' where email = 'security@ekc.local';
+          update public.profiles set role = 'hr', department = 'people' where email = 'hr@ekc.local';
+          update public.profiles set role = 'finance', department = 'finance' where email = 'finance@ekc.local';
+          update public.profiles set role = 'admin', department = null where email = 'admin@ekc.local';
+          select email, role, department from public.profiles order by role;
+          SQL

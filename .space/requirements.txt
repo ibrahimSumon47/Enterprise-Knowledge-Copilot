@@ -1,0 +1,15 @@
+# API service — FastAPI on a free Hugging Face Space (CPU only).
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.5
+pydantic-settings==2.7.1
+asyncpg==0.30.0
+httpx==0.28.1
+PyJWT[crypto]==2.10.1
+langgraph==0.2.60
+numpy==2.2.1
+python-multipart==0.0.20
+
+# Retrieval models. CPU wheels only; no CUDA downloads.
+torch==2.5.1
+sentence-transformers==3.3.1

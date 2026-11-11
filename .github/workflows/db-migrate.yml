@@ -1,0 +1,42 @@
+name: DB migrate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - ".github/workflows/db-migrate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Apply migrations
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_DB_URL}" ]; then
+            echo "SUPABASE_DB_URL secret is missing" >&2
+            exit 1
+          fi
+          psql --version
+          for file in $(ls supabase/migrations/*.sql | sort); do
+            echo "applying $file"
+            psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Verify schema
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c \
+            "select table_name from information_schema.tables where table_schema='public' order by 1;"
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c \
+            "select extname from pg_extension where extname in ('vector','pg_trgm');"

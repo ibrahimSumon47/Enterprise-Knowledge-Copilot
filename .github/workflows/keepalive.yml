@@ -1,0 +1,25 @@
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "17 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Keep the free project active and clean old rows
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c "select now(), 'keepalive';"
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c \
+            "delete from public.rate_events where created_at < now() - interval '2 days';"
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c \
+            "delete from public.answer_cache where created_at < now() - interval '7 days';"

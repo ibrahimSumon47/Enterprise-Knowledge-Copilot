@@ -35,7 +35,7 @@
       "description": "Permission-aware hybrid retrieval with the access predicate inside SQL",
       "acceptance": "search_chunks filters by role and department; leakage tests return 0",
       "status": "partial",
-      "evidence": "access predicate lives in search_chunks and RLS; corpus indexed (754 docs, 12032 chunks) but the zero-leakage measurement needs a working answer path"
+      "evidence": "the predicate lives inside search_chunks and in RLS; measured over REST as guest, employee and admin: 0 rows above the allowance (guest sees 495 public documents, admin sees 750 including the 12 synthetic confidential ones)"
     },
     {
       "id": "F-006",
@@ -70,7 +70,7 @@
       "description": "Chat UI with streaming, citation chips and source drawer",
       "acceptance": "signed-in user asks a question and sees citations open the drawer",
       "status": "partial",
-      "evidence": "app/chat/page.tsx renders answers, citation cards and honest error states; live answers blocked while the 512 MB host restarts under both ONNX models"
+      "evidence": "app/chat/page.tsx renders answers, citation cards and honest error states; after the encoder swap POST /chat returns 200 in 5.5 s with no restart, but retrieval is empty until the re-embed finishes"
     },
     {
       "id": "F-011",

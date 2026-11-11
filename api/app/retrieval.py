@@ -87,9 +87,16 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
     if not candidates:
         return RetrievalResult()
 
-    reranked = await asyncio.to_thread(
-        rerank, question, [candidate.__dict__ for candidate in candidates], settings
-    )
+    if settings.rerank_enabled:
+        reranked = await asyncio.to_thread(
+            rerank, question, [candidate.__dict__ for candidate in candidates], settings
+        )
+    else:
+        # Hybrid order only. Used where the host cannot fit a second model.
+        reranked = [
+            {**candidate.__dict__, "rerank_score": candidate.rrf_score}
+            for candidate in candidates
+        ]
     kept = [item for item in reranked if item["rerank_score"] >= settings.min_rerank_score][
         : settings.rerank_top_k
     ]

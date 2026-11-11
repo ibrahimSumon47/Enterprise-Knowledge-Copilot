@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     reranker_model: str = "cross-encoder/ms-marco-TinyBERT-L-2-v2"
 
     # Retrieval knobs. Kept explicit so the evaluation report can cite them.
+    # The free instance has 512 MB. Two ONNX models plus the interpreter
+    # can cross that line, so the cross-encoder is switchable per host.
+    rerank_enabled: bool = True
+
     candidate_limit: int = 30
     rerank_top_k: int = 6
     min_rerank_score: float = -6.0

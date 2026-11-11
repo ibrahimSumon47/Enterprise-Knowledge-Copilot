@@ -26,6 +26,10 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # 512 MB cannot hold the encoder and the cross-encoder at once.
+      # Set to 1 on an instance with more memory to restore full reranking.
+      - key: EKC_RERANK_ENABLED
+        value: "0"
       - key: SUPABASE_JWT_AUD
         value: authenticated
       - key: ALLOWED_ORIGINS

@@ -35,9 +35,15 @@ class Settings(BaseSettings):
     # fits inside 512 MB again and precision matters more than the saving.
     rerank_enabled: bool = True
 
-    candidate_limit: int = 40
+    # The cross-encoder scores every candidate on a 0.1 CPU instance, so the pool
+    # is the main latency lever: 24 keeps the recall that mattered at 40 while
+    # roughly halving the scoring work.
+    candidate_limit: int = 24
     # Three citations keeps the answer tight; six was diluting citation precision.
     rerank_top_k: int = 3
+    # 96 tokens covers the opening of a passage, where the answer sentence sits.
+    # 256 was buying tail context the citation snippet never shows.
+    rerank_max_length: int = 96
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

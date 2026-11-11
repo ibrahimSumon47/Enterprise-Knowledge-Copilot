@@ -11,7 +11,6 @@ permissions:
 jobs:
   ping:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Keep the free project active and clean old rows
         env:

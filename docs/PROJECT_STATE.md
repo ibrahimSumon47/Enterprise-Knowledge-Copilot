@@ -138,4 +138,4 @@ hold torch plus two transformer models.
   returned two citations in 2.1 s.
 - Login on the web: impossible until the two Supabase variables reach Vercel.
 - Evaluation: `docs/reports/eval.json` and `eval.md` now hold the full run --
-  84 questions, hit@k 0.217, MRR 0.21, citation precision 0.173, refusal accuracy 0.524, p95 2193 ms, leakage 0.
+  84 questions, hit@k 0.275, MRR 0.275, citation precision 0.22, refusal accuracy 0.571, p95 6942 ms, leakage 0.

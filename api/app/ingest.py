@@ -125,7 +125,11 @@ def _split_long(body: str) -> list[str]:
 
 async def _set_job(job_id: str, **fields: Any) -> None:
     assignments = ", ".join(f"{key} = ${index + 2}" for index, key in enumerate(fields))
-    values = list(fields.values())
+    # asyncpg hands parameters straight to Postgres; json/jsonb columns want text.
+    values = [
+        json.dumps(value) if key == "stats" and isinstance(value, dict) else value
+        for key, value in fields.items()
+    ]
     await db.pool().execute(
         f"update public.ingest_jobs set {assignments}, updated_at = now() where id = $1",
         job_id,

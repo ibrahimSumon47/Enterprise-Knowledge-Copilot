@@ -1,0 +1,5 @@
+Contact: https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot/security/advisories/new
+Expires: 2027-11-11T00:00:00.000Z
+Preferred-Languages: en, bn
+Canonical: https://enterprise-knowledge-copilot-wine.vercel.app/.well-known/security.txt
+Policy: https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot/blob/main/SECURITY.md

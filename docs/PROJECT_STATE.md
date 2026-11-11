@@ -64,8 +64,10 @@ report, and it is the only phase that fails (`docs/reports/eval.json` and
 - API service: `api/` — JWT/JWKS auth, rate limiting, hash-chained audit, provider router
   (Groq → Gemini → mock) with circuit breaker, cross-encoder rerank, citation verification,
   PII redaction, SSE streaming endpoint, admin and evaluation endpoints.
-- Evaluation: `eval/golden_set.jsonl` (84 questions: answerable, unanswerable, Bangla,
-  multi-document, cross-role) and `eval/run_eval.py` with a hard leakage gate.
+- Evaluation: `docs/reports/eval.json`, `eval.md` and `eval_comparison.md` hold
+  the full run -- 84 questions, hit@k 0.275, MRR 0.275, citation precision 0.22,
+  refusal accuracy 0.571, p95 6942 ms, leakage 0. The pre-rerank run is kept in
+  `eval_baseline.json`.
 
 ## Deployment path
 

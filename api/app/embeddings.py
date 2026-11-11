@@ -159,7 +159,7 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
 def _rerank_text(candidate: dict[str, Any]) -> str:
     heading = candidate.get("heading") or ""
     content = candidate.get("content") or ""
-    return f"{candidate.get('title', '')} — {heading}\n{content}"[:900]
+    return f"{candidate.get('title', '')} — {heading}\n{content}"[:1400]
 
 
 def embedding_dims() -> int:

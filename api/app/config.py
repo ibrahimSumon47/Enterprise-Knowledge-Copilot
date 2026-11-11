@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     candidate_limit: int = 24
     # Three citations keeps the answer tight; six was diluting citation precision.
     rerank_top_k: int = 3
-    # 96 tokens covers the opening of a passage, where the answer sentence sits.
-    # 256 was buying tail context the citation snippet never shows.
-    rerank_max_length: int = 96
+    # 96 tokens cut too much of the passage and cost hit@k; 192 keeps the policy
+    # sentence in view at 0.75 of the 256-token scoring cost.
+    rerank_max_length: int = 192
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

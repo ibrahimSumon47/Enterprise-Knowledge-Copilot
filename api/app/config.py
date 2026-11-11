@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     # Retrieval knobs. Kept explicit so the evaluation report can cite them.
     # The free instance has 512 MB. Two ONNX models plus the interpreter
     # can cross that line, so the cross-encoder is switchable per host.
-    rerank_enabled: bool = True
+    rerank_enabled: bool = False
 
     candidate_limit: int = 30
     rerank_top_k: int = 6

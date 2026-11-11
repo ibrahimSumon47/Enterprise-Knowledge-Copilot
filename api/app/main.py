@@ -109,7 +109,7 @@ async def hardening(request: Request, call_next):
 
 
 @app.get("/health", tags=["ops"])
-async def health() -> dict[str, str]:
+async def health() -> dict[str, Any]:
     return {"status": "ok", "service": "ekc-api", "rss_mb": _rss_mb()}
 
 

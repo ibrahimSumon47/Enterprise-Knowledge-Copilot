@@ -13,9 +13,7 @@ from typing import Any, TypedDict
 
 from langgraph.graph import END, StateGraph
 
-from . import audit
 from .config import Settings
-from .embeddings import rerank  # re-exported for tests
 from .providers import ProviderError, ProviderRouter
 from .retrieval import Retrieved, build_context, citation_payload, retrieve
 

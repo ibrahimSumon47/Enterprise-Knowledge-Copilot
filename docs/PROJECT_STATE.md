@@ -63,6 +63,13 @@ Spaces on free cpu-basic requires a PRO subscription."*
 - Evaluation: `eval/golden_set.jsonl` (84 questions: answerable, unanswerable, Bangla,
   multi-document, cross-role) and `eval/run_eval.py` with a hard leakage gate.
 
+## Known red checks (must be fixed before calling this done)
+
+1. **Vercel production deploy errors immediately (2s runtime).** The last good deployment still serves the alias, so `/` returns 200 but `/.well-known/security.txt` is 404 and none of the new pages ship. Suspected cause: the `ignoreCommand` script (`scripts/vercel-ignore.sh`) or a project-level build setting, not the Next build itself — `pnpm build` passes locally.
+2. **CI `web` job fails on `pnpm audit --audit-level high`**: after upgrading zod to 4.6.7, 6 advisories remain (4 moderate, 2 critical) in transitive packages. Identify them with `pnpm audit --json` and upgrade or pin the owning packages; do not lower the audit level.
+3. **CI `api` job** and **`secrets-scan` job** fail — read `gh run view <id> --log-failed`. The API job installs test deps without torch by design; the failure is in lint/tests/dep-audit, not in the service code.
+4. **History was rewritten once** to remove attribution trailers from the four commits that predated the rule (force-pushed to `main`). Commit-hygiene is now green.
+
 ## Next step (exact)
 
 1. Choose a free Docker host for `api/` (see Blocked) and set `NEXT_PUBLIC_API_BASE_URL`

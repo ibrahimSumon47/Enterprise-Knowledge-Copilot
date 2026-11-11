@@ -7,7 +7,6 @@ import json
 import logging
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
 from typing import Any, AsyncIterator
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -20,7 +19,6 @@ from .config import Settings, get_settings
 from .pipeline import answer_question, build_graph, stream_tokens
 from .providers import build_router
 from .redact import hash_identifier
-from .retrieval import citation_payload
 from .schemas import (
     AuditVerifyResponse,
     ChatRequest,

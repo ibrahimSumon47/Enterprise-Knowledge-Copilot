@@ -43,7 +43,8 @@ Re-running is safe: documents upsert by slug, chunks are replaced.
 
 **Chat returns 502 and `/health` is briefly empty.** The instance restarted,
 usually memory. Confirm with `/health` → `rss_mb`. Keep
-`EKC_RERANK_ENABLED=0` on 512 MB hosts; raise memory or re-enable the reranker
+`EKC_RERANK_ENABLED=1` on the 512 MB host: bge-small leaves room for the TinyBERT
+reranker (about 380 MB RSS with both loaded). Set it to 0 only to debug memory
 only where it fits.
 
 **`/ready` fails.** Read the payload: it names the failing check (pool, schema,

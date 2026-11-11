@@ -89,10 +89,11 @@ hold torch plus two transformer models.
    encoder is English-only. Verified: `POST /chat` returned 200 in 5.5 s with no
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
-3. **Answer quality, not plumbing.** The full run is published and leakage is 0,
-   but hit@k 0.217 and citation precision 0.173 are low. The reranker is off to
-   stay inside 512 MB and the encoder is English-only, so precision is the next
-   thing to improve, not the gate.
+3. **Answer quality.** Reranking is back on and the full run improved: hit@k
+   0.275 (was 0.217), citation precision 0.22
+   (was 0.173), refusal accuracy 0.571,
+   leakage still 0. p95 latency rose to 6942 ms because the
+   cross-encoder scores 40 candidates on 0.1 CPU; trimming that pool is next.
 
 ## Resolved since the previous snapshot
 

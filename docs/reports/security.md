@@ -21,7 +21,7 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
 
 1. **Availability, not confidentiality.** The free API instance exceeds 512 MB
    when both ONNX models load, so chat can return 502 while the service
-   restarts. Retrieval is now hybrid-only by default (`EKC_RERANK_ENABLED=0`);
+   restarts. Retrieval reranks with the TinyBERT cross-encoder (`EKC_RERANK_ENABLED=1`);
    turning the reranker back on requires an instance with more memory.
 2. **Demo accounts share a password.** Stored as a GitHub secret and used only
    for review. Rotate with `gh workflow run seed-users.yml` before any real use.

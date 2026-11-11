@@ -35,7 +35,7 @@
       "description": "Permission-aware hybrid retrieval with the access predicate inside SQL",
       "acceptance": "search_chunks filters by role and department; leakage tests return 0",
       "status": "pass",
-      "evidence": "predicate inside search_chunks plus RLS; full run: 84 questions, hit@k 0.217, MRR 0.21, citation precision 0.173, refusal accuracy 0.524, p95 2193 ms, leakage 0"
+      "evidence": "predicate inside search_chunks plus RLS; cross-encoder rerank restored, full run: 84 questions, hit@k 0.275, MRR 0.275, precision 0.22, leakage 0 (baseline 0.217/0.173)"
     },
     {
       "id": "F-006",
@@ -63,7 +63,7 @@
       "description": "Evaluation harness with 84 questions and a zero-leakage gate",
       "acceptance": "eval/run_eval.py --subset --offline runs in CI and writes docs/reports/eval.json",
       "status": "pass",
-      "evidence": "eval/run_eval.py full run wrote docs/reports/eval.json and eval.md: 84 questions, hit@k 0.217, MRR 0.21, citation precision 0.173, refusal accuracy 0.524, p95 2193 ms, leakage 0"
+      "evidence": "full run wrote eval.json, eval.md and eval_comparison.md: 84 questions, hit@k 0.275, refusal accuracy 0.571, p95 6942 ms, leakage 0"
     },
     {
       "id": "F-010",

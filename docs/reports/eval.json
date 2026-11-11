@@ -2,13 +2,13 @@
   "mode": "full",
   "questions": 84,
   "summary": {
-    "hit@k": 0.217,
-    "MRR": 0.21,
-    "citation_precision": 0.173,
+    "hit@k": 0.275,
+    "MRR": 0.275,
+    "citation_precision": 0.22,
     "faithfulness": 1.0,
-    "refusal_accuracy": 0.524,
-    "p50_latency_ms": 712,
-    "p95_latency_ms": 2193,
+    "refusal_accuracy": 0.571,
+    "p50_latency_ms": 4404,
+    "p95_latency_ms": 6942,
     "permission_leakage": 0
   },
   "results": [
@@ -22,8 +22,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 7546,
-      "answer_len": 769
+      "latency_ms": 10573,
+      "answer_len": 624
     },
     {
       "id": "a02",
@@ -35,7 +35,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1547,
+      "latency_ms": 3194,
       "answer_len": 49
     },
     {
@@ -48,7 +48,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1046,
+      "latency_ms": 2334,
       "answer_len": 49
     },
     {
@@ -61,8 +61,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2230,
-      "answer_len": 976
+      "latency_ms": 5849,
+      "answer_len": 742
     },
     {
       "id": "a05",
@@ -70,12 +70,12 @@
       "role": "employee",
       "hit": 1,
       "rr": 1.0,
-      "precision": 0.75,
+      "precision": 1.0,
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1199,
-      "answer_len": 404
+      "latency_ms": 8201,
+      "answer_len": 473
     },
     {
       "id": "a06",
@@ -87,24 +87,11 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1765,
-      "answer_len": 666
+      "latency_ms": 5288,
+      "answer_len": 397
     },
     {
       "id": "a07",
-      "category": "answerable",
-      "role": "employee",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
-      "faithful": 1,
-      "refusal_ok": 0,
-      "leaks": 0,
-      "latency_ms": 1375,
-      "answer_len": 49
-    },
-    {
-      "id": "a08",
       "category": "answerable",
       "role": "employee",
       "hit": 1,
@@ -113,8 +100,21 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1546,
-      "answer_len": 624
+      "latency_ms": 5304,
+      "answer_len": 580
+    },
+    {
+      "id": "a08",
+      "category": "answerable",
+      "role": "employee",
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
+      "faithful": 1,
+      "refusal_ok": 0,
+      "leaks": 0,
+      "latency_ms": 1648,
+      "answer_len": 49
     },
     {
       "id": "a09",
@@ -126,7 +126,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 997,
+      "latency_ms": 3346,
       "answer_len": 49
     },
     {
@@ -139,34 +139,34 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 849,
+      "latency_ms": 3475,
       "answer_len": 49
     },
     {
       "id": "a11",
       "category": "answerable",
       "role": "engineering",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1060,
-      "answer_len": 49
+      "latency_ms": 5414,
+      "answer_len": 759
     },
     {
       "id": "a12",
       "category": "answerable",
       "role": "engineering",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 0.5,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1263,
-      "answer_len": 49
+      "latency_ms": 5642,
+      "answer_len": 655
     },
     {
       "id": "a13",
@@ -178,7 +178,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 617,
+      "latency_ms": 3092,
       "answer_len": 49
     },
     {
@@ -191,7 +191,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2193,
+      "latency_ms": 2496,
       "answer_len": 49
     },
     {
@@ -204,7 +204,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 519,
+      "latency_ms": 5033,
       "answer_len": 49
     },
     {
@@ -217,8 +217,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1279,
-      "answer_len": 535
+      "latency_ms": 6541,
+      "answer_len": 510
     },
     {
       "id": "a17",
@@ -230,7 +230,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2047,
+      "latency_ms": 6154,
       "answer_len": 49
     },
     {
@@ -243,7 +243,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 464,
+      "latency_ms": 5699,
       "answer_len": 49
     },
     {
@@ -256,7 +256,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 449,
+      "latency_ms": 3965,
       "answer_len": 49
     },
     {
@@ -269,21 +269,21 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 0,
-      "answer_len": 0
+      "latency_ms": 6046,
+      "answer_len": 49
     },
     {
       "id": "a21",
       "category": "answerable",
       "role": "hr",
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3917,
-      "answer_len": 460
+      "latency_ms": 6823,
+      "answer_len": 49
     },
     {
       "id": "a22",
@@ -295,7 +295,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1943,
+      "latency_ms": 4536,
       "answer_len": 49
     },
     {
@@ -308,7 +308,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2095,
+      "latency_ms": 6309,
       "answer_len": 49
     },
     {
@@ -321,21 +321,21 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 952,
+      "latency_ms": 4404,
       "answer_len": 49
     },
     {
       "id": "a25",
       "category": "answerable",
       "role": "employee",
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2164,
-      "answer_len": 982
+      "latency_ms": 4967,
+      "answer_len": 49
     },
     {
       "id": "a26",
@@ -347,21 +347,21 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1550,
-      "answer_len": 511
+      "latency_ms": 5876,
+      "answer_len": 333
     },
     {
       "id": "a27",
       "category": "answerable",
       "role": "employee",
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1567,
-      "answer_len": 727
+      "latency_ms": 3820,
+      "answer_len": 49
     },
     {
       "id": "a28",
@@ -373,34 +373,34 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1064,
+      "latency_ms": 4737,
       "answer_len": 49
     },
     {
       "id": "a29",
       "category": "answerable",
       "role": "employee",
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1436,
-      "answer_len": 1090
+      "latency_ms": 3164,
+      "answer_len": 49
     },
     {
       "id": "a30",
       "category": "answerable",
       "role": "engineering",
-      "hit": 1,
-      "rr": 0.5,
-      "precision": 0.8,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2195,
-      "answer_len": 1032
+      "latency_ms": 4961,
+      "answer_len": 49
     },
     {
       "id": "u01",
@@ -412,7 +412,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 712,
+      "latency_ms": 739,
       "answer_len": 49
     },
     {
@@ -425,7 +425,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 879,
+      "latency_ms": 3927,
       "answer_len": 49
     },
     {
@@ -438,7 +438,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 993,
+      "latency_ms": 2911,
       "answer_len": 49
     },
     {
@@ -451,7 +451,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 370,
+      "latency_ms": 2715,
       "answer_len": 49
     },
     {
@@ -464,7 +464,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 743,
+      "latency_ms": 4340,
       "answer_len": 49
     },
     {
@@ -477,7 +477,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1335,
+      "latency_ms": 4084,
       "answer_len": 49
     },
     {
@@ -490,7 +490,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1084,
+      "latency_ms": 5188,
       "answer_len": 49
     },
     {
@@ -503,7 +503,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 438,
+      "latency_ms": 3833,
       "answer_len": 49
     },
     {
@@ -516,7 +516,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 459,
+      "latency_ms": 3633,
       "answer_len": 49
     },
     {
@@ -529,7 +529,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 231,
+      "latency_ms": 5708,
       "answer_len": 49
     },
     {
@@ -542,7 +542,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 256,
+      "latency_ms": 6045,
       "answer_len": 49
     },
     {
@@ -555,7 +555,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 235,
+      "latency_ms": 4157,
       "answer_len": 49
     },
     {
@@ -568,7 +568,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 246,
+      "latency_ms": 4899,
       "answer_len": 49
     },
     {
@@ -581,7 +581,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 287,
+      "latency_ms": 4584,
       "answer_len": 49
     },
     {
@@ -594,60 +594,60 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 407,
+      "latency_ms": 4376,
       "answer_len": 49
     },
     {
       "id": "b01",
       "category": "bangla",
       "role": "employee",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 274,
-      "answer_len": 49
+      "latency_ms": 6485,
+      "answer_len": 657
     },
     {
       "id": "b02",
       "category": "bangla",
       "role": "employee",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 236,
-      "answer_len": 49
+      "latency_ms": 3739,
+      "answer_len": 519
     },
     {
       "id": "b03",
       "category": "bangla",
       "role": "employee",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 317,
-      "answer_len": 49
+      "latency_ms": 6756,
+      "answer_len": 560
     },
     {
       "id": "b04",
       "category": "bangla",
       "role": "engineering",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 244,
-      "answer_len": 49
+      "latency_ms": 6528,
+      "answer_len": 650
     },
     {
       "id": "b05",
@@ -659,21 +659,21 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 250,
+      "latency_ms": 6942,
       "answer_len": 49
     },
     {
       "id": "b06",
       "category": "bangla",
       "role": "employee",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 227,
-      "answer_len": 49
+      "latency_ms": 7227,
+      "answer_len": 93
     },
     {
       "id": "b07",
@@ -685,7 +685,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 546,
+      "latency_ms": 5999,
       "answer_len": 49
     },
     {
@@ -698,7 +698,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 239,
+      "latency_ms": 7112,
       "answer_len": 49
     },
     {
@@ -711,21 +711,21 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 297,
+      "latency_ms": 6620,
       "answer_len": 49
     },
     {
       "id": "b10",
       "category": "bangla",
       "role": "employee",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 296,
-      "answer_len": 49
+      "latency_ms": 4275,
+      "answer_len": 463
     },
     {
       "id": "b11",
@@ -737,7 +737,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 294,
+      "latency_ms": 2174,
       "answer_len": 49
     },
     {
@@ -750,21 +750,21 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 266,
+      "latency_ms": 4612,
       "answer_len": 49
     },
     {
       "id": "m01",
       "category": "multi_doc",
       "role": "engineering",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 280,
-      "answer_len": 49
+      "latency_ms": 3946,
+      "answer_len": 910
     },
     {
       "id": "m02",
@@ -776,7 +776,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 295,
+      "latency_ms": 6076,
       "answer_len": 49
     },
     {
@@ -789,7 +789,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 243,
+      "latency_ms": 997,
       "answer_len": 49
     },
     {
@@ -802,7 +802,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 252,
+      "latency_ms": 2711,
       "answer_len": 49
     },
     {
@@ -815,34 +815,34 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 257,
+      "latency_ms": 5009,
       "answer_len": 49
     },
     {
       "id": "m06",
       "category": "multi_doc",
       "role": "security",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 302,
-      "answer_len": 49
+      "latency_ms": 6298,
+      "answer_len": 699
     },
     {
       "id": "m07",
       "category": "multi_doc",
       "role": "finance",
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 232,
-      "answer_len": 49
+      "latency_ms": 8183,
+      "answer_len": 1172
     },
     {
       "id": "m08",
@@ -854,21 +854,21 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 310,
+      "latency_ms": 3592,
       "answer_len": 49
     },
     {
       "id": "m09",
       "category": "multi_doc",
       "role": "engineering",
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2937,
-      "answer_len": 1112
+      "latency_ms": 4388,
+      "answer_len": 49
     },
     {
       "id": "m10",
@@ -880,21 +880,21 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1583,
+      "latency_ms": 6246,
       "answer_len": 49
     },
     {
       "id": "m11",
       "category": "multi_doc",
       "role": "hr",
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2042,
-      "answer_len": 982
+      "latency_ms": 5994,
+      "answer_len": 49
     },
     {
       "id": "m12",
@@ -906,8 +906,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1845,
-      "answer_len": 810
+      "latency_ms": 4223,
+      "answer_len": 993
     },
     {
       "id": "x01",
@@ -919,7 +919,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1090,
+      "latency_ms": 4145,
       "answer_len": 49
     },
     {
@@ -932,7 +932,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1338,
+      "latency_ms": 4693,
       "answer_len": 49
     },
     {
@@ -945,7 +945,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1444,
+      "latency_ms": 3516,
       "answer_len": 49
     },
     {
@@ -958,8 +958,8 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1656,
-      "answer_len": 942
+      "latency_ms": 2789,
+      "answer_len": 733
     },
     {
       "id": "x05",
@@ -969,10 +969,10 @@
       "rr": 0.0,
       "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2160,
-      "answer_len": 883
+      "latency_ms": 3525,
+      "answer_len": 49
     },
     {
       "id": "x06",
@@ -984,7 +984,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1286,
+      "latency_ms": 3732,
       "answer_len": 49
     },
     {
@@ -997,7 +997,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 773,
+      "latency_ms": 4614,
       "answer_len": 49
     },
     {
@@ -1010,7 +1010,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 496,
+      "latency_ms": 2915,
       "answer_len": 49
     },
     {
@@ -1023,7 +1023,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 239,
+      "latency_ms": 2036,
       "answer_len": 49
     },
     {
@@ -1036,7 +1036,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 224,
+      "latency_ms": 3955,
       "answer_len": 49
     },
     {
@@ -1049,7 +1049,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 239,
+      "latency_ms": 2129,
       "answer_len": 49
     },
     {
@@ -1062,7 +1062,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 227,
+      "latency_ms": 3100,
       "answer_len": 49
     },
     {
@@ -1073,10 +1073,10 @@
       "rr": 0.0,
       "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 220,
-      "answer_len": 49
+      "latency_ms": 4226,
+      "answer_len": 298
     },
     {
       "id": "x14",
@@ -1088,7 +1088,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 246,
+      "latency_ms": 2624,
       "answer_len": 49
     },
     {
@@ -1101,7 +1101,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 227,
+      "latency_ms": 3028,
       "answer_len": 49
     }
   ]

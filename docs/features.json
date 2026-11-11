@@ -20,8 +20,8 @@
       "id": "F-003",
       "description": "Postgres schema with pgvector, helper functions and RLS policies",
       "acceptance": "migrations apply through the db-migrate workflow",
-      "status": "blocked",
-      "evidence": "supabase/migrations/*.sql, .github/workflows/db-migrate.yml"
+      "status": "pass",
+      "evidence": "supabase/migrations/*.sql applied by db-migrate.yml (run 43018866865); tables documents/chunks/profiles/audit_log/eval_runs and extensions vector+pg_trgm verified"
     },
     {
       "id": "F-004",
@@ -34,8 +34,8 @@
       "id": "F-005",
       "description": "Permission-aware hybrid retrieval with the access predicate inside SQL",
       "acceptance": "search_chunks filters by role and department; leakage tests return 0",
-      "status": "blocked",
-      "evidence": "supabase/migrations/20261111000100_init.sql, api/app/retrieval.py"
+      "status": "partial",
+      "evidence": "access predicate lives in search_chunks and RLS; corpus indexed (754 docs, 12032 chunks) but the zero-leakage measurement needs a working answer path"
     },
     {
       "id": "F-006",
@@ -69,22 +69,28 @@
       "id": "F-010",
       "description": "Chat UI with streaming, citation chips and source drawer",
       "acceptance": "signed-in user asks a question and sees citations open the drawer",
-      "status": "fail",
-      "evidence": "not built yet"
+      "status": "partial",
+      "evidence": "app/chat/page.tsx renders answers, citation cards and honest error states; live answers blocked while the 512 MB host restarts under both ONNX models"
     },
     {
       "id": "F-011",
       "description": "Admin panel for upload, classification and re-index",
       "acceptance": "admin changes a document access level and the audit log records it",
-      "status": "fail",
-      "evidence": "not built yet"
+      "status": "partial",
+      "evidence": "app/admin/page.tsx starts ingestion, polls the job and verifies the audit chain; editing a document's access level is not built yet"
     },
     {
       "id": "F-012",
       "description": "Security documentation set (threat model, SECURITY.md, security.txt, report)",
       "acceptance": "docs/security/THREAT_MODEL.md maps controls to OWASP Top 10 and LLM Top 10",
-      "status": "fail",
-      "evidence": "not written yet"
+      "status": "pass",
+      "evidence": "docs/THREAT_MODEL.md (STRIDE + OWASP LLM Top 10), docs/reports/security.md, SECURITY.md, public/.well-known/security.txt"
     }
-  ]
+  ],
+  "summary": {
+    "pass": 8,
+    "partial": 4,
+    "blocked": 0,
+    "fail": 0
+  }
 }

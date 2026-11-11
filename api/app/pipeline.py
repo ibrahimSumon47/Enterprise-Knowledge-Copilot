@@ -184,12 +184,14 @@ def build_graph(router: ProviderRouter, settings: Settings):
         )
         try:
             completion = await router.complete(SYSTEM_PROMPT, prompt)
-        except ProviderError:
+        except ProviderError as exc:
+            # The status code is the difference between an outage and a retired
+            # model id, so it goes into the audit detail, not only the logs.
             return {
                 "refused": True,
                 "answer": REFUSAL,
                 "confidence": "low",
-                "reason": "no language model available",
+                "reason": f"no language model available ({exc})"[:240],
                 "provider": "none",
             }
         return {

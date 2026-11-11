@@ -110,7 +110,14 @@ async def hardening(request: Request, call_next):
 
 @app.get("/health", tags=["ops"])
 async def health() -> dict[str, Any]:
-    return {"status": "ok", "service": "ekc-api", "rss_mb": _rss_mb()}
+    settings = get_settings()
+    return {
+        "status": "ok",
+        "service": "ekc-api",
+        "rss_mb": _rss_mb(),
+        "model": settings.embedding_model,
+        "rerank": settings.rerank_enabled,
+    }
 
 
 @app.get("/ready", response_model=ReadyResponse, tags=["ops"])

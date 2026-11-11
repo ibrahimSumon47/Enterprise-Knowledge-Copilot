@@ -37,7 +37,9 @@ class LLMProvider(Protocol):
 class GroqProvider:
     name = "groq"
 
-    def __init__(self, settings: Settings, model: str = "llama-3.3-70b-versatile") -> None:
+    # Groq retired llama-3.3-70b-versatile for free and developer tiers on
+    # 2026-08-16, so the free replacement is the default here.
+    def __init__(self, settings: Settings, model: str = "openai/gpt-oss-120b") -> None:
         self._key = settings.groq_api_key
         self._model = model
 
@@ -151,7 +153,7 @@ class ProviderRouter:
                 self._failures[provider.name] = self._failures.get(provider.name, 0) + 1
                 if self._failures[provider.name] >= 2:
                     self._open_until[provider.name] = time.monotonic() + self._cooldown
-                errors.append(f"{provider.name}: {type(exc).__name__}")
+                errors.append(f"{provider.name}: {type(exc).__name__} {str(exc)[:80]}")
         raise ProviderError("; ".join(errors) or "no provider configured")
 
     def health(self) -> dict[str, str]:

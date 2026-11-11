@@ -131,12 +131,15 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
         scored.sort(key=lambda item: item["rerank_score"], reverse=True)
         return scored
 
+    from flashrank import RerankRequest
+
     passages = [
         {"id": index, "text": _rerank_text(candidate)}
         for index, candidate in enumerate(candidates)
     ]
     try:
-        ranked = model.rerank(question, passages, top_n=len(passages))
+        # flashrank scores a RerankRequest and returns every passage, sorted.
+        ranked = model.rerank(RerankRequest(query=question, passages=passages))
     except Exception as exc:  # noqa: BLE001 - same reason as above
         _rerank_error = f"score {type(exc).__name__}: {str(exc)[:160]}"
         logger.warning("rerank failed, keeping hybrid order: %s", exc)

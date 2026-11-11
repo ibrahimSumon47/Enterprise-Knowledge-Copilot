@@ -66,7 +66,7 @@ report, and it is the only phase that fails (`docs/reports/eval.json` and
   PII redaction, SSE streaming endpoint, admin and evaluation endpoints.
 - Evaluation: `docs/reports/eval.json`, `eval.md` and `eval_comparison.md` hold
   the full run -- 84 questions, hit@k 0.275, MRR 0.275, citation precision 0.22,
-  refusal accuracy 0.571, p95 6942 ms, leakage 0. The pre-rerank run is kept in
+  refusal accuracy 0.571, p95 3819 ms, leakage 0. The pre-rerank run is kept in
   `eval_baseline.json`.
 
 ## Deployment path
@@ -94,7 +94,7 @@ hold torch plus two transformer models.
 3. **Answer quality.** Reranking is back on and the full run improved: hit@k
    0.275 (was 0.275), citation precision 0.22
    (was 0.173), refusal accuracy 0.571,
-   leakage still 0. p95 latency rose to 6942 ms because the
+   leakage still 0. p95 latency is 3819 ms because the
    cross-encoder scores 40 candidates on 0.1 CPU; trimming that pool is next.
 
 ## Resolved since the previous snapshot

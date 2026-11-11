@@ -42,6 +42,10 @@ Spaces on free cpu-basic requires a PRO subscription."*
 
 ## Done and verified
 
+- **Database migrations applied for real.** `DB migrate` run 43018866865 succeeded; the verify step listed `audit_log, chunks, documents, eval_runs, profiles` and extensions `vector, pg_trgm` in the live Supabase project.
+- **Role accounts seeded** through `seed-users.yml` (run 43019244493 succeeded) using the `EKC_DEMO_PASSWORD` repository secret.
+- **Vercel environment variables are NOT set.** The CLI's non-interactive `env add` stored values in the wrong slot once, so the mis-stored entry was removed rather than left in place. Add these three in the Vercel dashboard (Settings → Environment Variables, Production and Preview): `NEXT_PUBLIC_SUPABASE_URL` = `https://ctfatevadhojxycuplsh.supabase.co`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` = the project's publishable/anon key, `NEXT_PUBLIC_API_BASE_URL` = the API host once one exists.
+
 - GitHub repo `main`, husky hook stripping attribution trailers, CI workflow with a
   commit-hygiene gate, CodeQL, gitleaks, DB migrate, seed, keepalive and Space-secret workflows.
 - Web app: Next.js 16 + Tailwind v4 design system, dark-first command-center landing page,

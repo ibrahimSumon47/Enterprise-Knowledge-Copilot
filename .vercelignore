@@ -1,0 +1,8 @@
+api/
+data/
+eval/
+docs/
+.space/
+.corpus-src/
+supabase/
+scripts/

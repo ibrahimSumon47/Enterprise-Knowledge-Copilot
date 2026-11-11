@@ -22,8 +22,10 @@ class Settings(BaseSettings):
 
     allowed_origins: str = "http://localhost:3000"
 
-    embedding_model: str = "intfloat/multilingual-e5-small"
-    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    # Both run on ONNX Runtime through fastembed and flashrank: the free host
+    # gives 512 MB, which torch cannot fit. Dims stay at 384 for the schema.
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
     # Retrieval knobs. Kept explicit so the evaluation report can cite them.
     candidate_limit: int = 30

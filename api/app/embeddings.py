@@ -23,9 +23,6 @@ _encoder: Any = None
 _reranker: Any = None
 _dims = 384
 
-QUERY_PREFIX = "query: "
-PASSAGE_PREFIX = "passage: "
-
 
 def set_encoder(encoder: Any) -> None:
     """Test hook: inject a fake encoder."""
@@ -70,28 +67,26 @@ def _normalize(vector: Any) -> list[float]:
 
 
 def embed_documents(texts: Sequence[str], settings: Settings) -> list[list[float]]:
-    """e5 models expect the `passage:` prefix for indexed text."""
+    """Embed indexed passages. The multilingual MiniLM needs no prefix."""
     encoder = _load_encoder(settings)
-    if hasattr(encoder, "passage_embed"):  # fastembed applies the model prompt itself
-        vectors = encoder.passage_embed(list(texts), batch_size=16)
-    else:  # injected encoder in tests
+    if hasattr(encoder, "encode"):  # injected encoder in tests
         vectors = encoder.encode(
-            [f"{PASSAGE_PREFIX}{text}" for text in texts],
+            list(texts),
             batch_size=16,
             normalize_embeddings=True,
             show_progress_bar=False,
         )
+    else:  # fastembed
+        vectors = encoder.embed(list(texts), batch_size=16)
     return [_normalize(vector) for vector in vectors]
 
 
 def embed_query(text: str, settings: Settings) -> list[float]:
     encoder = _load_encoder(settings)
-    if hasattr(encoder, "query_embed"):
-        vector = next(iter(encoder.query_embed([text])))
+    if hasattr(encoder, "encode"):
+        vector = encoder.encode([text], normalize_embeddings=True, show_progress_bar=False)[0]
     else:
-        vector = encoder.encode(
-            [f"{QUERY_PREFIX}{text}"], normalize_embeddings=True, show_progress_bar=False
-        )[0]
+        vector = next(iter(encoder.embed([text])))
     return _normalize(vector)
 
 

@@ -43,8 +43,17 @@ def chunk_markdown(text: str) -> list[dict[str, Any]]:
         if not body:
             return
         for piece in _split_long(body):
-            if len(piece) < MIN_CHUNK_CHARS and chunks:
-                # Attach short trailing fragments to the previous chunk.
+            previous = chunks[-1] if chunks else None
+            same_section = previous is not None and previous["heading"] == (
+                current_heading or None
+            )
+            fits = (
+                previous is not None
+                and len(previous["content"]) + len(piece) + 2 <= MAX_CHUNK_CHARS
+            )
+            if len(piece) < MIN_CHUNK_CHARS and same_section and fits:
+                # Attach short trailing fragments to the previous chunk, but never
+                # across a heading: that would file evidence under the wrong section.
                 chunks[-1]["content"] = f"{chunks[-1]['content']}\n\n{piece}".strip()
                 chunks[-1]["token_count"] = len(chunks[-1]["content"].split())
                 continue

@@ -1,0 +1,30 @@
+# Render blueprint for the FastAPI service. Free plan, Docker, no Render database
+# (the app talks to Supabase Postgres over its session pooler).
+#
+# Secrets are marked sync: false so Render asks for them once in the dashboard
+# instead of storing them in this file.
+services:
+  - type: web
+    name: ekc-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerContext: ./api
+    dockerfilePath: ./api/Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_DB_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SUPABASE_JWT_AUD
+        value: authenticated
+      - key: ALLOWED_ORIGINS
+        value: https://enterprise-knowledge-copilot-wine.vercel.app,http://localhost:3000

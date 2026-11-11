@@ -1,4 +1,4 @@
-# API service — FastAPI on a free Hugging Face Space (CPU only).
+# API service — FastAPI on a free Render web service (CPU only, 512 MB).
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 pydantic==2.10.5
@@ -10,6 +10,7 @@ langgraph==0.2.60
 numpy==2.2.1
 python-multipart==0.0.20
 
-# Retrieval models. CPU wheels only; no CUDA downloads.
-torch==2.5.1
-sentence-transformers==3.3.1
+# Retrieval models as ONNX: the same e5 encoder and ms-marco cross-encoder as
+# the torch build, without pulling 900 MB of framework into a 512 MB instance.
+fastembed==0.9.1
+flashrank==0.2.10

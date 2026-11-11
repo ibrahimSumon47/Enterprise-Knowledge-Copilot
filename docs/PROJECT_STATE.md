@@ -69,6 +69,8 @@ Spaces on free cpu-basic requires a PRO subscription."*
 2. **CI `web` job fails on `pnpm audit --audit-level high`**: after upgrading zod to 4.6.7, 6 advisories remain (4 moderate, 2 critical) in transitive packages. Identify them with `pnpm audit --json` and upgrade or pin the owning packages; do not lower the audit level.
 3. **CI `api` job** and **`secrets-scan` job** fail — read `gh run view <id> --log-failed`. The API job installs test deps without torch by design; the failure is in lint/tests/dep-audit, not in the service code.
 4. **History was rewritten once** to remove attribution trailers from the four commits that predated the rule (force-pushed to `main`). Commit-hygiene is now green.
+5. **CI `api` job: one failing unit test.** `test_chunking_keeps_headings` expects a chunk whose `heading` is `Receipts`; the chunker currently emits that section with a different heading because short trailing fragments are merged into the previous chunk. Fix the chunker (attach the new heading after a merge, or flush before merging), not the assertion. Everything else in the API job passes, including the dependency audit (`pnpm audit` is clean at high severity).
+6. **Vercel deploys are green** after anchoring `.vercelignore` to the repo root — an unanchored `supabase/` pattern had also hidden `lib/supabase`. `/.well-known/security.txt` now returns 200.
 
 ## Next step (exact)
 

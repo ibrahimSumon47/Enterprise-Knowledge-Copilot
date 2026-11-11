@@ -1,9 +1,18 @@
-"""Embedding and reranking. Models load lazily so tests never download weights."""
+"""Embedding and reranking on CPU with ONNX models.
+
+The free hosting target gives a 512 MB instance, which torch plus two
+transformer models cannot fit. fastembed and flashrank serve the same
+multilingual-e5-small encoder and the same ms-marco MiniLM cross-encoder from
+ONNX Runtime instead, at roughly a tenth of the memory. Models still load
+lazily, so unit tests never download weights.
+"""
 
 from __future__ import annotations
 
 import logging
 from typing import Any, Sequence
+
+import numpy as np
 
 from .config import Settings
 
@@ -12,6 +21,9 @@ logger = logging.getLogger(__name__)
 _encoder: Any = None
 _reranker: Any = None
 _dims = 384
+
+QUERY_PREFIX = "query: "
+PASSAGE_PREFIX = "passage: "
 
 
 def set_encoder(encoder: Any) -> None:
@@ -29,54 +41,82 @@ def set_reranker(reranker: Any) -> None:
 def _load_encoder(settings: Settings) -> Any:
     global _encoder, _dims
     if _encoder is None:
-        from sentence_transformers import SentenceTransformer
+        from fastembed import TextEmbedding
 
         logger.info("loading embedding model %s", settings.embedding_model)
-        _encoder = SentenceTransformer(settings.embedding_model, device="cpu")
-        _dims = int(_encoder.get_sentence_embedding_dimension())
+        _encoder = TextEmbedding(model_name=settings.embedding_model)
+        _dims = len(next(iter(_encoder.embed(["dimension probe"]))))
     return _encoder
 
 
 def _load_reranker(settings: Settings) -> Any:
     global _reranker
     if _reranker is None:
-        from sentence_transformers import CrossEncoder
+        from flashrank import Ranker
 
-        logger.info("loading reranker %s", settings.reranker_model)
-        _reranker = CrossEncoder(settings.reranker_model, device="cpu")
+        # flashrank ships the same cross-encoders under their short names.
+        model_name = settings.reranker_model.rsplit("/", 1)[-1]
+        logger.info("loading reranker %s", model_name)
+        _reranker = Ranker(model_name=model_name, cache_dir="/tmp/flashrank")
     return _reranker
+
+
+def _normalize(vector: Any) -> list[float]:
+    array = np.asarray(vector, dtype=np.float32)
+    norm = float(np.linalg.norm(array)) or 1.0
+    return [float(value) for value in array / norm]
 
 
 def embed_documents(texts: Sequence[str], settings: Settings) -> list[list[float]]:
     """e5 models expect the `passage:` prefix for indexed text."""
     encoder = _load_encoder(settings)
-    vectors = encoder.encode(
-        [f"passage: {text}" for text in texts],
-        batch_size=16,
-        normalize_embeddings=True,
-        show_progress_bar=False,
-    )
-    return [list(map(float, vector)) for vector in vectors]
+    if hasattr(encoder, "passage_embed"):  # fastembed applies the model prompt itself
+        vectors = encoder.passage_embed(list(texts), batch_size=16)
+    else:  # injected encoder in tests
+        vectors = encoder.encode(
+            [f"{PASSAGE_PREFIX}{text}" for text in texts],
+            batch_size=16,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        )
+    return [_normalize(vector) for vector in vectors]
 
 
 def embed_query(text: str, settings: Settings) -> list[float]:
     encoder = _load_encoder(settings)
-    vector = encoder.encode(
-        [f"query: {text}"], normalize_embeddings=True, show_progress_bar=False
-    )[0]
-    return list(map(float, vector))
+    if hasattr(encoder, "query_embed"):
+        vector = next(iter(encoder.query_embed([text])))
+    else:
+        vector = encoder.encode(
+            [f"{QUERY_PREFIX}{text}"], normalize_embeddings=True, show_progress_bar=False
+        )[0]
+    return _normalize(vector)
 
 
 def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) -> list[dict[str, Any]]:
-    """Score each candidate against the question and sort by the cross-encoder."""
+    """Score each candidate against the question with a cross-encoder."""
     if not candidates:
         return []
     model = _load_reranker(settings)
-    pairs = [(question, _rerank_text(candidate)) for candidate in candidates]
-    scores = model.predict(pairs)
+
+    if hasattr(model, "predict"):  # injected encoder in tests
+        scores = model.predict([(question, _rerank_text(candidate)) for candidate in candidates])
+        scored = [
+            {**candidate, "rerank_score": float(score)}
+            for candidate, score in zip(candidates, scores, strict=True)
+        ]
+        scored.sort(key=lambda item: item["rerank_score"], reverse=True)
+        return scored
+
+    passages = [
+        {"id": index, "text": _rerank_text(candidate)}
+        for index, candidate in enumerate(candidates)
+    ]
+    ranked = model.rerank(question, passages, top_k=len(passages))
+    by_index = {int(item["id"]): float(item["score"]) for item in ranked}
     scored = [
-        {**candidate, "rerank_score": float(score)}
-        for candidate, score in zip(candidates, scores, strict=True)
+        {**candidate, "rerank_score": by_index.get(index, float("-inf"))}
+        for index, candidate in enumerate(candidates)
     ]
     scored.sort(key=lambda item: item["rerank_score"], reverse=True)
     return scored

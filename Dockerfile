@@ -29,13 +29,7 @@ RUN mkdir -p /home/appuser/.cache \
 USER appuser
 
 # Bake the ONNX weights into the image so a cold start does not download them.
-RUN python - <<'PY'
-from fastembed import TextEmbedding
-from flashrank import Ranker
-
-list(TextEmbedding(model_name="intfloat/multilingual-e5-small").embed(["warm up"]))
-Ranker(model_name="ms-marco-MiniLM-L-6-v2", cache_dir="/home/appuser/.cache/flashrank")
-PY
+RUN python -c "from fastembed import TextEmbedding; from flashrank import Ranker; list(TextEmbedding(model_name='intfloat/multilingual-e5-small').embed(['warm up'])); Ranker(model_name='ms-marco-MiniLM-L-6-v2', cache_dir='/home/appuser/.cache/flashrank')"
 
 EXPOSE 8000
 

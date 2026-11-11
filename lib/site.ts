@@ -1,3 +1,7 @@
+// Public origin of the FastAPI service. The env var wins when it is set;
+// the fallback keeps the deployed preview working without extra setup.
+const RENDER_API_BASE_URL = "https://enterprise-knowledge-copilot-2u57.onrender.com";
+
 export const site = {
   name: "Enterprise Knowledge Copilot",
   shortName: "EKC",
@@ -12,7 +16,7 @@ export const site = {
     license: "CC BY-SA 4.0",
     licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
   },
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? "",
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? RENDER_API_BASE_URL,
 } as const;
 
 /** Roles the access model knows about, in the order they appear in the UI. */

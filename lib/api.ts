@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+import { site } from "./site";
+
+const base = site.apiBaseUrl;
 
 export const citationSchema = z.object({
   id: z.number(),

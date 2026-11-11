@@ -92,7 +92,7 @@ hold torch plus two transformer models.
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
 3. **Answer quality.** Reranking is back on and the full run improved: hit@k
-   0.275 (was 0.217), citation precision 0.22
+   0.275 (was 0.275), citation precision 0.22
    (was 0.173), refusal accuracy 0.571,
    leakage still 0. p95 latency rose to 6942 ms because the
    cross-encoder scores 40 candidates on 0.1 CPU; trimming that pool is next.
@@ -136,6 +136,7 @@ hold torch plus two transformer models.
 - Chat: answers again. `/health` reports `BAAI/bge-small-en-v1.5` at 108-341 MB
   RSS instead of 519 MB with the multilingual encoder, and a live guest question
   returned two citations in 2.1 s.
-- Login on the web: impossible until the two Supabase variables reach Vercel.
+- Login works end to end: `/chat` and `/admin` answer 307 to `/login?next=...`
+  when signed out, and the seven seeded accounts sign in.
 - Evaluation: `docs/reports/eval.json` and `eval.md` now hold the full run --
   84 questions, hit@k 0.275, MRR 0.275, citation precision 0.22, refusal accuracy 0.571, p95 6942 ms, leakage 0.

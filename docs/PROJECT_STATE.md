@@ -98,3 +98,26 @@ hold torch plus two transformer models.
 | Supabase project | `ctfatevadhojxycuplsh` (ap-south-1) |
 | HF Space | **blocked** — HTTP 402, PRO required for Docker Spaces |
 | Corpus manifest | `data/corpus_manifest.json` |
+
+## Snapshot 2026-11-11 (owner approved pausing chat)
+
+**Working, with evidence**
+
+- Web: `/`, `/login`, `/chat`, `/trust`, `/credits`, `/evals`, `/admin` build and
+  return 200 on the live origin (admin and chat redirect to `/login` when signed
+  out, by design).
+- API: `/health` -> `{"status":"ok","service":"ekc-api","rss_mb":…}`; all seven
+  role accounts authenticate against Supabase and `/me` returns the stored role.
+- Ingestion runs in GitHub Actions (`ingest.yml`) because the free instance has
+  0.1 CPU. At the last check the job was at 62% (481/754 documents, 7,494 chunks).
+- Phase gate: `node scripts/check-done.mjs` passes P0–P5 and P7; P6, P8 and P9
+  failed on missing artefacts and now have a threat model, a security report, a
+  runbook, an ADR, project facts and `llms.txt`.
+
+**Known red**
+
+- Chat is paused by decision: the 512 MB instance exceeds its memory limit when
+  the ONNX encoder and the cross-encoder load together. `EKC_RERANK_ENABLED`
+  defaults to off, so retrieval is hybrid-only until a larger host is available.
+- `docs/reports/eval.json` and `docs/reports/gold.json` do not exist, so P8 fails
+  honestly. The 84-question golden set and the harness are committed.

@@ -1,0 +1,46 @@
+{
+  "name": "Enterprise Knowledge Copilot",
+  "tagline": "Ask the handbook. Get answers with proof.",
+  "status": "in-progress",
+  "updated": "2026-11-11",
+  "repository": "https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot",
+  "origins": {
+    "web": "https://enterprise-knowledge-copilot-wine.vercel.app",
+    "api": "https://enterprise-knowledge-copilot-2u57.onrender.com",
+    "database": "supabase:ctfatevadhojxycuplsh (ap-south-1)"
+  },
+  "stack": {
+    "web": "Next.js 16 App Router, TypeScript, Tailwind v4",
+    "api": "FastAPI, Python 3.12, Docker, LangGraph",
+    "data": "Supabase Postgres 17, pgvector, full-text search, Auth, RLS",
+    "retrieval": "hybrid pgvector + tsvector, reciprocal rank fusion, optional cross-encoder",
+    "models": {
+      "embeddings": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 (384 dims, ONNX)",
+      "reranker": "cross-encoder/ms-marco-TinyBERT-L-2-v2 (ONNX, opt-in)",
+      "llm": "Groq primary, Gemini fallback, deterministic mock in tests"
+    }
+  },
+  "corpus": {
+    "documents": 754,
+    "words": 871422,
+    "synthetic_documents": 12,
+    "source": "GitLab Handbook",
+    "licence": "CC BY-SA 4.0"
+  },
+  "access_model": {
+    "roles": ["guest", "employee", "engineering", "security", "hr", "finance", "admin"],
+    "levels": ["public", "employee", "department", "confidential"],
+    "enforcement": "SQL predicate inside search_chunks plus RLS policies"
+  },
+  "evaluation": {
+    "golden_questions": 84,
+    "harness": "eval/run_eval.py",
+    "report": null
+  },
+  "known_limits": [
+    "The 512 MB free API instance cannot hold both ONNX models; reranking is disabled there.",
+    "Chat can return 502 while the instance restarts after a memory spike.",
+    "No published evaluation report yet.",
+    "Demo role accounts share one password held outside the repository."
+  ]
+}

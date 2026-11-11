@@ -1,0 +1,46 @@
+# Enterprise Knowledge Copilot
+
+> A role-aware RAG copilot over the public GitLab Handbook plus clearly labelled
+> synthetic confidential documents. Answers cite the passage they came from and
+> refuse when the evidence is weak. Access control is enforced in SQL, not after
+> retrieval.
+
+## What it is
+
+- Live web app: https://enterprise-knowledge-copilot-wine.vercel.app
+- API: https://enterprise-knowledge-copilot-2u57.onrender.com (health at /health)
+- Source: https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot
+
+## How it works
+
+1. The question is classified (policy, compensation, security, unclear).
+2. Hybrid retrieval runs inside Postgres: pgvector similarity plus full-text,
+   fused with reciprocal rank fusion. The caller's role and department are part
+   of the SQL predicate, so unauthorised passages never leave the database.
+3. An ONNX cross-encoder can rerank the candidates where memory allows.
+4. The model answers only from the numbered passages and must cite each claim.
+5. Every citation is verified against the retrieved chunks; weak evidence or an
+   uncited sentence produces an explicit refusal.
+
+## Access model
+
+- guest: public
+- employee: public + employee
+- engineering / security / hr / finance: public + employee + own department
+- admin: everything, including the synthetic confidential set
+
+## Corpus and licences
+
+GitLab Handbook content under CC BY-SA 4.0, with source URL, licence and
+attribution stored per chunk. Confidential documents are synthetic and marked
+`synthetic` in metadata and in the UI.
+
+## Pages
+
+- / — overview and access matrix
+- /login — role accounts (password held by the owner)
+- /chat — ask a question, read answers with citations
+- /trust — controls linked to the code that implements them
+- /evals — evaluation metrics and current status
+- /credits — corpus and model attribution
+- /.well-known/security.txt — disclosure policy

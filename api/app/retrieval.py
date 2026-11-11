@@ -141,7 +141,7 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
 
     top = retrieved[0].rerank_score
     if retrieved[0].reranked:
-        if top >= settings.min_answer_score + 2:
+        if top >= settings.high_confidence_score:
             confidence = "high"
         elif top >= settings.min_answer_score:
             confidence = "medium"

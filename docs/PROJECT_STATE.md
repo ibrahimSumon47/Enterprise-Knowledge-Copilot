@@ -63,6 +63,14 @@ Spaces on free cpu-basic requires a PRO subscription."*
 - Evaluation: `eval/golden_set.jsonl` (84 questions: answerable, unanswerable, Bangla,
   multi-document, cross-role) and `eval/run_eval.py` with a hard leakage gate.
 
+## Deployment path
+
+The API runs as a Docker web service on Render's free plan (`render.yaml`, root
+`Dockerfile`, port from `$PORT`). The Hugging Face Space path is retired: Docker
+Spaces now require a PRO plan, so `.space/` and `scripts/prepare_space.sh` are
+gone. Retrieval uses ONNX Runtime (fastembed + flashrank) because 512 MB cannot
+hold torch plus two transformer models.
+
 ## Known red checks (must be fixed before calling this done)
 
 1. **Vercel production deploy errors immediately (2s runtime).** The last good deployment still serves the alias, so `/` returns 200 but `/.well-known/security.txt` is 404 and none of the new pages ship. Suspected cause: the `ignoreCommand` script (`scripts/vercel-ignore.sh`) or a project-level build setting, not the Next build itself — `pnpm build` passes locally.

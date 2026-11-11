@@ -2,8 +2,8 @@
 
 The free hosting target gives a 512 MB instance, which torch plus two
 transformer models cannot fit. fastembed and flashrank serve the same
-multilingual-e5-small encoder and the same ms-marco MiniLM cross-encoder from
-ONNX Runtime instead, at roughly a tenth of the memory. Models still load
+multilingual MiniLM encoder and the ms-marco MiniLM cross-encoder from ONNX
+Runtime instead, at roughly a tenth of the memory. Models still load
 lazily, so unit tests never download weights.
 """
 

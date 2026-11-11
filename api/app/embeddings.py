@@ -90,11 +90,26 @@ def embed_query(text: str, settings: Settings) -> list[float]:
     return _normalize(vector)
 
 
+def _rrf_fallback(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Order by the hybrid score when the cross-encoder cannot run.
+
+    A 512 MB instance can run out of memory while loading a second ONNX model.
+    Losing precision is acceptable; losing the whole answer to a crash is not,
+    and the response still carries citations either way.
+    """
+    ordered = sorted(candidates, key=lambda item: item.get("rrf_score", 0.0), reverse=True)
+    return [{**candidate, "rerank_score": float(candidate.get("rrf_score", 0.0))} for candidate in ordered]
+
+
 def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) -> list[dict[str, Any]]:
     """Score each candidate against the question with a cross-encoder."""
     if not candidates:
         return []
-    model = _load_reranker(settings)
+    try:
+        model = _load_reranker(settings)
+    except Exception as exc:  # noqa: BLE001 - never fail a request over the reranker
+        logger.warning("reranker unavailable, keeping hybrid order: %s", exc)
+        return _rrf_fallback(candidates)
 
     if hasattr(model, "predict"):  # injected encoder in tests
         scores = model.predict([(question, _rerank_text(candidate)) for candidate in candidates])
@@ -109,7 +124,11 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
         {"id": index, "text": _rerank_text(candidate)}
         for index, candidate in enumerate(candidates)
     ]
-    ranked = model.rerank(question, passages, top_k=len(passages))
+    try:
+        ranked = model.rerank(question, passages, top_k=len(passages))
+    except Exception as exc:  # noqa: BLE001 - same reason as above
+        logger.warning("rerank failed, keeping hybrid order: %s", exc)
+        return _rrf_fallback(candidates)
     by_index = {int(item["id"]): float(item["score"]) for item in ranked}
     scored = [
         {**candidate, "rerank_score": by_index.get(index, float("-inf"))}

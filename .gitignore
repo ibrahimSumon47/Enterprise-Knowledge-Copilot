@@ -11,10 +11,14 @@ next-env.d.ts
 .env
 .env.local
 .env.*.local
+.env*
 !.env.example
 
 # vercel
 .vercel
+
+# supabase CLI cache
+supabase/.temp/
 
 # agent / editor
 .freebuff/

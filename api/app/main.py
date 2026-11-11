@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from . import audit, db, ingest
 from .auth import AuthUser, current_user, decode_token, require_admin
 from .config import Settings, get_settings
+from .embeddings import rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
 from .providers import build_router
 from .redact import hash_identifier
@@ -117,6 +118,7 @@ async def health() -> dict[str, Any]:
         "rss_mb": _rss_mb(),
         "model": settings.embedding_model,
         "rerank": settings.rerank_enabled,
+        "rerank_state": rerank_state(),
     }
 
 

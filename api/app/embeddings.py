@@ -21,7 +21,13 @@ logger = logging.getLogger(__name__)
 
 _encoder: Any = None
 _reranker: Any = None
+_rerank_error: str | None = None
 _dims = 384
+
+
+def rerank_state() -> dict[str, Any]:
+    """Why reranking is or is not running, for /health and the runbook."""
+    return {"loaded": _reranker is not None, "error": _rerank_error}
 
 
 def set_encoder(encoder: Any) -> None:
@@ -108,9 +114,11 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
     """Score each candidate against the question with a cross-encoder."""
     if not candidates:
         return []
+    global _rerank_error
     try:
         model = _load_reranker(settings)
     except Exception as exc:  # noqa: BLE001 - never fail a request over the reranker
+        _rerank_error = f"load {type(exc).__name__}: {str(exc)[:160]}"
         logger.warning("reranker unavailable, keeping hybrid order: %s", exc)
         return _rrf_fallback(candidates)
 
@@ -130,8 +138,10 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
     try:
         ranked = model.rerank(question, passages, top_k=len(passages))
     except Exception as exc:  # noqa: BLE001 - same reason as above
+        _rerank_error = f"score {type(exc).__name__}: {str(exc)[:160]}"
         logger.warning("rerank failed, keeping hybrid order: %s", exc)
         return _rrf_fallback(candidates)
+    _rerank_error = None
     by_index = {int(item["id"]): float(item["score"]) for item in ranked}
     scored = [
         {**candidate, "rerank_score": by_index.get(index, float("-inf")), "reranked": True}

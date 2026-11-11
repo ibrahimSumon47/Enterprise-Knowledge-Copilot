@@ -1,7 +1,7 @@
-api/
-data/
-eval/
-docs/
-.space/
-.corpus-src/
-supabase/
+/api/
+/data/
+/eval/
+/docs/
+/.space/
+/.corpus-src/
+/supabase/

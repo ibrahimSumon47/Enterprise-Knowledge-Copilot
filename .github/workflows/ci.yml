@@ -75,7 +75,7 @@ jobs:
       - name: Lint
         run: ruff check api/app api/tests eval scripts
       - name: Tests
-        run: python -m pytest api/tests -q
+        run: PYTHONPATH=api python -m pytest api/tests -q
       - name: Dependency audit
         run: |
           pip install pip-audit==2.7.3

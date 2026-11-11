@@ -11,6 +11,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -21,7 +22,28 @@ from .embeddings import embed_documents
 
 logger = logging.getLogger(__name__)
 
-CORPUS_PATH = Path(__file__).resolve().parents[2] / "data" / "corpus.jsonl"
+CORPUS_ENV = "EKC_CORPUS_PATH"
+
+
+def corpus_path() -> Path:
+    """Find the committed corpus in both layouts: the repo and the container.
+
+    In the repo the file sits at the checkout root; in the image the package is
+    /app/app, so the same parents[2] arithmetic would point at /data.
+    """
+    candidates = [
+        Path(os.environ[CORPUS_ENV]) if os.environ.get(CORPUS_ENV) else None,
+        Path.cwd() / "data" / "corpus.jsonl",
+        Path(__file__).resolve().parents[2] / "data" / "corpus.jsonl",
+        Path("/app/data/corpus.jsonl"),
+    ]
+    for candidate in candidates:
+        if candidate is not None and candidate.exists():
+            return candidate
+    return candidates[1]
+
+
+CORPUS_PATH = corpus_path()
 MAX_CHUNK_CHARS = 1100
 MIN_CHUNK_CHARS = 160
 

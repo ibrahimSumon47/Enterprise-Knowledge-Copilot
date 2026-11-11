@@ -29,16 +29,20 @@ Spaces on free cpu-basic requires a PRO subscription."*
 
 | Phase | Scope | Status |
 | --- | --- | --- |
-| P0 | repo, rules, hooks, CI, scaffolds, deploy | **done** (web live on Vercel) |
-| P1 | auth, roles, seeded accounts, admin shell | **partial** — Supabase clients, middleware, auth pages and the seed workflow exist; role pages not built |
-| P2 | ingestion and corpus | **partial** — 754-document slice + 12 synthetic docs committed; ingestion code complete; not executed (needs the API host) |
-| P3 | permission-aware retrieval | **code done** — SQL predicate + `search_chunks` + RLS policies; leakage tests not yet executed against a live database |
-| P4 | LangGraph pipeline, citations, refusal, providers | **code done** — graph, verification, refusal, provider router with breaker; live run blocked with the API host |
-| P5 | chat UI, source drawer, palette | **not started** |
-| P6 | admin, audit log, traces | **not started** |
-| P7 | evaluation suite and dashboard | **partial** — 84-question golden set + runner + offline CI job |
-| P8 | security hardening and documentation | **partial** — CI scanners, security headers middleware; threat model not written |
-| P9 | final polish, README, diagrams, handoff | **not started** |
+| P0 | repo, rules, hooks, CI, deploy | **done** — CI green on `main`, web live on Vercel |
+| P1 | auth, roles, seeded accounts | **code done, cannot sign in on the web** — seven role accounts authenticate against Supabase; the web app needs the two `NEXT_PUBLIC_SUPABASE_*` variables in the Vercel dashboard |
+| P2 | ingestion and corpus | **done** — `ingest.yml` run 43038984299 finished 754/754 documents, 12,032 chunks (11,987 rows in the database) |
+| P3 | permission-aware retrieval | **code done** — the predicate lives inside `search_chunks` and in RLS; the zero-leakage count is not measured yet |
+| P4 | pipeline, citations, refusal, providers | **code done, not serving** — the 512 MB host restarts while loading the encoder, so `/chat` returns 502 |
+| P5 | chat UI, source drawer, palette | **partial** — page, citation cards, refusals and error states ship; the command palette is not built |
+| P6 | admin, audit log, traces | **partial** — admin starts ingestion, polls the job and verifies the audit chain; `/traces` is a redirect and there is no document-level editor |
+| P7 | evaluation suite | **partial** — 84-question golden set, runner and offline CI subset; no report written |
+| P8 | security hardening and documentation | **done** — threat model, security report, runbook, `security.txt`, CI scanners |
+| P9 | polish, README, handoff | **done** — ADR, project facts, `llms.txt`, credits page |
+
+`node scripts/check-done.mjs` numbers phases differently: its P8 is the evaluation
+report, and it is the only phase that fails (`docs/reports/eval.json` and
+`docs/reports/gold.json` missing). P0-P7 and P9 print DONE.
 
 ## Done and verified
 
@@ -71,23 +75,26 @@ Spaces now require a PRO plan, so `.space/` and `scripts/prepare_space.sh` are
 gone. Retrieval uses ONNX Runtime (fastembed + flashrank) because 512 MB cannot
 hold torch plus two transformer models.
 
-## Known red checks (must be fixed before calling this done)
+## Open work
 
-1. **Vercel production deploy errors immediately (2s runtime).** The last good deployment still serves the alias, so `/` returns 200 but `/.well-known/security.txt` is 404 and none of the new pages ship. Suspected cause: the `ignoreCommand` script (`scripts/vercel-ignore.sh`) or a project-level build setting, not the Next build itself — `pnpm build` passes locally.
-2. **CI `web` job fails on `pnpm audit --audit-level high`**: after upgrading zod to 4.6.7, 6 advisories remain (4 moderate, 2 critical) in transitive packages. Identify them with `pnpm audit --json` and upgrade or pin the owning packages; do not lower the audit level.
-3. **CI `api` job** and **`secrets-scan` job** fail — read `gh run view <id> --log-failed`. The API job installs test deps without torch by design; the failure is in lint/tests/dep-audit, not in the service code.
-4. **History was rewritten once** to remove attribution trailers from the four commits that predated the rule (force-pushed to `main`). Commit-hygiene is now green.
-5. **CI `api` job: one failing unit test.** `test_chunking_keeps_headings` expects a chunk whose `heading` is `Receipts`; the chunker currently emits that section with a different heading because short trailing fragments are merged into the previous chunk. Fix the chunker (attach the new heading after a merge, or flush before merging), not the assertion. Everything else in the API job passes, including the dependency audit (`pnpm audit` is clean at high severity).
-6. **Vercel deploys are green** after anchoring `.vercelignore` to the repo root — an unanchored `supabase/` pattern had also hidden `lib/supabase`. `/.well-known/security.txt` now returns 200.
+1. **Vercel environment variables.** Add `NEXT_PUBLIC_SUPABASE_URL`
+   (`https://ctfatevadhojxycuplsh.supabase.co`) and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   (the publishable key, Settings -> API Keys) in the dashboard for Production and
+   Preview, then redeploy. Until then middleware cannot guard `/chat` and `/admin`,
+   and the login form cannot create a session.
+2. **API memory.** The free 512 MB instance exceeds its limit while `fastembed`
+   loads the multilingual encoder, with the reranker disabled, so every `/chat`
+   call returns 502 and the instance restarts. Options: a smaller quantised encoder
+   plus a full re-ingest, remote embeddings, or a paid 1 GB instance.
+3. **Evaluation report.** `docs/reports/eval.json` and `docs/reports/gold.json`
+   cannot be produced until answers work end to end.
 
-## Next step (exact)
+## Resolved since the previous snapshot
 
-1. Choose a free Docker host for `api/` (see Blocked) and set `NEXT_PUBLIC_API_BASE_URL`
-   in Vercel for production and preview.
-2. Run `gh workflow run db-migrate.yml`, then `gh workflow run seed-users.yml`
-   (needs the `EKC_DEMO_PASSWORD` secret, already set) so the seven role accounts exist.
-3. Build the chat UI (P5) against the API, then admin/audit/traces (P6), then run the full
-   evaluation (P7) and write the security documentation (P8).
+- Migrations applied and verified; role accounts seeded; corpus ingested.
+- Chunker heading test fixed in the code, not the assertion.
+- Vercel deploys green after anchoring `.vercelignore`; `security.txt` returns 200.
+- Audit, provider router, refusal and citation verification covered by unit tests.
 
 ## Evidence
 
@@ -99,25 +106,24 @@ hold torch plus two transformer models.
 | HF Space | **blocked** — HTTP 402, PRO required for Docker Spaces |
 | Corpus manifest | `data/corpus_manifest.json` |
 
-## Snapshot 2026-11-11 (owner approved pausing chat)
+## Snapshot 2026-11-11 (latest)
 
 **Working, with evidence**
 
-- Web: `/`, `/login`, `/chat`, `/trust`, `/credits`, `/evals`, `/admin` build and
-  return 200 on the live origin (admin and chat redirect to `/login` when signed
-  out, by design).
+- Web: `/`, `/login`, `/chat`, `/admin`, `/trust`, `/credits`, `/evals`,
+  `/llms.txt` and `/.well-known/security.txt` all answer 200 on the live origin.
 - API: `/health` -> `{"status":"ok","service":"ekc-api","rss_mb":…}`; all seven
-  role accounts authenticate against Supabase and `/me` returns the stored role.
-- Ingestion runs in GitHub Actions (`ingest.yml`) because the free instance has
-  0.1 CPU. At the last check the job was at 62% (481/754 documents, 7,494 chunks).
-- Phase gate: `node scripts/check-done.mjs` passes P0–P5 and P7; P6, P8 and P9
-  failed on missing artefacts and now have a threat model, a security report, a
-  runbook, an ADR, project facts and `llms.txt`.
+  role accounts authenticate and `/me` returns the stored role and visible levels.
+- Corpus: 754 documents indexed into 12,032 chunks; `documents` and `chunks` are
+  queryable in the live database.
+- Checks: `pnpm lint`, `pnpm typecheck`, `pnpm test` (6) and `pnpm build` exit 0;
+  the latest CI run on `main` succeeded.
+- Feature ledger: 12 features, 8 pass, 4 partial, 0 blocked, 0 fail.
 
 **Known red**
 
-- Chat is paused by decision: the 512 MB instance exceeds its memory limit when
-  the ONNX encoder and the cross-encoder load together. `EKC_RERANK_ENABLED`
-  defaults to off, so retrieval is hybrid-only until a larger host is available.
-- `docs/reports/eval.json` and `docs/reports/gold.json` do not exist, so P8 fails
-  honestly. The 84-question golden set and the harness are committed.
+- Chat: 502 on every call, measured twice, with `/health` unreachable immediately
+  afterwards (memory kill, confirmed by the host's own notification).
+- Login on the web: impossible until the two Supabase variables reach Vercel.
+- `docs/reports/eval.json` and `docs/reports/gold.json` do not exist, so the gate's
+  P8 stays open. The 84-question golden set and the harness are committed.

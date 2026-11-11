@@ -15,7 +15,7 @@
     "data": "Supabase Postgres 17, pgvector, full-text search, Auth, RLS",
     "retrieval": "hybrid pgvector + tsvector, reciprocal rank fusion, optional cross-encoder",
     "models": {
-      "embeddings": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 (384 dims, ONNX)",
+      "embeddings": "BAAI/bge-small-en-v1.5 (384 dims, ONNX, 0.067 GB); non-Latin questions are translated to English before embedding",
       "reranker": "cross-encoder/ms-marco-TinyBERT-L-2-v2 (ONNX, opt-in)",
       "llm": "Groq primary, Gemini fallback, deterministic mock in tests"
     }

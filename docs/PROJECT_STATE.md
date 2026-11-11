@@ -82,10 +82,12 @@ hold torch plus two transformer models.
    (the publishable key, Settings -> API Keys) in the dashboard for Production and
    Preview, then redeploy. Until then middleware cannot guard `/chat` and `/admin`,
    and the login form cannot create a session.
-2. **API memory.** The free 512 MB instance exceeds its limit while `fastembed`
-   loads the multilingual encoder, with the reranker disabled, so every `/chat`
-   call returns 502 and the instance restarts. Options: a smaller quantised encoder
-   plus a full re-ingest, remote embeddings, or a paid 1 GB instance.
+2. **API memory (being fixed on the free tier).** The instance exceeded 512 MB
+   while `fastembed` loaded the multilingual encoder. It now loads
+   `BAAI/bge-small-en-v1.5` (0.067 GB instead of 0.22 GB, still 384 dims), and
+   Bengali questions are translated to English before embedding because the small
+   encoder is English-only. A full re-ingest is running; the paid 1 GB plan is out
+   of scope by decision.
 3. **Evaluation report.** `docs/reports/eval.json` and `docs/reports/gold.json`
    cannot be produced until answers work end to end.
 

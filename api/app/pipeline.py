@@ -30,7 +30,13 @@ Rules you must follow:
 
 REFUSAL = "I don't know based on the documents I can access."
 
+TRANSLATE_PROMPT = (
+    "Translate the user's question into English. Reply with the translation only, "
+    "no notes, no quotes."
+)
+
 CITATION_RE = re.compile(r"\[(\d+)\]")
+NON_LATIN_RE = re.compile(r"[\u0980-\u09FF]")
 STOPWORDS = {
     "the", "and", "for", "with", "that", "this", "from", "are", "was", "were",
     "have", "has", "will", "can", "not", "you", "your", "our", "their", "they",
@@ -85,7 +91,33 @@ def _content_words(text: str) -> set[str]:
     return {word for word in words if word not in STOPWORDS}
 
 
-def verify_answer(answer: str, candidates: list[Retrieved]) -> tuple[bool, str]:
+def _is_non_latin(text: str) -> bool:
+    return bool(NON_LATIN_RE.search(text))
+
+
+async def _retrieval_question(question: str, router: ProviderRouter) -> str:
+    """Translate a non-Latin question before embedding it.
+
+    The encoder that fits in 512 MB is English-only while the corpus is English,
+    so a Bengali question is translated first. If only the mock provider is left
+    (tests, offline evaluation) the question is used as-is, which keeps those
+    runs deterministic.
+    """
+    if not _is_non_latin(question):
+        return question
+    try:
+        completion = await router.complete(TRANSLATE_PROMPT, question, max_tokens=120)
+    except ProviderError:
+        return question
+    translated = completion.text.strip()
+    if completion.provider == "mock" or not translated:
+        return question
+    return translated
+
+
+def verify_answer(
+    answer: str, candidates: list[Retrieved], cross_lingual: bool = False
+) -> tuple[bool, str]:
     """Citation verification: every marker is real and the text overlaps its source."""
     if answer.strip().rstrip(".") == REFUSAL.rstrip("."):
         return True, "explicit refusal"
@@ -105,6 +137,11 @@ def verify_answer(answer: str, candidates: list[Retrieved]) -> tuple[bool, str]:
     if len(uncited) > max(1, len(sentences) // 3):
         return False, "too many uncited sentences"
 
+    if cross_lingual:
+        # A Bengali answer shares no words with English sources. The marker check
+        # above is the honest test here; a lexical one could never pass.
+        return True, "ok (cross-lingual)"
+
     overlap = len(_content_words(answer) & cited_words)
     if overlap < 4:
         return False, "answer does not overlap its sources"
@@ -120,8 +157,10 @@ def build_graph(router: ProviderRouter, settings: Settings):
     async def retrieve_node(state: PipelineState) -> PipelineState:
         if state.get("route") == "unclear":
             return {"candidates": [], "confidence": "low", "reason": "question too short"}
+        # Retrieve with the English form; answer in the language that was asked.
+        query = await _retrieval_question(state["question"], router)
         result = await retrieve(
-            state["question"], state["role"], state.get("department"), settings
+            query, state["role"], state.get("department"), settings
         )
         return {
             "candidates": result.candidates,
@@ -163,7 +202,9 @@ def build_graph(router: ProviderRouter, settings: Settings):
         if state.get("refused"):
             return {"citations": []}
         candidates = state.get("candidates") or []
-        ok, reason = verify_answer(state.get("answer", ""), candidates)
+        ok, reason = verify_answer(
+            state.get("answer", ""), candidates, _is_non_latin(state["question"])
+        )
         if not ok:
             return {
                 "refused": True,

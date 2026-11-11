@@ -85,7 +85,7 @@ Hard gate: **permission leakage must be exactly 0**.
 | Data | Supabase Postgres + pgvector + Auth + RLS | free tier, RLS is the access boundary |
 | Retrieval | pgvector + full-text, RRF, cross-encoder rerank | good recall, CPU-friendly precision |
 | LLM | provider router: Groq primary, Gemini backup, mock for tests | free tiers, no lock-in |
-| Embeddings | `paraphrase-multilingual-MiniLM-L12-v2` (ONNX, 384 dims) | Bangla questions over English documents |
+| Embeddings | `bge-small-en-v1.5` (ONNX, 384 dims, 0.067 GB) | Fits the 512 MB host; Bengali questions are translated to English before embedding |
 
 ## Quick start (reviewer)
 

@@ -22,9 +22,12 @@ class Settings(BaseSettings):
 
     allowed_origins: str = "http://localhost:3000"
 
-    # Both run on ONNX Runtime through fastembed and flashrank: the free host
-    # gives 512 MB, which torch cannot fit. Dims stay at 384 for the schema.
-    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    # ONNX Runtime through fastembed: the free host gives 512 MB and torch does
+    # not fit. The multilingual MiniLM (118M params, 0.22 GB on disk) still
+    # crossed the limit while loading, so the default is bge-small-en-v1.5:
+    # 0.067 GB, 384 dims, same schema. Non-Latin questions are translated to
+    # English before they are embedded (pipeline._retrieval_question).
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
     reranker_model: str = "cross-encoder/ms-marco-TinyBERT-L-2-v2"
 
     # Retrieval knobs. Kept explicit so the evaluation report can cite them.

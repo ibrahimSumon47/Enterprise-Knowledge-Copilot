@@ -136,7 +136,7 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
         for index, candidate in enumerate(candidates)
     ]
     try:
-        ranked = model.rerank(question, passages, top_k=len(passages))
+        ranked = model.rerank(question, passages, top_n=len(passages))
     except Exception as exc:  # noqa: BLE001 - same reason as above
         _rerank_error = f"score {type(exc).__name__}: {str(exc)[:160]}"
         logger.warning("rerank failed, keeping hybrid order: %s", exc)

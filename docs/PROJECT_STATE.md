@@ -89,8 +89,10 @@ hold torch plus two transformer models.
    encoder is English-only. Verified: `POST /chat` returned 200 in 5.5 s with no
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
-3. **Evaluation report.** `docs/reports/eval.json` and `docs/reports/gold.json`
-   cannot be produced until answers work end to end.
+3. **Answer quality, not plumbing.** The full run is published and leakage is 0,
+   but hit@k 0.217 and citation precision 0.173 are low. The reranker is off to
+   stay inside 512 MB and the encoder is English-only, so precision is the next
+   thing to improve, not the gate.
 
 ## Resolved since the previous snapshot
 
@@ -128,8 +130,9 @@ hold torch plus two transformer models.
 
 **Known red**
 
-- Chat: 502 on every call, measured twice, with `/health` unreachable immediately
-  afterwards (memory kill, confirmed by the host's own notification).
+- Chat: answers again. `/health` reports `BAAI/bge-small-en-v1.5` at 108-341 MB
+  RSS instead of 519 MB with the multilingual encoder, and a live guest question
+  returned two citations in 2.1 s.
 - Login on the web: impossible until the two Supabase variables reach Vercel.
-- `docs/reports/eval.json` and `docs/reports/gold.json` do not exist, so the gate's
-  P8 stays open. The 84-question golden set and the harness are committed.
+- Evaluation: `docs/reports/eval.json` and `eval.md` now hold the full run --
+  84 questions, hit@k 0.217, MRR 0.21, citation precision 0.173, refusal accuracy 0.524, p95 2193 ms, leakage 0.

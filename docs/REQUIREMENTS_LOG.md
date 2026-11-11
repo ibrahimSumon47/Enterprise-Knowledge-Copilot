@@ -37,6 +37,8 @@ One line per requirement. **Source** = `owner` (stated by the owner) or `agent` 
 | R-30 | 2026-11-11 | `SUPABASE_URL` re-set 11:23 UTC; Vercel still unlinked and no Vercel project for this repo. | agent check | open — non-blocking, project created at deploy time |
 | R-31 | 2026-11-11 | Deploy skeleton pushed: Next.js 16.4.6 + React 19.3.1, `pnpm build` passes locally, commit `feb624c` on `main`. | agent | done |
 | R-32 | 2026-11-11 | `SUPABASE_DB_URL` must use the **Session pooler** host; direct `db.<ref>.supabase.co` is IPv6-only and unreachable here (DNS `gaierror`), pooler `aws-0/aws-1-ap-south-1.pooler.supabase.com:5432` is reachable over IPv4. | agent check | working rule for the FastAPI service |
+| R-33 | 2026-11-11 | Vercel project `enterprise-knowledge-copilot` created, linked, GitHub-connected; production alias `https://enterprise-knowledge-copilot-wine.vercel.app` returns 200; a push to `main` produced an automatic Production deployment. | agent | done |
+| R-34 | 2026-11-11 | Supabase live key test: legacy `anon`/`service_role` + new `default/publishable`/`default/secret` exist; `service_role` REST `/rest/v1/` → 200, `/auth/v1/health` → 200, `anon` auth health → 200. | agent check | done |
 
 ## Timeline
 
@@ -44,3 +46,4 @@ One line per requirement. **Source** = `owner` (stated by the owner) or `agent` 
 - **2026-11-11** — Setup verified read-only: repo empty but public, 6/7 secrets present (`SUPABASE_DB_URL` missing), Supabase project healthy (`ctfatevadhojxycuplsh`), HF logged in as `NoobMaster005` (OAuth token expiring 2026-11-26), Vercel not linked to GitHub. Requirements R-27…R-29 logged.
 - **2026-11-11** — Re-check after owner setup: 7/7 secrets present, Supabase `ACTIVE_HEALTHY`, HF has no Spaces yet and `ekc-space` is a WRITE token without expiry, repo still empty (no commits). Requirements R-30 logged. Build not started.
 - **2026-11-11** — Connection checks passed: Supabase REST live (401 without key), session pooler reachable over IPv4, Groq/Gemini endpoints reachable, HF logged in, 7/7 secrets. Minimal Next.js 16.4.6 scaffold built (`pnpm build` ✓), committed and pushed to `main` (commit `feb624c`). Requirements R-31, R-32 logged. Feature build not started.
+- **2026-11-11** — Vercel set up end to end: project created with a lowercase name (the folder name broke project creation), linked, `vercel.json` pinned the Next.js framework (the CLI-created project defaulted to a static `public` preset and failed the first build), production deploy ready, GitHub repo connected so pushes to `main` auto-deploy. Supabase keys proven working against the live project. Requirements R-33, R-34 logged.

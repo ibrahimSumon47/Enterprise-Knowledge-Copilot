@@ -165,6 +165,8 @@ Secrets are added by the owner only: `gh secret set NAME` in a terminal (value t
 
 **None blocking.** Verified 2026-11-11 11:25 UTC: 7/7 secrets set, Supabase `ACTIVE_HEALTHY`, HF `ekc-space` is a WRITE token with no expiry, GitHub repo public (still empty, as expected before the build).
 
-Still open, all agent work after START: git init + first push, Vercel project + GitHub link, Hugging Face Space creation, schema/RLS/pgvector index, corpus ingestion, smoke + auth tests.
+**Done since:** repo initialized and pushed (`main`), Vercel project `enterprise-knowledge-copilot` created + linked + GitHub-connected, production alias **https://enterprise-knowledge-copilot-wine.vercel.app** live (HTTP 200), and a push-triggered auto-deploy confirmed.
+
+Still open, all agent work after START: Hugging Face Space creation, schema/RLS/pgvector index, corpus ingestion, smoke + auth tests, Vercel env vars for Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) and the Space URL.
 
 Note: GitHub secret values are write-only. They are validated by a live connection test as the first build step; if one is wrong, only that secret is re-set by the owner.

@@ -163,7 +163,9 @@ async def run_ingest(job_id: str, settings: Settings) -> None:
                     },
                 }
             )
-            vectors = embed_documents([chunk["content"] for chunk in chunks], settings)
+            vectors = await asyncio.to_thread(
+                embed_documents, [chunk["content"] for chunk in chunks], settings
+            )
             for chunk, vector in zip(chunks, vectors, strict=True):
                 chunk["embedding"] = vector
             await db.replace_chunks(document_id, chunks)

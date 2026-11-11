@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import logging
 from dataclasses import dataclass, field
 from typing import Any
@@ -55,7 +57,8 @@ class RetrievalResult:
 
 async def retrieve(question: str, role: str, department: str | None, settings: Settings) -> RetrievalResult:
     """Run the full retrieval path. The access predicate is applied by SQL."""
-    embedding = embed_query(question, settings)
+    # ONNX inference is CPU-bound; keep the event loop free for health checks.
+    embedding = await asyncio.to_thread(embed_query, question, settings)
     rows = await db.search_chunks(
         embedding=embedding,
         query_text=question,
@@ -85,7 +88,9 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
     if not candidates:
         return RetrievalResult()
 
-    reranked = rerank(question, [candidate.__dict__ for candidate in candidates], settings)
+    reranked = await asyncio.to_thread(
+        rerank, question, [candidate.__dict__ for candidate in candidates], settings
+    )
     kept = [item for item in reranked if item["rerank_score"] >= settings.min_rerank_score][
         : settings.rerank_top_k
     ]

@@ -61,6 +61,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await db.close_pool()
 
 
+def _rss_mb() -> int:
+    """Peak RSS in MB. The free host allows 512 MB, so this is worth seeing."""
+    try:
+        import resource
+
+        return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024)
+    except Exception:  # pragma: no cover - not Linux
+        return 0
+
+
 app = FastAPI(
     title="Enterprise Knowledge Copilot API",
     version="1.0.0",
@@ -100,7 +110,7 @@ async def hardening(request: Request, call_next):
 
 @app.get("/health", tags=["ops"])
 async def health() -> dict[str, str]:
-    return {"status": "ok", "service": "ekc-api"}
+    return {"status": "ok", "service": "ekc-api", "rss_mb": _rss_mb()}
 
 
 @app.get("/ready", response_model=ReadyResponse, tags=["ops"])

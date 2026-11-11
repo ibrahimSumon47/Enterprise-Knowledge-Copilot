@@ -42,7 +42,7 @@ def _load_encoder(settings: Settings) -> Any:
         from fastembed import TextEmbedding
 
         logger.info("loading embedding model %s", settings.embedding_model)
-        _encoder = TextEmbedding(model_name=settings.embedding_model)
+        _encoder = TextEmbedding(model_name=settings.embedding_model, threads=1)
         _dims = len(next(iter(_encoder.embed(["dimension probe"]))))
     return _encoder
 
@@ -56,7 +56,7 @@ def _load_reranker(settings: Settings) -> Any:
         model_name = settings.reranker_model.rsplit("/", 1)[-1]
         logger.info("loading reranker %s", model_name)
         cache_dir = os.environ.get("FLASHRANK_CACHE_DIR", "/tmp/flashrank")
-        _reranker = Ranker(model_name=model_name, cache_dir=cache_dir)
+        _reranker = Ranker(model_name=model_name, cache_dir=cache_dir, max_length=256)
     return _reranker
 
 

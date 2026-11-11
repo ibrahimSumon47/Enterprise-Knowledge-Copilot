@@ -65,7 +65,7 @@ const phases = {
     fileCheck("feature ledger", "docs/features.json"),
     fileCheck("security policy", "SECURITY.md"),
     fileCheck("phase gate", "scripts/check-done.mjs"),
-    containsCheck("no attribution trailers in the hook", ".husky/pre-commit", ["Co-Authored-By"]),
+    containsCheck("commit hygiene gate", ".github/workflows/ci.yml", ["Co-Authored-By", "commit-hygiene"]),
   ],
   P1: [
     containsCheck("schema defines the access predicate", "supabase/migrations/20261111000100_init.sql", [

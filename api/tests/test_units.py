@@ -141,3 +141,15 @@ def test_retrieval_uses_sql_permission_filter(monkeypatch: pytest.MonkeyPatch) -
     assert captured["limit"] == settings.candidate_limit
     assert result.candidates
     assert result.confidence == "high"
+
+
+def test_graph_compiles() -> None:
+    """LangGraph rejects a node whose name is also a state key, so build it here."""
+    from app.pipeline import build_graph
+
+    class DummyRouter:
+        async def complete(self, *args: Any, **kwargs: Any) -> Any:
+            raise AssertionError("the graph must not call the model while compiling")
+
+    graph = build_graph(DummyRouter(), Settings(supabase_url="https://example.test"))  # type: ignore[arg-type]
+    assert graph is not None

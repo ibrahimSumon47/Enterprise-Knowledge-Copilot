@@ -195,20 +195,24 @@ def build_graph(router: ProviderRouter, settings: Settings):
         return "answer"
 
     graph = StateGraph(PipelineState)
-    graph.add_node("route", route_node)
-    graph.add_node("retrieve", retrieve_node)
-    graph.add_node("grade", grade_node)
-    graph.add_node("answer", answer_node)
-    graph.add_node("verify", verify_node)
-    graph.add_node("refuse", refuse_node)
+    # Node names must differ from state keys: LangGraph rejects a node called
+    # "route" or "answer" because those are already channels in PipelineState.
+    graph.add_node("route_step", route_node)
+    graph.add_node("retrieve_step", retrieve_node)
+    graph.add_node("grade_step", grade_node)
+    graph.add_node("answer_step", answer_node)
+    graph.add_node("verify_step", verify_node)
+    graph.add_node("refuse_step", refuse_node)
 
-    graph.set_entry_point("route")
-    graph.add_edge("route", "retrieve")
-    graph.add_edge("retrieve", "grade")
-    graph.add_conditional_edges("grade", after_grade, {"answer": "answer", "refuse": "refuse"})
-    graph.add_edge("answer", "verify")
-    graph.add_edge("verify", END)
-    graph.add_edge("refuse", END)
+    graph.set_entry_point("route_step")
+    graph.add_edge("route_step", "retrieve_step")
+    graph.add_edge("retrieve_step", "grade_step")
+    graph.add_conditional_edges(
+        "grade_step", after_grade, {"answer": "answer_step", "refuse": "refuse_step"}
+    )
+    graph.add_edge("answer_step", "verify_step")
+    graph.add_edge("verify_step", END)
+    graph.add_edge("refuse_step", END)
 
     return graph.compile()
 

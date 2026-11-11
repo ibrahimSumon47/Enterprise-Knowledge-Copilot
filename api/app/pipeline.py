@@ -117,11 +117,15 @@ async def _retrieval_question(question: str, router: ProviderRouter) -> str:
     return translated
 
 
+def _is_refusal(answer: str) -> bool:
+    return answer.strip().rstrip(".").lower() == REFUSAL.rstrip(".").lower()
+
+
 def verify_answer(
     answer: str, candidates: list[Retrieved], cross_lingual: bool = False
 ) -> tuple[bool, str]:
     """Citation verification: every marker is real and the text overlaps its source."""
-    if answer.strip().rstrip(".") == REFUSAL.rstrip("."):
+    if _is_refusal(answer):
         return True, "explicit refusal"
     markers = {int(match) for match in CITATION_RE.findall(answer)}
     if not markers:
@@ -205,6 +209,16 @@ def build_graph(router: ProviderRouter, settings: Settings):
     async def verify_node(state: PipelineState) -> PipelineState:
         if state.get("refused"):
             return {"citations": []}
+        # A model that declines on its own must be reported as a refusal, not as
+        # a successful answer that happens to carry no citations.
+        if _is_refusal(state.get("answer", "")):
+            return {
+                "refused": True,
+                "answer": REFUSAL,
+                "confidence": "low",
+                "reason": "model declined to answer",
+                "citations": [],
+            }
         candidates = state.get("candidates") or []
         ok, reason = verify_answer(
             state.get("answer", ""), candidates, _is_non_latin(state["question"])

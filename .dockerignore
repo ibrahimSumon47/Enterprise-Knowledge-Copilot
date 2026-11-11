@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+.next
+.vercel
+.corpus-src
+.space
+eval
+docs
+web
+data/handbook
+*.md
+**/__pycache__
+**/.pytest_cache

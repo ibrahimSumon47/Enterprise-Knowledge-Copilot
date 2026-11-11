@@ -42,7 +42,7 @@ ALLOWED_ORIGINS=https://enterprise-knowledge-copilot-wine.vercel.app
 - Database: `gh workflow run db-migrate.yml` applies `supabase/migrations/*.sql`
   with the `SUPABASE_DB_URL` secret.
 - Role accounts: `gh workflow run seed-users.yml` (needs `EKC_DEMO_PASSWORD`).
-- API: build `api/Dockerfile` and host it anywhere with Docker. A Hugging Face
+- API: build `Dockerfile` and host it anywhere with Docker. A Hugging Face
   Docker Space needs PRO, which the free-only rule forbids — see the Blocked
   section of `docs/PROJECT_STATE.md`.
 - Corpus: `python scripts/build_corpus.py` regenerates `data/corpus.jsonl` from

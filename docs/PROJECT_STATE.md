@@ -14,7 +14,7 @@ Spaces on free cpu-basic requires a PRO subscription."*
 - Impact: the FastAPI service in `api/` cannot be hosted on the planned free
   tier, so the deployed web app has no live API behind it yet.
 - The service itself is complete and ready to run anywhere that builds the
-  image: `api/Dockerfile` (or `scripts/prepare_space.sh` for a Space).
+  image: `Dockerfile` (or `scripts/prepare_space.sh` for a Space).
 - Options for the owner (pick one, no code change needed):
   1. HF PRO subscription (paid — not allowed by the free-only rule).
   2. A free static Space cannot run FastAPI. Use another free Docker host

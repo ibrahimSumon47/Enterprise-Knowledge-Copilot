@@ -9,8 +9,10 @@ services:
     runtime: docker
     plan: free
     region: singapore
-    dockerContext: ./api
-    dockerfilePath: ./api/Dockerfile
+    # Root context with the default Dockerfile path: no extra settings in the
+    # dashboard, and the COPY lines resolve from the repository root.
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     autoDeploy: true
     envVars:

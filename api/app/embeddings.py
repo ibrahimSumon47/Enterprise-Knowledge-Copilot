@@ -10,6 +10,7 @@ lazily, so unit tests never download weights.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Sequence
 
 import numpy as np
@@ -57,7 +58,8 @@ def _load_reranker(settings: Settings) -> Any:
         # flashrank ships the same cross-encoders under their short names.
         model_name = settings.reranker_model.rsplit("/", 1)[-1]
         logger.info("loading reranker %s", model_name)
-        _reranker = Ranker(model_name=model_name, cache_dir="/tmp/flashrank")
+        cache_dir = os.environ.get("FLASHRANK_CACHE_DIR", "/tmp/flashrank")
+        _reranker = Ranker(model_name=model_name, cache_dir=cache_dir)
     return _reranker
 
 

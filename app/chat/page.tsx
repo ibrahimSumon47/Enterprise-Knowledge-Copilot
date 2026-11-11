@@ -18,6 +18,10 @@ type Answer = {
 
 type Turn = { question: string; result?: Answer; error?: string };
 
+const CONFIGURED = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+);
+
 const SUGGESTIONS = [
   "How do I submit an expense receipt?",
   "What is the incident response process?",
@@ -31,10 +35,10 @@ export default function ChatPage() {
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
   const [busy, setBusy] = useState(false);
-  const [configError, setConfigError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!CONFIGURED) return;
     try {
       const supabase = supabaseBrowser();
       supabase.auth.getSession().then(({ data }) => {
@@ -46,9 +50,8 @@ export default function ChatPage() {
         setEmail(data.session.user.email ?? null);
       });
     } catch (caught) {
-      setConfigError(
-        caught instanceof Error ? caught.message : "Supabase is not configured on this deployment",
-      );
+      // Surfaced in the banner below; no state writes inside an effect.
+      console.error(caught);
     }
   }, [router]);
 
@@ -105,13 +108,13 @@ export default function ChatPage() {
           </button>
         </header>
 
-        {configError ? (
+        {CONFIGURED ? null : (
           <p className="mt-4 rounded-lg border border-[var(--warn)] px-3 py-2 text-xs leading-6 text-[var(--warn)]">
             <AlertTriangle className="mr-1 inline" size={13} />
-            {configError}. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to this
-            deployment, then reload.
+            Supabase is not configured on this deployment. Add NEXT_PUBLIC_SUPABASE_URL and
+            NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel, then redeploy.
           </p>
-        ) : null}
+        )}
 
         <div className="panel mt-5 flex-1 space-y-5 overflow-y-auto p-5">
           {turns.length === 0 ? (

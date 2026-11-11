@@ -62,7 +62,9 @@ def _load_reranker(settings: Settings) -> Any:
         model_name = settings.reranker_model.rsplit("/", 1)[-1]
         logger.info("loading reranker %s", model_name)
         cache_dir = os.environ.get("FLASHRANK_CACHE_DIR", "/tmp/flashrank")
-        _reranker = Ranker(model_name=model_name, cache_dir=cache_dir, max_length=256)
+        _reranker = Ranker(
+            model_name=model_name, cache_dir=cache_dir, max_length=settings.rerank_max_length
+        )
     return _reranker
 
 
@@ -157,7 +159,7 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
 def _rerank_text(candidate: dict[str, Any]) -> str:
     heading = candidate.get("heading") or ""
     content = candidate.get("content") or ""
-    return f"{candidate.get('title', '')} — {heading}\n{content}"[:2000]
+    return f"{candidate.get('title', '')} — {heading}\n{content}"[:900]
 
 
 def embedding_dims() -> int:

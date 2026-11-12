@@ -110,6 +110,18 @@ hold torch plus two transformer models.
    report hash unchanged; a half-outage run scored 6 of 12. The full rerun is
    pending: the free Groq quota is exhausted, so every live question is an outage.
 
+- **Provider fallback actually works now.** Gemini answered 404 for every request
+  because the fallback used the retired `gemini-2.5-flash` id ("no longer available
+  to new users"), so a Groq quota error still ended in a refusal. The default is now
+  `gemini-3.1-flash-lite` with `gemini-3.5-flash-lite` behind it, and the first id
+  that answers is remembered per process. Evidence: `/admin/providers/models?answer=true`
+  returned `provider: gemini, tokens: 15`; five live questions came back one `groq`
+  and four `gemini`, each with citations and `outage: false`, and the audit log shows
+  the old `gemini http 404` rows beside the new successful ones.
+- **Provider diagnostics.** `GET /admin/providers/models` lists the Gemini ids the
+  key can call and `?probe=true&models=a,b` runs a one-word generation per id, so a
+  retired model is a 404 with a named id instead of a silent outage.
+
 ## Resolved since the previous snapshot
 
 - Migrations applied and verified; role accounts seeded; corpus ingested.

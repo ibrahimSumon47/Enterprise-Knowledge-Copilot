@@ -3,7 +3,7 @@
 Updated at the end of every phase. An AI resuming this repo should read
 `AGENTS.md`, then this file, then `docs/HANDOFF.md`.
 
-**Last updated:** 2026-11-12
+**Last updated:** 2026-11-12 (last improvement sprint)
 
 ## Where it runs
 
@@ -18,6 +18,37 @@ Vercel has `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and
 `NEXT_PUBLIC_API_BASE_URL` set for Production and Preview; `/chat` and `/admin`
 answer 307 to `/login` when signed out, so the variables are in place. The seven
 role accounts sign in through the normal form.
+
+## Model-free retrieval evaluation (2026-11-12, this sprint)
+
+Measured through `/admin/retrieval?all_candidates=true` with no LLM call;
+`eval/retrieval_eval.py`, three passes per split, spread 0.000 everywhere.
+
+| Split | Config | hit@3 | hit@10 | MRR |
+| --- | --- | --- | --- | --- |
+| dev (32 answerable) | fused only | 0.688 | 0.719 | 0.601 |
+| dev | + TinyBERT rerank | 0.688 | 0.781 | 0.686 |
+| test (21 answerable) | fused only | 0.857 | 0.857 | 0.833 |
+| test | + TinyBERT rerank | 0.857 | 0.857 | 0.809 |
+
+The reranker helps ordering on dev and ties on test; a fused/rerank blend was
+tested and did not beat either on ordering or separation. Refusal at the
+configured 0.15 answers 0.476 of answerable test questions and refuses 0.846 of
+unanswerable ones; the dev sweep found no threshold that refuses 90% of
+unanswerable questions while refusing fewer than 19 of 32 answerable ones, because
+the score distributions overlap (AUC 0.667 dev, 0.687 test). That is the measured
+limit behind the end-to-end hit@k. Full report: `docs/reports/retrieval_eval.md`.
+
+Memory, measured on the deployed 512 MB instance with both ONNX models loaded and
+five concurrent retrieval requests: 386 MB, settling at 402 MB across three
+rounds; no restarts. There is no torch in the image — `fastembed` and `flashrank`
+run on onnxruntime (`api/requirements.txt`).
+
+Permission difference verified live on the same question ("engineering salary
+bands"): role=guest returns zero synthetic documents; role=admin returns
+"Engineering salary bands (synthetic)" at score 1.0. Evidence in
+`.tmp/permission_check.json` during the run, reproducible with the command in the
+report.
 
 ## Current quality (last full run, 2026-11-12)
 
@@ -60,6 +91,13 @@ Reports: `docs/reports/eval.md`, `eval_providers.md` (five transport runs),
 not behaviour, so treat this table as the behavioural view.
 
 ## Known limits (measured, not guessed)
+
+- **Refusal separation.** AUC 0.667/0.687 means the top score cannot separate
+  answerable from unanswerable questions well enough to hit both refusal targets.
+  The evidence grader in the pipeline is the lever, and it is off by default
+  because it doubles model calls against a free quota.
+- **`langgraph` 0.2.x advisories.** Accepted risk, explained in
+  `docs/reports/security.md`; fixing means a 1.x migration.
 
 1. **Recall is the weak point.** 14 answerable questions retrieve the right
    document at rank 1 and are still scored near zero by TinyBERT

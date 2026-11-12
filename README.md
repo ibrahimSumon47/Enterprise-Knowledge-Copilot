@@ -21,12 +21,16 @@ audit trail and an evaluation suite that measures all of it.
 | Postgres schema, RLS, hybrid retrieval SQL | Written and versioned in `supabase/migrations`, applied by CI |
 | FastAPI service (auth, RAG, audit, eval API) | **Live** on Render's free Docker tier (512 MB, ~50 s cold start); see `docs/PROJECT_STATE.md` for the measured limits |
 | Corpus | 754 documents (871k words) from the public GitLab Handbook + 12 labelled synthetic confidential documents |
+| Memory under load | **386 → 402 MB RSS** with five concurrent retrieval requests and both ONNX models loaded (measured on the deployed 512 MB instance) |
 | Evaluation set | 84 questions across answerable, unanswerable, Bangla, multi-document and cross-role cases |
 
 Quality of the last full run: **hit@k 0.406**, citation precision 0.333, refusal
-accuracy 0.679, p95 6.7 s, permission leakage **0** over 84 questions. The full
-phase-by-phase state lives in `docs/PROJECT_STATE.md`; feature status with evidence
-is in `docs/features.json`.
+accuracy 0.679, p95 6.7 s, permission leakage **0** over 84 questions. A
+model-free run on the test split (no LLM, 3 passes) puts the right document in the
+top three for **0.857** of answerable questions, which locates the loss in the
+refusal decision rather than in ranking — see `docs/reports/retrieval_eval.md`.
+The full phase-by-phase state lives in `docs/PROJECT_STATE.md`; feature status with
+evidence is in `docs/features.json`.
 
 ## What it does
 
@@ -87,6 +91,27 @@ sprint that measured recall and the evidence grader is in
 
 Hard gate: **permission leakage must be exactly 0**.
 
+### Model-free retrieval evaluation
+
+`eval/retrieval_eval.py` calls `/admin/retrieval?all_candidates=true`, which returns
+every scored passage without touching a language model, so ranking and the refusal
+decision can be measured even when the free LLM quota is exhausted. Three passes
+per split; retrieval is deterministic, so the spread is 0.000.
+
+| Split | Config | hit@3 | hit@10 | MRR | unanswerable refused | separation AUC |
+| --- | --- | --- | --- | --- | --- | --- |
+| dev (50) | fused only | 0.688 ± 0.000 | 0.719 ± 0.000 | 0.601 ± 0.000 | n/a | n/a |
+| dev (50) | + TinyBERT rerank | 0.688 ± 0.000 | 0.781 ± 0.000 | 0.686 ± 0.000 | 0.833 | 0.667 |
+| test (34) | fused only | 0.857 ± 0.000 | 0.857 ± 0.000 | 0.833 ± 0.000 | n/a | n/a |
+| test (34) | + TinyBERT rerank | 0.857 ± 0.000 | 0.857 ± 0.000 | 0.809 ± 0.000 | 0.846 | 0.687 |
+
+The reranker improves ordering on dev (MRR 0.601 → 0.686) and ties on test; a
+blend of fused rank and reranker score was tested and did not beat either
+(AUC 0.56–0.60). The refusal threshold sweep on dev found no value that refuses
+90% of unanswerable questions while refusing fewer than 19 of 32 answerable ones,
+because the top-score distributions overlap (AUC 0.667). That is the measured
+limit behind the end-to-end hit@k.
+
 ## Stack and why
 
 | Layer | Choice | Why |
@@ -115,6 +140,50 @@ python -m pytest api/tests -q
 python eval/run_eval.py --subset --offline
 node scripts/check-done.mjs --phase P0
 ```
+
+## Security controls
+
+Every control links to the workflow or test that proves it. Details:
+`docs/reports/security.md`, plus the public `/trust` page.
+
+| Control | Where it runs | Proof |
+| --- | --- | --- |
+| Secret scanning (full history) | `.github/workflows/ci.yml` (`secrets-scan`) | gitleaks, pinned CLI |
+| Code scanning | `.github/workflows/codeql.yml` | CodeQL for TypeScript and Python |
+| Container and filesystem scan | `.github/workflows/security.yml` (`trivy`) | Trivy 0.57.1, SARIF to code scanning |
+| SBOM | `.github/workflows/security.yml` | CycloneDX `sbom.cdx.json` artifact |
+| Python dependency audit | `.github/workflows/security.yml` (`dependencies`) | pip-audit report artifact |
+| Node dependency audit | `.github/workflows/security.yml` (`dependencies`) | `pnpm audit --audit-level high` |
+| Supply-chain posture | `.github/workflows/security.yml` (`scorecard`) | OpenSSF Scorecard SARIF |
+| Action pinning | every workflow | every `uses:` is a commit SHA |
+| Permission leakage | `api/tests/test_retrieval_access.py` | guest/employee/department cases |
+| Audit chain | `api/tests/test_units.py` | tampering and windowed-page tests |
+
+## Screenshots
+
+Captured from the live deployment on 2026-11-12.
+
+| | |
+| --- | --- |
+| ![Landing](docs/screenshots/01-landing.png) | ![Sign in](docs/screenshots/02-sign-in.png) |
+| ![Cited answer](docs/screenshots/04-chat-citations.png) | ![Admin editor](docs/screenshots/06-admin-editor.png) |
+
+More in `docs/screenshots/`. The showcase script is `docs/showcase/demo-video-script.md`.
+
+## Free-tier limits and cold start
+
+- The API runs on Render's free Docker tier: 512 MB, one shared CPU, and the
+  instance sleeps after 15 idle minutes. The first answer after a quiet period
+  can take up to a minute while the container starts; `components/warmup-banner.tsx`
+  says so in the UI.
+- Groq and Gemini free tiers are the LLM source, with a 1.5 s hedge and a 12 s
+  cap. When both are exhausted the API returns a refusal with no citations rather
+  than an error.
+- Cloudflare Workers AI is wired as an optional reranker (`EKC_CLOUDFLARE_ACCOUNT_ID`
+  and `EKC_CLOUDFLARE_API_TOKEN`). Its free plan gives 10,000 Neurons a day with no
+  card, and `@cf/baai/bge-reranker-base` costs 283 Neurons per million input
+  tokens. It was not enabled on the live deployment (no account token) and its
+  free-tier terms are documented rather than measured here.
 
 ## Limitations
 

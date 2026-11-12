@@ -1,0 +1,52 @@
+name: Nightly eval
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  llm-eval:
+    name: sampled LLM eval
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      # Answers are cached per question and configuration, so a run that dies on
+      # a 429 resumes where it stopped the next night instead of paying twice.
+      - name: Restore the answer cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .cache
+          key: eval-answers-v1
+          restore-keys: eval-answers-
+      - name: Sampled LLM eval (12 questions, retries on quota)
+        env:
+          EKC_API_URL: https://enterprise-knowledge-copilot-2u57.onrender.com
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
+        run: |
+          python eval/run_eval.py --split dev --subset --retry-outage 3 --retry-wait 60 \
+            --cache-tag nightly
+      - name: Save the answer cache
+        if: always()
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .cache
+          key: eval-answers-v1-${{ github.run_id }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: nightly-eval
+          path: |
+            docs/reports/eval.json
+            docs/reports/eval_dev.json
+          if-no-files-found: ignore

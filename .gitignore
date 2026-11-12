@@ -38,3 +38,4 @@ coverage/
 
 # scratch space for local scripts and key hand-offs
 .tmp/
+.cache/

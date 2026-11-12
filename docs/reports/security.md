@@ -12,23 +12,53 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
 | Audit chain | Each row stores the previous hash; `/audit/verify` recomputes the chain and reports the first break. |
 | Secret separation | Only the anon key is in the browser bundle; the service-role key exists on the API host only. `.env.example` lists names, no values. |
 | Secret scanning | CI installs the pinned gitleaks CLI and scans full history; the job is green. |
-| Dependency audit | `pnpm audit --audit-level high` is clean (one moderate advisory remains, below the gate); `pip-audit` runs for the API. |
+| Dependency audit | `pnpm audit --audit-level high`: one moderate advisory, below the gate. `pip-audit` against `api/requirements.txt`: see the finding below. Both run in `.github/workflows/security.yml` and attach their reports as the `dependency-audit` artifact. |
+| Container scan | Trivy 0.57.1 scans the built image and the repository in `.github/workflows/security.yml`; SARIF goes to code scanning. |
+| SBOM | CycloneDX `sbom.cdx.json` is produced from the built image and kept as the `sbom-cyclonedx` artifact. |
+| Supply-chain posture | OpenSSF Scorecard runs weekly and on `main` (`.github/workflows/security.yml`, job `scorecard`) and publishes SARIF. |
+| Action pinning | Every `uses:` in `.github/workflows/` is a commit SHA, including the third-party actions (`aquasecurity`, `ossf`, `pnpm`). |
+| Least privilege | Workflows default to `contents: read`; only the SARIF upload steps get `security-events: write`, and Scorecard adds `id-token: write` for its results. |
 | Commit hygiene | CI fails on attribution trailers; the four commits that predated the rule were rewritten and force-pushed once. |
 | Transport | HTTPS everywhere; CORS restricted to the Vercel origin plus localhost. |
 | Injection resistance | Answers are plain text, no HTML rendering, no tool execution from model output. |
 
-## Open findings
+## Findings from the 2026-11-12 security run
 
-1. **Availability, not confidentiality.** The free API instance exceeds 512 MB
-   when both ONNX models load, so chat can return 502 while the service
-   restarts. Retrieval reranks with the TinyBERT cross-encoder (`EKC_RERANK_ENABLED=1`);
-   turning the reranker back on requires an instance with more memory.
+1. **Fixed — vulnerable direct pins.** `pip-audit` reported 63 advisories across 7
+   packages. The direct pins were updated (`PyJWT` 2.10.1 → 2.15.1,
+   `python-multipart` 0.0.20 → 0.0.33, `fastapi` 0.115.6 → 0.116.1, which also
+   moves `starlette` off 0.41.3). The remaining advisories are all in the
+   `langgraph` 0.2 family; fixing them means a 1.x migration of the graph code,
+   which is not a dependency-only change and is recorded as accepted risk below.
+2. **Fixed — audit verification reported the whole log as tampered.** The verify
+   endpoint checks the newest 500 rows, and treated the first row's `prev_hash`
+   (which points outside the window) as a break once the log passed 500 entries
+   (1157–1656 were all listed). `verify_chain` now anchors on the window edge,
+   reports `anchor_id`/`anchored_at_genesis`, and a unit test covers it.
+3. **Recorded — base image CVEs.** Trivy reports HIGH/CRITICAL advisories in
+   `python:3.12-slim` OS packages. They are uploaded as SARIF and printed in the
+   job log, and the gate is advisory because only a newer base image can fix
+   them; the repository's own dependency gates are pip-audit and pnpm audit.
+4. **Recorded — no OSV-Scanner or Dependabot.** Not added; the two audits above
+   are the dependency gates.
+
+## Accepted risk
+
+- **`langgraph` 0.2.x advisories.** The graph runs in-process with a compiled
+  `StateGraph` and no checkpoint loading from untrusted input, which is the
+  surface those advisories describe. Upgrading to 1.x is scheduled, not silently
+  skipped: the pin in `api/requirements.txt` carries this note.
+- **Shared demo password.** Stored as a GitHub secret and used only for review.
+
+## Earlier open findings
+
+1. **Availability, not confidentiality.** The free API instance sleeps after 15
+   idle minutes and a cold start can take about a minute. Measured under load:
+   386–402 MB RSS with both ONNX models and five concurrent retrieval requests,
+   below the 512 MB limit.
 2. **Demo accounts share a password.** Stored as a GitHub secret and used only
    for review. Rotate with `gh workflow run seed-users.yml` before any real use.
-3. **No published evaluation report yet.** `docs/reports/eval.json` is absent,
-   so `node scripts/check-done.mjs --phase P8` fails by design. The harness and
-   the 84-question golden set are committed.
-4. **No third-party penetration test.**
+3. **No third-party penetration test.**
 
 ## Reproduction
 

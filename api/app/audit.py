@@ -50,11 +50,21 @@ async def record(
 
 
 def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Recompute hashes bottom-up. Rows are expected newest-first."""
+    """Recompute hashes bottom-up. Rows are expected newest-first.
+
+    The caller passes a window (the newest N rows), not the whole log. The first
+    row of that window is an anchor: its `prev_hash` points at a row outside the
+    window, so it is checked against its own payload rather than against
+    `genesis`. Treating the window edge as a break reported the entire log as
+    tampered once the log outgrew the page size.
+    """
     ordered = sorted(rows, key=lambda row: row["id"])
-    prev = GENESIS
+    if not ordered:
+        return {"entries": 0, "intact": True, "broken_ids": [], "head": GENESIS, "anchor_id": None}
+    anchor = ordered[0]["prev_hash"]
+    prev = anchor
     broken: list[int] = []
-    for row in ordered:
+    for position, row in enumerate(ordered):
         payload = {
             "action": row["action"],
             "resource_type": row["resource_type"],
@@ -69,7 +79,8 @@ def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
             else str(row["created_at"]),
         }
         expected = compute_hash(row["prev_hash"], payload)
-        if row["prev_hash"] != prev or expected != row["entry_hash"]:
+        linked = position == 0 or row["prev_hash"] == prev
+        if not linked or expected != row["entry_hash"]:
             broken.append(int(row["id"]))
         prev = row["entry_hash"]
     return {
@@ -77,4 +88,6 @@ def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "intact": not broken,
         "broken_ids": broken,
         "head": prev,
+        "anchor_id": int(ordered[0]["id"]),
+        "anchored_at_genesis": anchor == GENESIS,
     }

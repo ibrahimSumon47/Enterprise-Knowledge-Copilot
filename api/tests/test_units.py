@@ -103,6 +103,35 @@ def test_audit_chain_detects_tampering() -> None:
     assert audit.verify_chain(rows)["intact"] is False
 
 
+def test_audit_chain_verifies_a_window_without_the_genesis_row() -> None:
+    """The log outgrows the 500-row page; the window edge is not a break."""
+    payload = {
+        "action": "chat.question",
+        "resource_type": "conversation",
+        "resource_id": "c1",
+        "actor_id": "u1",
+        "actor_role": "employee",
+        "outcome": "ok",
+        "ip_hash": "h",
+        "detail": {},
+        "created_at": "2026-11-11T10:00:00+00:00",
+    }
+    outside = audit.compute_hash(audit.GENESIS, payload)
+    first_payload = {**payload, "action": "chat.refused"}
+    first = audit.compute_hash(outside, first_payload)
+    second_payload = {**payload, "action": "document.access_changed"}
+    second = audit.compute_hash(first, second_payload)
+    window = [
+        {"id": 11, "prev_hash": outside, "entry_hash": first, **first_payload},
+        {"id": 12, "prev_hash": first, "entry_hash": second, **second_payload},
+    ]
+    result = audit.verify_chain(window)
+    assert result["intact"] is True
+    assert result["anchored_at_genesis"] is False
+    window[1]["prev_hash"] = "not-the-previous-hash"
+    assert audit.verify_chain(window)["intact"] is False
+
+
 def test_retrieval_uses_sql_permission_filter(monkeypatch: pytest.MonkeyPatch) -> None:
     captured: dict[str, Any] = {}
 

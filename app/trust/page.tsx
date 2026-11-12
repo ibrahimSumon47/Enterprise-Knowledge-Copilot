@@ -38,7 +38,7 @@ const controls = [
   {
     icon: FileCheck2,
     title: "Supply chain checks",
-    body: "CI runs a dependency audit, a secret scan over full history, CodeQL for the web and the API, and a failure on any commit that carries an attribution trailer.",
+    body: "CI runs a dependency audit, a secret scan over full history, CodeQL for the web and the API, a Trivy image scan, a CycloneDX SBOM, OpenSSF Scorecard and a failure on any commit that carries an attribution trailer. Every action is pinned to a commit SHA.",
     evidence: ".github/workflows/ci.yml · codeql.yml · SECURITY.md",
   },
 ];

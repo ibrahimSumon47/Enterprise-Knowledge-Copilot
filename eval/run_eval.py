@@ -210,6 +210,9 @@ def main() -> int:
         help="retries per question when no model answered (quota or outage)",
     )
     parser.add_argument("--retry-wait", type=int, default=45)
+    # Changes whenever retrieval or the prompt changes, so stale answers are not
+    # silently reused across configurations.
+    parser.add_argument("--cache-tag", default="default")
     args = parser.parse_args()
 
     if args.split != "all":
@@ -246,6 +249,24 @@ def main() -> int:
         print("missing --api-url/--supabase-url/--anon-key/--password", file=sys.stderr)
         return 2
 
+    # Answers are cached per (split, question, config tag): a run that dies on a
+    # 429 resumes instead of paying for the same questions twice, and repeated
+    # runs of one configuration cost nothing.
+    cache_path = Path(".cache/eval_answers.json")
+    cache: dict[str, dict] = {}
+    if cache_path.exists():
+        try:
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            print("warning: unreadable answer cache, starting fresh", file=sys.stderr)
+
+    def cache_key(item: dict) -> str:
+        return f"{args.split}:{item['id']}:{args.cache_tag}"
+
+    def save_cache() -> None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps(cache, indent=2) + "\n", encoding="utf-8")
+
     tokens: dict[str, str] = {}
     results: list[dict] = []
     leaks = 0
@@ -256,7 +277,12 @@ def main() -> int:
             tokens[role] = sign_in(
                 args.supabase_url, args.anon_key, ROLE_EMAILS[role], args.password
             )
-        response = ask(args, item, tokens[role])
+        key = cache_key(item)
+        response = cache.get(key)
+        if response is not None:
+            print(f"  {item['id']}: cached answer", file=sys.stderr)
+        else:
+            response = ask(args, item, tokens[role])
         retries = 0
         while is_outage(response) and retries < args.retry_outage:
             retries += 1
@@ -266,6 +292,10 @@ def main() -> int:
             )
             time.sleep(args.retry_wait)
             response = ask(args, item, tokens[role])
+
+        if not is_outage(response):
+            cache[key] = response
+            save_cache()
 
         scored = score(item, response)
         leaks += scored["leaks"]

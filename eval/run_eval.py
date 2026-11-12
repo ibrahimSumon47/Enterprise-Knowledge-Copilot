@@ -209,8 +209,20 @@ def main() -> int:
 
         scored = score(item, response)
         leaks += scored["leaks"]
-        results.append({"id": item["id"], "category": item["category"], "role": role, **scored})
+        results.append(
+            {
+                "id": item["id"],
+                "category": item["category"],
+                "role": role,
+                # A throttled provider refuses without citations, which scores
+                # exactly like a retrieval miss. Keep the evidence to tell them
+                # apart, and let the summary count them.
+                "provider": response.get("provider") or "none",
+                **scored,
+            }
+        )
 
+    provider_failures = sum(1 for result in results if result["provider"] in (None, "none"))
     latencies = sorted(result["latency_ms"] for result in results)
     answered = [r for r in results if r["category"] != "unanswerable"]
     summary = {
@@ -226,9 +238,17 @@ def main() -> int:
         "p50_latency_ms": latencies[len(latencies) // 2] if latencies else 0,
         "p95_latency_ms": latencies[int(len(latencies) * 0.95) - 1] if latencies else 0,
         "permission_leakage": leaks,
+        "provider_failures": provider_failures,
     }
     metrics = {"questions": len(results), "summary": summary, "results": results}
     write_report(metrics, "subset" if args.subset else "full")
+    if provider_failures:
+        print(
+            f"warning: {provider_failures} of {len(results)} questions got no model "
+            "answer (provider outage or quota); their scores measure availability, "
+            "not retrieval.",
+            file=sys.stderr,
+        )
     print(json.dumps(summary, indent=2))
     return 0 if leaks == 0 else 1
 

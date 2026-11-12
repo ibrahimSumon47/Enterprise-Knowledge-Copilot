@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0
-    min_answer_score: float = 0.10
+    min_answer_score: float = 0.15
     high_confidence_score: float = 0.45
     # Reciprocal-rank fusion never exceeds 2/61, so the hybrid fallback needs its
     # own scale instead of comparing against cross-encoder logits.

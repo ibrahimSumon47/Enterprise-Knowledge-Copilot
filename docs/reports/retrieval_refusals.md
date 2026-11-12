@@ -25,10 +25,12 @@ refusals are not spread over the gap, they are piled at the bottom:
 Questions the set expects to be refused score in the same range: 24 of 31 are below 0.05. No cut can separate those from the 13
 false refusals, so the threshold is not what breaks them — the cross-encoder is.
 
-What the cut does cost is small and measurable: lowering it to 0.10 recovers
-exactly one question (a18 at 0.141) and admits nothing that should be refused.
-Lowering it to 0.03 recovers one more (m03 at 0.025) but starts admitting the
-near-zero matches the correct refusals depend on.
+I tried the one step that looked free: 0.15 → 0.10. It recovers a18, whose
+answer cites nothing that matches the question, and one previously answered
+Bengali question flipped to a refusal in the same run. Over the full set hit@k
+moved 0.406 → 0.377, inside run-to-run noise and in the wrong direction, so the
+threshold is back at 0.15 (`eval_threshold_010.json` keeps the run). Lowering it
+further only starts admitting the near-zero matches the correct refusals depend on.
 
 The refusals trace to the score itself, not the cut. Example:
 `What is the deadline for submitting receipts?` retrieves the right page

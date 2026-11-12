@@ -9,7 +9,7 @@ from typing import Any
 
 from . import db
 from .config import Settings
-from .embeddings import embed_query, rerank
+from .embeddings import embed_query, note_rerank_depth, rerank
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,24 @@ class RetrievalResult:
         return bool(self.candidates)
 
 
+def _shortlist_depth(candidates: list[Retrieved], settings: Settings) -> int:
+    """How many passages the cross-encoder should read.
+
+    Both branches ranking the same passage first, with a clear gap to fourth, is
+    the signal that the hybrid order is trustworthy: the reranker then only has to
+    confirm the top few instead of re-scoring the whole pool.
+    """
+    if not settings.rerank_adaptive or len(candidates) <= settings.rerank_fast_depth:
+        return len(candidates)
+    top = candidates[0].rrf_score
+    if top < settings.rerank_agree_score:
+        return len(candidates)
+    fourth = candidates[min(3, len(candidates) - 1)].rrf_score
+    if top - fourth < settings.rerank_agree_margin:
+        return len(candidates)
+    return settings.rerank_fast_depth
+
+
 async def retrieve(question: str, role: str, department: str | None, settings: Settings) -> RetrievalResult:
     """Run the full retrieval path. The access predicate is applied by SQL."""
     # ONNX inference is CPU-bound; keep the event loop free for health checks.
@@ -89,9 +107,23 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
         return RetrievalResult()
 
     if settings.rerank_enabled:
+        depth = _shortlist_depth(candidates, settings)
         reranked = await asyncio.to_thread(
-            rerank, question, [candidate.__dict__ for candidate in candidates], settings
+            rerank,
+            question,
+            [candidate.__dict__ for candidate in candidates[:depth]],
+            settings,
         )
+        best = max((item.get("rerank_score", 0.0) for item in reranked), default=0.0)
+        if depth < len(candidates) and best < settings.min_answer_score:
+            # Nothing quotable in the shortlist: the evidence may sit deeper in the
+            # pool, so pay for the full pass before refusing.
+            reranked = await asyncio.to_thread(
+                rerank, question, [candidate.__dict__ for candidate in candidates], settings
+            )
+            note_rerank_depth("escalated")
+        else:
+            note_rerank_depth("short" if depth < len(candidates) else "full")
     else:
         # Hybrid order only. Used where the host cannot fit a second model.
         reranked = [

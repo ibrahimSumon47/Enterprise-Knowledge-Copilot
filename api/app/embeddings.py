@@ -25,6 +25,14 @@ _rerank_error: str | None = None
 _dims = 384
 
 
+_rerank_depth: dict[str, int] = {"short": 0, "full": 0, "escalated": 0}
+
+
+def note_rerank_depth(kind: str) -> None:
+    """Count how the adaptive shortlist resolved, for /health."""
+    _rerank_depth[kind] = _rerank_depth.get(kind, 0) + 1
+
+
 def rerank_state() -> dict[str, Any]:
     """Why reranking is or is not running, for /health and the runbook."""
     settings = get_settings()
@@ -33,6 +41,7 @@ def rerank_state() -> dict[str, Any]:
         "error": _rerank_error,
         "candidates": settings.candidate_limit,
         "max_length": settings.rerank_max_length,
+        "depth": dict(_rerank_depth),
     }
 
 

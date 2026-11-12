@@ -44,6 +44,16 @@ class Settings(BaseSettings):
     # 96 tokens cut too much of the passage and cost hit@k; 192 keeps the policy
     # sentence in view at 0.75 of the 256-token scoring cost.
     rerank_max_length: int = 192
+    # Adaptive depth: when both retrieval branches put the same passage on top,
+    # scoring the whole pool rarely moves the winner. Score a shortlist and pay
+    # the full price only when that shortlist comes back weak.
+    rerank_adaptive: bool = True
+    rerank_fast_depth: int = 8
+    # A passage ranked first by both branches scores 2/61 ~= 0.0328 in RRF; near
+    # that means agreement rather than one branch carrying the result alone.
+    rerank_agree_score: float = 0.030
+    # The fourth passage has to sit clearly behind the first, too.
+    rerank_agree_margin: float = 0.004
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

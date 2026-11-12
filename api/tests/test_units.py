@@ -153,3 +153,37 @@ def test_graph_compiles() -> None:
 
     graph = build_graph(DummyRouter(), Settings(supabase_url="https://example.test"))  # type: ignore[arg-type]
     assert graph is not None
+
+
+def test_shortlist_depth_follows_branch_agreement() -> None:
+    """Both branches on top means the pool can be scored cheaply; disagreement cannot."""
+    from app.retrieval import _shortlist_depth
+
+    settings = Settings()
+    agreed = [Retrieved_stub(0.032)] + [Retrieved_stub(0.010)] * 23
+    assert _shortlist_depth(agreed, settings) == settings.rerank_fast_depth
+
+    one_branch_only = [Retrieved_stub(0.016)] + [Retrieved_stub(0.008)] * 23
+    assert _shortlist_depth(one_branch_only, settings) == 24
+
+    flat = [Retrieved_stub(0.032)] + [Retrieved_stub(0.030)] * 23
+    assert _shortlist_depth(flat, settings) == 24
+
+
+def Retrieved_stub(rrf: float):
+    from app.retrieval import Retrieved
+
+    return Retrieved(
+        chunk_id="c",
+        document_id="d",
+        title="t",
+        heading=None,
+        content="x",
+        access_level="employee",
+        department=None,
+        is_synthetic=False,
+        source_url=None,
+        license="CC BY-SA 4.0",
+        attribution="GitLab Handbook",
+        rrf_score=rrf,
+    )

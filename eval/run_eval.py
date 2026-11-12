@@ -72,8 +72,10 @@ def is_outage(response: dict) -> bool:
     Those rows carry no information about retrieval quality, so they are excluded
     from the metrics instead of being scored as retrieval misses.
     """
-    if response.get("outage"):
-        return True
+    if "outage" in response:
+        # The API says explicitly whether a model was reached. A retrieval refusal
+        # also reports provider "none", so the heuristic below must not override it.
+        return bool(response["outage"])
     return (
         (response.get("provider") or "none") == "none"
         and bool(response.get("refused"))

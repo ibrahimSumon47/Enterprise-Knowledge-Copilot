@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     # names what the configured key can actually call.
     gemini_model: str = "gemini-3.1-flash-lite"
     gemini_fallbacks: str = "gemini-3.5-flash-lite"
+    # A quota-limited primary can also hang instead of answering 429, and the
+    # fallback only starts when the first call gives up. 45 s turned the p95 into
+    # 24 s in the evaluation, so the primary gets a short leash.
+    groq_timeout_seconds: float = 12.0
+    gemini_timeout_seconds: float = 30.0
 
     allowed_origins: str = "http://localhost:3000"
 

@@ -43,6 +43,7 @@ class GroqProvider:
     def __init__(self, settings: Settings, model: str = "openai/gpt-oss-120b") -> None:
         self._key = settings.groq_api_key
         self._model = model
+        self._timeout = settings.groq_timeout_seconds
 
     async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
         if not self._key:
@@ -56,7 +57,7 @@ class GroqProvider:
                 {"role": "user", "content": prompt},
             ],
         }
-        async with httpx.AsyncClient(timeout=45) as client:
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
             response = await client.post(
                 GROQ_URL,
                 json=payload,
@@ -78,6 +79,7 @@ class GeminiProvider:
         # The model id is configuration, not a constant: the catalogue retires ids
         # and a retired id answers 404 for every request. The first id that answers
         # is remembered, so a dead alias costs one failed call, not one per question.
+        self._timeout = settings.gemini_timeout_seconds
         primary = model or settings.gemini_model
         extra = [name.strip() for name in (settings.gemini_fallbacks or "").split(",") if name.strip()]
         self._models = list(dict.fromkeys([primary, *extra]))
@@ -91,7 +93,7 @@ class GeminiProvider:
             "generationConfig": {"temperature": 0.1, "maxOutputTokens": max_tokens},
         }
         failures: list[str] = []
-        async with httpx.AsyncClient(timeout=45) as client:
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
             for model in self._models:
                 response = await client.post(
                     GEMINI_URL.format(model=model),

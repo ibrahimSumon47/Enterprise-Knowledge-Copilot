@@ -262,8 +262,10 @@ async def insert_audit(entry: dict[str, Any]) -> None:
 async def audit_page(limit: int = 100) -> list[dict[str, Any]]:
     rows = await pool().fetch(
         """
-        select id, prev_hash, entry_hash, actor_role, action, resource_type,
-               resource_id, outcome, created_at, detail
+        -- Every column the hash covers must be selected, or verification
+        -- compares a payload the row never had.
+        select id, prev_hash, entry_hash, actor_id, actor_role, action,
+               resource_type, resource_id, outcome, ip_hash, created_at, detail
         from public.audit_log
         order by id desc
         limit $1

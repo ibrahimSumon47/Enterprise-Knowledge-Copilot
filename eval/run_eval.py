@@ -23,6 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GOLDEN = ROOT / "eval" / "golden_set.jsonl"
+SPLITS = {"dev": ROOT / "eval" / "golden_dev.jsonl", "test": ROOT / "eval" / "golden_test.jsonl"}
 REPORT_JSON = ROOT / "docs" / "reports" / "eval.json"
 REPORT_MD = ROOT / "docs" / "reports" / "eval.md"
 
@@ -37,9 +38,9 @@ ROLE_EMAILS = {
 }
 
 
-def load_golden() -> list[dict]:
+def load_golden(path: Path | None = None) -> list[dict]:
     items: list[dict] = []
-    with GOLDEN.open(encoding="utf-8") as handle:
+    with (path or GOLDEN).open(encoding="utf-8") as handle:
         for line in handle:
             line = line.strip()
             if line:
@@ -191,6 +192,12 @@ def write_report(metrics: dict, mode: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--subset", action="store_true")
+    parser.add_argument(
+        "--split",
+        choices=["all", "dev", "test"],
+        default="all",
+        help="run only the dev or test half of the golden set",
+    )
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--api-url", default=os.environ.get("EKC_API_URL", ""))
     parser.add_argument("--supabase-url", default=os.environ.get("SUPABASE_URL", ""))
@@ -205,7 +212,11 @@ def main() -> int:
     parser.add_argument("--retry-wait", type=int, default=45)
     args = parser.parse_args()
 
-    items = load_golden()
+    if args.split != "all":
+        global REPORT_JSON, REPORT_MD
+        REPORT_JSON = ROOT / "docs" / "reports" / f"eval_{args.split}.json"
+        REPORT_MD = ROOT / "docs" / "reports" / f"eval_{args.split}.md"
+    items = load_golden(SPLITS.get(args.split))
     if args.subset:
         items = subset(items)
 
@@ -317,7 +328,8 @@ def main() -> int:
         "by_provider": by_provider,
         "results": results,
     }
-    write_report(metrics, "subset" if args.subset else "full")
+    mode = "subset" if args.subset else ("full" if args.split == "all" else args.split)
+    write_report(metrics, mode)
     if outages:
         print(
             f"warning: {len(outages)} of {len(results)} questions got no model answer "

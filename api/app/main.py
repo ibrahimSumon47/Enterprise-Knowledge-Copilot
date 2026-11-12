@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from . import audit, db, ingest
 from .auth import AuthUser, current_user, decode_token, require_admin
 from .config import Settings, get_settings
-from .embeddings import rerank_state
+from .embeddings import embed_query, rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
 from .providers import GeminiProvider, build_router, list_gemini_models, probe_gemini
 from .redact import hash_identifier
@@ -501,6 +501,43 @@ async def retrieval_debug(
                 "is_synthetic": candidate.is_synthetic,
             }
             for candidate in result.candidates
+        ],
+    }
+
+
+@app.get("/admin/recall", tags=["admin"])
+async def recall_debug(
+    question: str,
+    role: str = "admin",
+    department: str | None = None,
+    k: int = 50,
+    settings: Settings = Depends(get_settings),
+    _: AuthUser = Depends(require_admin),
+) -> dict[str, Any]:
+    """The hybrid candidates before dedup, reranking or any threshold.
+
+    Recall is a property of this list: if the answer is not in it, no reranker or
+    threshold downstream can recover it.
+    """
+    embedding = await asyncio.to_thread(embed_query, question, settings)
+    rows = await db.search_chunks(
+        embedding=embedding,
+        query_text=question,
+        role=role,
+        department=department,
+        limit=max(1, min(k, 100)),
+    )
+    return {
+        "k": k,
+        "candidates": [
+            {
+                "document_id": str(row["document_id"]),
+                "title": row["title"],
+                "heading": row["heading"],
+                "rrf_score": round(float(row["rrf_score"]), 5),
+                "snippet": (row["content"] or "")[:240],
+            }
+            for row in rows
         ],
     }
 

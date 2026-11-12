@@ -1,0 +1,31 @@
+{
+  "questions": 84,
+  "corpus_documents": 754,
+  "split": {
+    "dev": 50,
+    "test": 34
+  },
+  "split_by_category": {
+    "answerable": {
+      "dev": 18,
+      "test": 12
+    },
+    "unanswerable": {
+      "dev": 9,
+      "test": 6
+    },
+    "bangla": {
+      "dev": 7,
+      "test": 5
+    },
+    "multi_doc": {
+      "dev": 7,
+      "test": 5
+    },
+    "cross_role": {
+      "dev": 9,
+      "test": 6
+    }
+  },
+  "problems": []
+}

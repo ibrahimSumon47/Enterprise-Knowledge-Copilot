@@ -44,13 +44,6 @@ class Settings(BaseSettings):
     # 96 tokens cut too much of the passage and cost hit@k; 192 keeps the policy
     # sentence in view at 0.75 of the 256-token scoring cost.
     rerank_max_length: int = 192
-    # Adaptive depth: score a shortlist first and only pay for the rest when the
-    # shortlist has nothing quotable. The trigger is the cross-encoder's own score,
-    # not RRF: fusion scores are 1/(60+rank) and nearly flat when one branch returns
-    # nothing (measured: an RRF margin rule fired on 2 of 46 questions), and high
-    # confidence escalated 14 of 15 questions, so the bar is the refusal threshold.
-    rerank_adaptive: bool = True
-    rerank_fast_depth: int = 8
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

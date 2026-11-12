@@ -9,7 +9,7 @@ from typing import Any
 
 from . import db
 from .config import Settings
-from .embeddings import embed_query, note_rerank_depth, rerank
+from .embeddings import embed_query, rerank
 
 logger = logging.getLogger(__name__)
 
@@ -89,26 +89,9 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
         return RetrievalResult()
 
     if settings.rerank_enabled:
-        depth = settings.rerank_fast_depth if settings.rerank_adaptive else len(candidates)
-        depth = min(depth, len(candidates))
         reranked = await asyncio.to_thread(
-            rerank, question, [candidate.__dict__ for candidate in candidates[:depth]], settings
+            rerank, question, [candidate.__dict__ for candidate in candidates], settings
         )
-        best = max((item.get("rerank_score", 0.0) for item in reranked), default=0.0)
-        if depth < len(candidates) and best < settings.min_answer_score:
-            # Nothing in the shortlist is quotable, so the evidence may sit deeper.
-            # The bar is the refusal threshold, not high confidence: on the measured
-            # set a 0.45 bar escalated 14 of 15 questions and saved nothing.
-            # Score only the rest and merge: the head is already scored.
-            deeper = await asyncio.to_thread(
-                rerank, question, [candidate.__dict__ for candidate in candidates[depth:]], settings
-            )
-            reranked = sorted(
-                reranked + deeper, key=lambda item: item["rerank_score"], reverse=True
-            )
-            note_rerank_depth("escalated")
-        else:
-            note_rerank_depth("short" if depth < len(candidates) else "full")
     else:
         # Hybrid order only. Used where the host cannot fit a second model.
         reranked = [

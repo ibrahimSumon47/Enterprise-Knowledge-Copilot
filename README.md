@@ -157,7 +157,7 @@ Every control links to the workflow or test that proves it. Details:
 | Supply-chain posture | `.github/workflows/security.yml` (`scorecard`) | OpenSSF Scorecard SARIF |
 | Action pinning | every workflow | every `uses:` is a commit SHA |
 | Permission leakage | `api/tests/test_retrieval_access.py` | guest/employee/department cases |
-| Audit chain | `.github/workflows/audit-integrity.yml` | every six hours, `scripts/check_audit_chain.py` fails the run if `/audit/verify` reports a break; `api/tests/test_units.py` covers tampering, windowed pages and jsonb detail |
+| Audit chain | `.github/workflows/audit-integrity.yml` | every six hours `scripts/check_audit_chain.py` asks `/audit/verify`, which now pages the whole log from the genesis row, and fails the run on a break, a missing prefix, an unverified tail or an outage; `api/tests/test_units.py` covers tampering, paging and jsonb detail |
 
 ## Screenshots
 

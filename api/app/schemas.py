@@ -97,6 +97,9 @@ class AuditVerifyResponse(BaseModel):
     # first row in that window is an anchor rather than a chain break.
     anchor_id: int | None = None
     anchored_at_genesis: bool = False
+    complete: bool = True
+    first_id: int | None = None
+    last_id: int | None = None
 
 
 class EvalRun(BaseModel):

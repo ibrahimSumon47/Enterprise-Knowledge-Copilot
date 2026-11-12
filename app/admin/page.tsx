@@ -31,6 +31,9 @@ type ChainCheck = {
   head: string;
   anchor_id?: number | null;
   anchored_at_genesis?: boolean;
+  complete?: boolean;
+  first_id?: number | null;
+  last_id?: number | null;
 };
 
 type DocumentRow = {
@@ -244,8 +247,8 @@ export default function AdminPage() {
               <ShieldCheck size={13} />
               {chain.intact
                 ? `chain ok · ${chain.entries} entries${
-                    chain.anchored_at_genesis ? "" : ` · window from #${chain.anchor_id ?? "?"}`
-                  }`
+                    chain.complete === false ? " · partial log" : ""
+                  }${chain.anchored_at_genesis === false ? " · prefix missing" : ""}`
                 : `chain broken · ${chain.broken_ids.length} entries`}
             </span>
           ) : null}

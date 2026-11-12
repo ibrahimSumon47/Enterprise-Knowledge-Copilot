@@ -117,26 +117,36 @@ def main() -> int:
     broken = result.get("broken_ids") or []
     anchor = result.get("anchor_id")
     genesis = result.get("anchored_at_genesis")
+    complete = result.get("complete", True)
+    first_id = result.get("first_id")
+    last_id = result.get("last_id")
 
     if not isinstance(entries, int) or not isinstance(intact, bool):
         print(f"::error::unexpected /audit/verify body: {json.dumps(result)[:200]}")
         return 1
 
     print(
-        f"audit chain: entries={entries} intact={intact} broken={len(broken)} "
-        f"anchor={anchor} at_genesis={genesis}"
+        f"audit chain: rows={first_id}..{last_id} entries={entries} intact={intact} "
+        f"broken={len(broken)} complete={complete} at_genesis={genesis} anchor={anchor}"
     )
     summarize(
         "## Audit chain\n\n"
-        f"- entries checked: **{entries}**\n"
+        f"- entries checked: **{entries}** ({first_id}..{last_id})\n"
         f"- intact: **{intact}**\n"
         f"- broken rows: **{len(broken)}**\n"
-        f"- window anchor: #{anchor} (genesis: {genesis})\n"
+        f"- whole log checked: **{complete}**\n"
+        f"- anchored at genesis: **{genesis}** (anchor #{anchor})\n"
     )
 
     if not intact:
         first = ", ".join(str(row) for row in broken[:10])
         print(f"::error::audit chain is broken at {len(broken)} rows (first: {first})")
+        return 1
+    if not complete:
+        print("::error::audit verification stopped at the row ceiling; the log was not fully checked")
+        return 1
+    if not genesis:
+        print("::error::audit chain does not start at genesis; the oldest rows are missing")
         return 1
     return 0
 

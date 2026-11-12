@@ -36,6 +36,12 @@ from .schemas import (
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger("ekc")
 
+# Whole-log verification pages in ascending id order. The ceiling keeps a
+# runaway table from pinning the free instance; hitting it reports
+# complete=false rather than pretending the log was verified.
+AUDIT_VERIFY_PAGE = 1000
+AUDIT_VERIFY_MAX_ROWS = 50_000
+
 VISIBLE = {
     "guest": ["public"],
     "employee": ["public", "employee"],
@@ -578,8 +584,27 @@ async def audit_log(limit: int = 100, _: AuthUser = Depends(require_admin)) -> d
 
 @app.post("/audit/verify", response_model=AuditVerifyResponse, tags=["admin"])
 async def audit_verify(_: AuthUser = Depends(require_admin)) -> AuditVerifyResponse:
-    rows = await db.audit_page(500)
+    """Verify the whole log, oldest row first.
+
+    The previous version checked the newest 500 rows and anchored on the window
+    edge, so any tampering older than that window was invisible. The cap only
+    exists so a runaway table cannot pin the free instance: a run that hits it
+    reports `complete: false` instead of pretending the log was verified.
+    """
+    rows: list[dict[str, Any]] = []
+    after = 0
+    reached_end = False
+    while len(rows) < AUDIT_VERIFY_MAX_ROWS:
+        batch = await db.audit_rows(after, AUDIT_VERIFY_PAGE)
+        rows.extend(batch)
+        if len(batch) < AUDIT_VERIFY_PAGE:
+            reached_end = True
+            break
+        after = batch[-1]["id"]
     result = audit.verify_chain(rows)
+    result["complete"] = reached_end
+    result["first_id"] = rows[0]["id"] if rows else None
+    result["last_id"] = rows[-1]["id"] if rows else None
     return AuditVerifyResponse(**result)
 
 

@@ -98,7 +98,9 @@ def test_audit_chain_detects_tampering() -> None:
         {"id": 1, "prev_hash": audit.GENESIS, "entry_hash": first, **payload},
         {"id": 2, "prev_hash": first, "entry_hash": second, **second_payload},
     ]
-    assert audit.verify_chain(rows)["intact"] is True
+    full = audit.verify_chain(rows)
+    assert full["intact"] is True
+    assert full["anchored_at_genesis"] is True
     rows[0]["entry_hash"] = "tampered"
     assert audit.verify_chain(rows)["intact"] is False
 

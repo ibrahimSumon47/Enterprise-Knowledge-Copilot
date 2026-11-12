@@ -9,7 +9,7 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
 | Authorisation inside SQL | `search_chunks` takes `role` and `department` and applies `can_read` in the query; a post-filter would be a bug. `supabase/migrations/20261111000100_init.sql`. |
 | Row Level Security | Policies on `documents`, `chunks`, `profiles`, `audit_log`, `eval_runs`; verified by querying as a role account through PostgREST. |
 | Identity from token | The API verifies the Supabase JWT against the project JWKS, then loads the role from `profiles`; `require_admin` rejects employees. |
-| Audit chain | Each row stores the previous hash; `/audit/verify` recomputes the chain and reports the first break. `.github/workflows/audit-integrity.yml` runs `scripts/check_audit_chain.py` every six hours and fails the run when the deployed chain does not verify, when the endpoint is unreachable, or when the response is malformed. |
+| Audit chain | Each row stores the previous hash; `/audit/verify` pages the **whole log** from the genesis row (1000-row pages, 50 000-row ceiling reported as `complete: false`) and reports the first break. `.github/workflows/audit-integrity.yml` runs `scripts/check_audit_chain.py` every six hours and fails the run when the deployed chain does not verify, when the endpoint is unreachable, or when the response is malformed. |
 | Secret separation | Only the anon key is in the browser bundle; the service-role key exists on the API host only. `.env.example` lists names, no values. |
 | Secret scanning | CI installs the pinned gitleaks CLI and scans full history; the job is green. |
 | Dependency audit | `pnpm audit --audit-level high`: one moderate advisory, below the gate. `pip-audit` against `api/requirements.txt`: see the finding below. Both run in `.github/workflows/security.yml` and attach their reports as the `dependency-audit` artifact. |
@@ -31,7 +31,8 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
    `langgraph` 0.2 family; fixing them means a 1.x migration of the graph code,
    which is not a dependency-only change and is recorded as accepted risk below.
 2. **Fixed — the audit chain could never verify.** Three faults stacked up:
-   (a) verification treated the first row of its 500-row window as a chain break;
+   (a) verification only read the newest 500 rows and treated the first row of
+   that window as a chain break, so anything older was invisible;
    (b) `asyncpg` returns `jsonb` as text, so the verifier hashed a string where the
    writer hashed a dict; (c) the insert never stored `created_at`, so the column
    defaulted to `now()` with microseconds while the hash covered the app's
@@ -39,7 +40,9 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
    edited. Fixed in `api/app/audit.py` (window anchor, jsonb decode) and
    `api/app/db.py` (persist `created_at`), with unit tests for each. Existing rows
    were re-hashed in id order by `scripts/repair_audit_chain.py`, which backs up
-   the old hashes first and rewrites only `prev_hash`/`entry_hash`.
+   the old hashes first and rewrites only `prev_hash`/`entry_hash`. Verification
+   now walks the whole log (`db.audit_rows`), so the window anchor is gone and a
+   deleted prefix is reported as `anchored_at_genesis: false`.
 3. **Recorded — base image CVEs.** Trivy reports HIGH/CRITICAL advisories in
    `python:3.12-slim` OS packages. They are uploaded as SARIF and printed in the
    job log, and the gate is advisory because only a newer base image can fix

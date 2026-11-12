@@ -261,6 +261,29 @@ async def insert_audit(entry: dict[str, Any]) -> None:
     )
 
 
+async def audit_rows(after_id: int = 0, limit: int = 1000) -> list[dict[str, Any]]:
+    """One ascending page of the audit log, for whole-log verification.
+
+    `audit_page` returns the newest N rows for the UI; verification has to walk
+    from the genesis row upward or a break before the window stays invisible.
+    """
+    rows = await pool().fetch(
+        """
+        -- Every column the hash covers must be selected, or verification
+        -- compares a payload the row never had.
+        select id, prev_hash, entry_hash, actor_id, actor_role, action,
+               resource_type, resource_id, outcome, ip_hash, created_at, detail
+        from public.audit_log
+        where id > $1
+        order by id asc
+        limit $2
+        """,
+        after_id,
+        limit,
+    )
+    return [dict(row) for row in rows]
+
+
 async def audit_page(limit: int = 100) -> list[dict[str, Any]]:
     rows = await pool().fetch(
         """

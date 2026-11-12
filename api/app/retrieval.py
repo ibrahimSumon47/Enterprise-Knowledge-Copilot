@@ -55,24 +55,6 @@ class RetrievalResult:
         return bool(self.candidates)
 
 
-def _shortlist_depth(candidates: list[Retrieved], settings: Settings) -> int:
-    """How many passages the cross-encoder should read.
-
-    A leader that RRF already ranks first in some branch, with fourth place clearly
-    behind it, is the signal that the hybrid order is trustworthy: the reranker
-    then only has to confirm the top few instead of re-scoring the whole pool.
-    """
-    if not settings.rerank_adaptive or len(candidates) <= settings.rerank_fast_depth:
-        return len(candidates)
-    top = candidates[0].rrf_score
-    if top < settings.rerank_agree_score:
-        return len(candidates)
-    fourth = candidates[min(3, len(candidates) - 1)].rrf_score
-    if fourth > top * settings.rerank_margin_ratio:
-        return len(candidates)
-    return settings.rerank_fast_depth
-
-
 async def retrieve(question: str, role: str, department: str | None, settings: Settings) -> RetrievalResult:
     """Run the full retrieval path. The access predicate is applied by SQL."""
     # ONNX inference is CPU-bound; keep the event loop free for health checks.
@@ -107,19 +89,20 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
         return RetrievalResult()
 
     if settings.rerank_enabled:
-        depth = _shortlist_depth(candidates, settings)
+        depth = settings.rerank_fast_depth if settings.rerank_adaptive else len(candidates)
+        depth = min(depth, len(candidates))
         reranked = await asyncio.to_thread(
-            rerank,
-            question,
-            [candidate.__dict__ for candidate in candidates[:depth]],
-            settings,
+            rerank, question, [candidate.__dict__ for candidate in candidates[:depth]], settings
         )
         best = max((item.get("rerank_score", 0.0) for item in reranked), default=0.0)
-        if depth < len(candidates) and best < settings.min_answer_score:
-            # Nothing quotable in the shortlist: the evidence may sit deeper in the
-            # pool, so pay for the full pass before refusing.
-            reranked = await asyncio.to_thread(
-                rerank, question, [candidate.__dict__ for candidate in candidates], settings
+        if depth < len(candidates) and best < settings.high_confidence_score:
+            # The shortlist did not produce a confident passage, so the answer may
+            # sit deeper. Score only the rest and merge: the head is already scored.
+            deeper = await asyncio.to_thread(
+                rerank, question, [candidate.__dict__ for candidate in candidates[depth:]], settings
+            )
+            reranked = sorted(
+                reranked + deeper, key=lambda item: item["rerank_score"], reverse=True
             )
             note_rerank_depth("escalated")
         else:

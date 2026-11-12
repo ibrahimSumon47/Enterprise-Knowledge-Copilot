@@ -155,35 +155,52 @@ def test_graph_compiles() -> None:
     assert graph is not None
 
 
-def test_shortlist_depth_follows_branch_agreement() -> None:
-    """Both branches on top means the pool can be scored cheaply; disagreement cannot."""
-    from app.retrieval import _shortlist_depth
+def _retrieval_row(index: int) -> dict:
+    return {
+        "chunk_id": f"chunk-{index}",
+        "document_id": f"doc-{index}",
+        "title": f"Doc {index}",
+        "heading": "Policy",
+        "content": "Text about the policy.",
+        "access_level": "employee",
+        "department": None,
+        "is_synthetic": False,
+        "source_url": None,
+        "license": "CC BY-SA 4.0",
+        "attribution": "GitLab Handbook",
+        "rrf_score": 0.016 - index * 0.0001,
+    }
 
-    settings = Settings()
-    agreed = [Retrieved_stub(0.032)] + [Retrieved_stub(0.010)] * 23
-    assert _shortlist_depth(agreed, settings) == settings.rerank_fast_depth
 
-    crowded = [Retrieved_stub(0.016)] + [Retrieved_stub(0.014)] * 23
-    assert _shortlist_depth(crowded, settings) == 24
+def _run_adaptive(monkeypatch, first_pass_score: float) -> list[int]:
+    """Run retrieve with 24 candidates and record how many each rerank call got."""
+    from app.retrieval import retrieve
 
-    flat = [Retrieved_stub(0.032)] + [Retrieved_stub(0.030)] * 23
-    assert _shortlist_depth(flat, settings) == 24
+    calls: list[int] = []
+
+    async def fake_search(**kwargs):
+        return [_retrieval_row(index) for index in range(24)]
+
+    def fake_rerank(question, candidates, settings):
+        calls.append(len(candidates))
+        scored = []
+        for index, candidate in enumerate(candidates):
+            score = first_pass_score if (not calls[1:] and index == 0) else 0.01
+            scored.append({**candidate, "rerank_score": score})
+        return sorted(scored, key=lambda item: item["rerank_score"], reverse=True)
+
+    monkeypatch.setattr(db, "search_chunks", fake_search)
+    monkeypatch.setattr("app.retrieval.embed_query", lambda text, settings: [0.1] * 384)
+    monkeypatch.setattr("app.retrieval.rerank", fake_rerank)
+
+    settings = Settings(supabase_url="https://example.supabase.co")
+    asyncio.run(retrieve("a question?", "employee", None, settings))
+    return calls
 
 
-def Retrieved_stub(rrf: float):
-    from app.retrieval import Retrieved
+def test_adaptive_rerank_stops_when_shortlist_is_confident(monkeypatch) -> None:
+    assert _run_adaptive(monkeypatch, 0.9) == [8]
 
-    return Retrieved(
-        chunk_id="c",
-        document_id="d",
-        title="t",
-        heading=None,
-        content="x",
-        access_level="employee",
-        department=None,
-        is_synthetic=False,
-        source_url=None,
-        license="CC BY-SA 4.0",
-        attribution="GitLab Handbook",
-        rrf_score=rrf,
-    )
+
+def test_adaptive_rerank_scores_the_rest_when_shortlist_is_weak(monkeypatch) -> None:
+    assert _run_adaptive(monkeypatch, 0.2) == [8, 16]

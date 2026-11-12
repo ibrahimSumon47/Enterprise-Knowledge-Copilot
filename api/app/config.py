@@ -44,19 +44,12 @@ class Settings(BaseSettings):
     # 96 tokens cut too much of the passage and cost hit@k; 192 keeps the policy
     # sentence in view at 0.75 of the 256-token scoring cost.
     rerank_max_length: int = 192
-    # Adaptive depth: when both retrieval branches put the same passage on top,
-    # scoring the whole pool rarely moves the winner. Score a shortlist and pay
-    # the full price only when that shortlist comes back weak.
+    # Adaptive depth: score a shortlist first and only pay for the rest when the
+    # shortlist is not already confident. The trigger is the cross-encoder's own
+    # score, not RRF: fusion scores are 1/(60+rank) and nearly flat when one branch
+    # returns nothing (measured: an RRF margin rule fired on 2 of 46 questions).
     rerank_adaptive: bool = True
     rerank_fast_depth: int = 8
-    # RRF awards 1/61 for a first place in either branch, so this floor means
-    # "at least one branch ranked it first". Requiring both branches to agree was
-    # measured at 2 of 27 questions: plainto_tsquery ANDs every term, so the text
-    # branch often returns nothing on the whole handbook.
-    rerank_agree_score: float = 0.016
-    # The fourth passage must sit at most 75% of the leader's score, otherwise
-    # the pool is a tie and the reranker has to see all of it.
-    rerank_margin_ratio: float = 0.75
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

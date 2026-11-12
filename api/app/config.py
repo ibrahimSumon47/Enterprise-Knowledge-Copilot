@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     # fallback only starts when the first call gives up. 45 s turned the p95 into
     # 24 s in the evaluation, so the primary gets a short leash.
     groq_timeout_seconds: float = 12.0
-    gemini_timeout_seconds: float = 30.0
+    gemini_timeout_seconds: float = 12.0
     # Start the backup this long after the primary instead of waiting for the
     # primary to fail: a hung provider otherwise owns the whole latency budget.
     provider_hedge_seconds: float = 1.5

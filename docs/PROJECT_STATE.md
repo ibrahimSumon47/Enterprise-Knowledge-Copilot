@@ -91,11 +91,13 @@ hold torch plus two transformer models.
    encoder is English-only. Verified: `POST /chat` returned 200 in 5.5 s with no
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
-3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens: hit@k
-   0.290 (0.217 with rerank off), citation precision 0.232 (0.173), refusal
-   accuracy 0.595, leakage 0. p95 is 5047 ms, down from 6942 ms at 40 candidates
-   and 256 tokens. `docs/reports/eval_latency.md` holds the cost curve and the
-   rerank-off trade (~2.2 s p95, hit@k ~0.22).
+3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens. The fallback
+   run scored 82 questions: hit@k 0.343, citation precision
+   0.28, refusal accuracy 0.634, leakage
+   0. p95 is 24098 ms, and that number is a
+   provider problem, not retrieval: a hung Groq call plus a slow Gemini retry costs
+   up to 49 s on two serial attempts. `docs/reports/eval_providers.md` has the
+   per-provider split and the cause; `eval_latency.md` has the rerank cost curve.
 
 4. **Adaptive rerank depth: tried and reverted.** Both RRF-based triggers fired on
    2 of 27 and 1 of 46 questions, and a high-confidence escalation bar escalated 14

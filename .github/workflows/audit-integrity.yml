@@ -1,0 +1,29 @@
+name: Audit integrity
+
+on:
+  schedule:
+    # Every six hours, off the hour so it does not race the other schedules.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-chain:
+    name: verify audit chain
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Verify the deployed audit chain
+        env:
+          EKC_API_URL: https://enterprise-knowledge-copilot-2u57.onrender.com
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
+        run: python scripts/check_audit_chain.py

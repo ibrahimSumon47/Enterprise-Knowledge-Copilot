@@ -9,7 +9,7 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
 | Authorisation inside SQL | `search_chunks` takes `role` and `department` and applies `can_read` in the query; a post-filter would be a bug. `supabase/migrations/20261111000100_init.sql`. |
 | Row Level Security | Policies on `documents`, `chunks`, `profiles`, `audit_log`, `eval_runs`; verified by querying as a role account through PostgREST. |
 | Identity from token | The API verifies the Supabase JWT against the project JWKS, then loads the role from `profiles`; `require_admin` rejects employees. |
-| Audit chain | Each row stores the previous hash; `/audit/verify` recomputes the chain and reports the first break. |
+| Audit chain | Each row stores the previous hash; `/audit/verify` recomputes the chain and reports the first break. `.github/workflows/audit-integrity.yml` runs `scripts/check_audit_chain.py` every six hours and fails the run when the deployed chain does not verify, when the endpoint is unreachable, or when the response is malformed. |
 | Secret separation | Only the anon key is in the browser bundle; the service-role key exists on the API host only. `.env.example` lists names, no values. |
 | Secret scanning | CI installs the pinned gitleaks CLI and scans full history; the job is green. |
 | Dependency audit | `pnpm audit --audit-level high`: one moderate advisory, below the gate. `pip-audit` against `api/requirements.txt`: see the finding below. Both run in `.github/workflows/security.yml` and attach their reports as the `dependency-audit` artifact. |

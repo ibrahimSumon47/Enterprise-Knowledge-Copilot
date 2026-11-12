@@ -15,7 +15,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from .config import Settings
+from .config import Settings, get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,13 @@ _dims = 384
 
 def rerank_state() -> dict[str, Any]:
     """Why reranking is or is not running, for /health and the runbook."""
-    return {"loaded": _reranker is not None, "error": _rerank_error}
+    settings = get_settings()
+    return {
+        "loaded": _reranker is not None,
+        "error": _rerank_error,
+        "candidates": settings.candidate_limit,
+        "max_length": settings.rerank_max_length,
+    }
 
 
 def set_encoder(encoder: Any) -> None:

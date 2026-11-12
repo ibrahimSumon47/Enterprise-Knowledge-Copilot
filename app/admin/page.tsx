@@ -72,6 +72,18 @@ function isoAge(value?: string | null) {
   return `${Math.floor(hours / 24)} d ago`;
 }
 
+// The scheduled check advances the checkpoint every six hours whenever there is
+// anything new, and the weekly full pass always does, so an older resume point
+// means verification has not moved in a while.
+const CHECKPOINT_STALE_MS = 6 * 60 * 60 * 1000;
+
+function isStaleCheckpoint(value?: string | null) {
+  if (!value) return false;
+  const updated = new Date(value).getTime();
+  if (!Number.isFinite(updated)) return false;
+  return Date.now() - updated > CHECKPOINT_STALE_MS;
+}
+
 const LEVELS = ["public", "employee", "department", "confidential"];
 const DEPARTMENTS = ["engineering", "security", "people", "finance"];
 
@@ -87,6 +99,7 @@ export default function AdminPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [fullPass, setFullPass] = useState(false);
+  const checkpointStale = chain ? isStaleCheckpoint(chain.checkpoint_at) : false;
 
   useEffect(() => {
     const supabase = supabaseBrowser();
@@ -289,24 +302,34 @@ export default function AdminPage() {
             {chain ? (
               <span
                 title={
-                  chain.mode === "incremental"
+                  (chain.mode === "incremental"
                     ? `Resumed from checkpoint #${chain.checkpoint_id ?? "?"}; ${chain.verified_now ?? 0} new rows hashed this run.`
-                    : `Re-hashed the whole log from genesis; ${chain.verified_now ?? chain.entries} rows hashed this run.`
+                    : `Re-hashed the whole log from genesis; ${chain.verified_now ?? chain.entries} rows hashed this run.`) +
+                  (checkpointStale
+                    ? " The checkpoint has not advanced in over six hours; a full pass re-checks the whole log."
+                    : "")
                 }
                 className={`mono flex items-center gap-1 text-[11px] ${
                   chain.intact ? "text-[var(--ok)]" : "text-[var(--danger)]"
                 }`}
               >
                 <ShieldCheck size={13} />
-                {chain.intact
-                  ? `chain ok · ${chain.entries} entries · ${
+                {chain.intact ? (
+                  <>
+                    {`chain ok · ${chain.entries} entries · ${
                       chain.mode === "incremental"
                         ? `checkpoint #${chain.checkpoint_id ?? "?"} (+${chain.verified_now ?? 0})`
                         : "full pass"
                     }${chain.complete === false ? " · partial log" : ""}${
                       chain.anchored_at_genesis === false ? " · prefix missing" : ""
-                    }`
-                  : `chain broken · ${chain.broken_ids.length} entries`}
+                    }`}
+                    {checkpointStale ? (
+                      <span className="text-[var(--warn)]"> · checkpoint stale</span>
+                    ) : null}
+                  </>
+                ) : (
+                  `chain broken · ${chain.broken_ids.length} entries`
+                )}
               </span>
             ) : null}
           </div>

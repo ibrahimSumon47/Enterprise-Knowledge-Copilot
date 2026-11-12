@@ -31,5 +31,9 @@ p95 5047 ms (`eval_latency.md`).
 
 Shipping a retrieval change whose quality numbers are missing would break the
 evidence rule this project runs on. The 0.15-escalation build is worth revisiting
-only once (a) the eval can distinguish a provider outage from a retrieval miss, and
-(b) there is quota headroom to run 84 questions without throttling.
+once there is quota headroom to run 84 questions without throttling.
+
+(a) is done: `/chat` returns `outage: true` when no model answered, the eval excludes
+those rows and reports the counts, and an all-outage run exits 2 without overwriting
+the published report. That was verified against a local stub, not against a healthy
+provider — the free Groq quota is currently exhausted.

@@ -102,9 +102,13 @@ hold torch plus two transformer models.
    of 15, so the shortlist never paid for itself. The refusal-threshold variant was
    never measured: the free Groq quota was exhausted and `provider: none` refuses
    the same way a retrieval miss does. See `docs/reports/adaptive_depth.md`.
-5. **Evaluation needs a provider-outage signal.** The eval counts a 429 refusal as
-   a normal refusal, so a throttled run looks like hit@k 0.0. Record `provider` per
-   question and mark those rows as excluded before the next comparison run.
+5. **Evaluation excludes provider outages.** `/chat` now returns `outage: true`
+   when no model answered, and `eval/run_eval.py` drops those rows from hit@k,
+   precision and refusal accuracy, reports `scored_questions` and
+   `excluded_no_model`, and exits 2 without touching the published report if every
+   row is an outage. Verified against a stub: all-outage run exited 2 with the
+   report hash unchanged; a half-outage run scored 6 of 12. The full rerun is
+   pending: the free Groq quota is exhausted, so every live question is an outage.
 
 ## Resolved since the previous snapshot
 

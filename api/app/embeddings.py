@@ -141,18 +141,10 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
 
     from flashrank import RerankRequest
 
-    # One passage per candidate, or one per window when head-and-tail scoring is on.
-    passages: list[dict[str, Any]] = []
-    owners: list[int] = []
-    for index, candidate in enumerate(candidates):
-        windows = (
-            _rerank_windows(candidate, settings.rerank_window_chars)
-            if settings.rerank_head_tail
-            else [_rerank_text(candidate)]
-        )
-        for window in windows:
-            passages.append({"id": len(owners), "text": window})
-            owners.append(index)
+    passages = [
+        {"id": index, "text": _rerank_text(candidate)}
+        for index, candidate in enumerate(candidates)
+    ]
     try:
         # flashrank scores a RerankRequest and returns every passage, sorted.
         ranked = model.rerank(RerankRequest(query=question, passages=passages))
@@ -161,32 +153,13 @@ def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) 
         logger.warning("rerank failed, keeping hybrid order: %s", exc)
         return _rrf_fallback(candidates)
     _rerank_error = None
-    # A passage is kept if any of its windows answers the question; the tail window
-    # is what rescues long chunks whose policy sentence sits at the bottom.
-    best = [float("-inf")] * len(candidates)
-    for item in ranked:
-        owner = owners[int(item["id"])]
-        best[owner] = max(best[owner], float(item["score"]))
+    by_index = {int(item["id"]): float(item["score"]) for item in ranked}
     scored = [
-        {**candidate, "rerank_score": best[index], "reranked": True}
+        {**candidate, "rerank_score": by_index.get(index, float("-inf")), "reranked": True}
         for index, candidate in enumerate(candidates)
     ]
     scored.sort(key=lambda item: item["rerank_score"], reverse=True)
     return scored
-
-
-def _rerank_windows(candidate: dict[str, Any], chars: int) -> list[str]:
-    """Head and tail of a passage, each carrying the title.
-
-    The cross-encoder truncates at 192 tokens, so on a 1 400-character chunk the
-    sentence that answers the question is usually cut off. Scoring the tail as its
-    own passage costs one extra forward pass and puts that sentence back in view.
-    """
-    prefix = f"{candidate.get('title', '')} — {candidate.get('heading') or ''}\n"
-    content = candidate.get("content") or ""
-    if len(content) <= chars:
-        return [f"{prefix}{content}"]
-    return [f"{prefix}{content[:chars]}", f"{prefix}{content[-chars:]}"]
 
 
 def _rerank_text(candidate: dict[str, Any]) -> str:

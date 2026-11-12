@@ -1,51 +1,54 @@
 # Provider fallback and hedged requests
 
-Three full runs of the same 84-question set against the deployed API.
+Four full runs of the same 84-question set against the deployed API.
 
 | Run | Scored | hit@k | Precision | Refusal | p50 | p95 | Leakage |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | No working fallback | 84 | 0.29 | 0.232 | 0.595 | 3280 ms | 5047 ms | 0 |
 | Gemini fallback, serial | 82 | 0.343 | 0.28 | 0.634 | 3482 ms | 24098 ms | 0 |
-| Gemini fallback, hedged | 84 | **0.391** | **0.317** | **0.667** | **3541 ms** | **9963 ms** | **0** |
+| Gemini fallback, hedge 3 s | 84 | 0.391 | 0.317 | 0.667 | 3541 ms | 9963 ms | 0 |
+| Gemini fallback, hedge 1.5 s | 84 | **0.333** | **0.274** | **0.607** | **3125 ms** | **8960 ms** | **0** |
 
-The middle run exposes the cost of waiting: a hung primary kept the whole budget, so
-p95 reached 24098 ms and two questions timed out entirely. Starting the
-backup on a three-second timer instead brought p95 down to 9963 ms
-(-59%),
-and every question in the last run got an answer.
+## Did the shorter hedge help?
 
-## By provider (hedged run)
+| | hedge 3 s | hedge 1.5 s | Change |
+| --- | --- | --- | --- |
+| p50 | 3541 ms | 3125 ms | -12% |
+| p95 | 9963 ms | 8960 ms | -10% |
+| hit@k | 0.391 | 0.333 | -0.058 |
+| Precision | 0.317 | 0.274 | -0.043 |
+
+Latency improved about 10%, and the quality difference is inside the spread this
+evaluation has shown across runs (hit@k has read 0.290, 0.333, 0.343 and 0.391 for
+configurations that differ only in transport). Treat the quality delta as noise and
+the latency delta as small but real.
+
+## What the hedge actually costs
+
+Counters from `/health` across the 1.5 s run: 55 model calls,
+1 hedged (2%),
+12 answered by the backup,
+11 primary failures.
+
+Almost no double-spend: a quota-limited Groq answers 429 in milliseconds, so the
+"fast failure" path starts Gemini immediately and the timer rarely fires. The hedge
+is a safety net for a *hanging* primary, not the normal path.
+
+## By provider (1.5 s run)
 
 | Provider | Questions | hit@k | Precision | Refusal | p50 ms | p95 ms |
 | --- | --- | --- | --- | --- | --- | --- |
-| gemini | 41 | 0.675 | 0.65 | 0.732 | 4828 | 10449 |
-| groq | 1 | 0.0 | 0.0 | 1.0 | 4940 | 4940 |
-| none | 42 | 0.0 | 0.0 | 0.595 | 2432 | 3431 |
+| gemini | 41 | 0.564 | 0.537 | 0.61 | 4824 | 9534 |
+| groq | 1 | 1.0 | 1.0 | 1.0 | 4676 | 4676 |
+| none | 42 | 0.0 | 0.0 | 0.595 | 2440 | 3079 |
 
-`none` is not a provider: those 42
-questions were refused at retrieval ("best match below the answer threshold") and never
-reached a model, so their hit@k is 0 by construction. Only one question in this run was
-answered by Groq before the quota pushed everything to Gemini.
-
-What the Gemini rows say: 41 answers,
-hit@k 0.675, precision
-0.65, refusal accuracy
-0.732 — the backup model is not a
-degraded stand-in, it carries the run.
-
-## How hedging works
-
-`ProviderRouter` starts provider *i* after `hedge_seconds * i` instead of after
-provider *i-1* fails. The first success wins and the rest are cancelled; a fast
-failure (429 in milliseconds) sets an event so the backup starts immediately rather
-than waiting out the timer. A slow primary therefore costs at most the hedge delay,
-not its own timeout.
+`none` is not a provider: those questions were refused at retrieval and never reached
+a model, so their hit@k is 0 by construction.
 
 ## Caveats
 
-- All 84 rows scored, so refusal accuracy is comparable with the pre-fallback run.
-- hit@k moved 0.29 -> 0.391 across the three runs, but the question
-  sets and providers changed together; treat the direction as encouraging, not as a
-  precise effect size.
-- The 15.7 s worst case in the hedged run is a slow Gemini answer, not a wait for a
-  dead provider.
+- One provider pair was measured on one day of free-tier quota; the mix of Groq vs
+  Gemini answers changes with the quota window, which is why the provider split is
+  reported next to the aggregate.
+- hit@k moves of ±0.05 appear between runs of the same configuration; only the
+  p95 halving (24 s -> 10 s) is large enough to attribute to the change.

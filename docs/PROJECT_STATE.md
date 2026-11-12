@@ -92,13 +92,12 @@ hold torch plus two transformer models.
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
 3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens; providers are
-   hedged (backup starts after 3 s). Last full run: 84/84 scored,
-   hit@k 0.391, citation precision 0.317, refusal accuracy
-   0.667, leakage 0, p50 3541 ms,
-   p95 9963 ms (was 24098 ms before hedging). Gemini
-   answered 41 questions with hit@k
-   0.675. `docs/reports/eval_providers.md` has the
-   three-run comparison and the per-provider split.
+   hedged with a 1.5 s delay. Last full run: 84/84 scored,
+   hit@k 0.333, citation precision 0.274, refusal accuracy
+   0.607, leakage 0, p50 3125 ms,
+   p95 8960 ms. Hedge cost measured from `/health`: 1
+   of 55 calls actually hedged. `docs/reports/eval_providers.md`
+   has all four runs and the provider split.
 4. **Adaptive rerank depth: tried and reverted.** Both RRF-based triggers fired on
    2 of 27 and 1 of 46 questions, and a high-confidence escalation bar escalated 14
    of 15, so the shortlist never paid for itself. The refusal-threshold variant was

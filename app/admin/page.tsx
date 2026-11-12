@@ -324,7 +324,18 @@ export default function AdminPage() {
                       chain.anchored_at_genesis === false ? " · prefix missing" : ""
                     }`}
                     {checkpointStale ? (
-                      <span className="text-[var(--warn)]"> · checkpoint stale</span>
+                      <>
+                        <span className="text-[var(--warn)]"> · </span>
+                        <button
+                          className="text-[var(--warn)] underline decoration-dotted underline-offset-2 disabled:opacity-60"
+                          disabled={verifying || !token}
+                          onClick={() => void verifyChain(true)}
+                          title="Re-hash the whole log from genesis now"
+                          type="button"
+                        >
+                          checkpoint stale
+                        </button>
+                      </>
                     ) : null}
                   </>
                 ) : (

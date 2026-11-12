@@ -98,6 +98,10 @@ class AuditVerifyResponse(BaseModel):
     mode: str = "full"
     checkpoint_id: int | None = None
     verified_now: int = 0
+    # `verified_at` is when this run finished; `checkpoint_at` is when the
+    # resume point last advanced, so the panel can show how stale it is.
+    verified_at: str | None = None
+    checkpoint_at: str | None = None
     anchor_id: int | None = None
     anchored_at_genesis: bool = False
     complete: bool = True

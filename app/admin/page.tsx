@@ -37,6 +37,8 @@ type ChainCheck = {
   mode?: "full" | "incremental";
   checkpoint_id?: number | null;
   verified_now?: number;
+  verified_at?: string | null;
+  checkpoint_at?: string | null;
 };
 
 type DocumentRow = {
@@ -46,6 +48,29 @@ type DocumentRow = {
   department: string | null;
   is_synthetic?: boolean;
 };
+
+function isoClock(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function isoAge(value?: string | null) {
+  if (!value) return null;
+  const elapsed = Date.now() - new Date(value).getTime();
+  if (!Number.isFinite(elapsed)) return null;
+  const minutes = Math.max(0, Math.floor(elapsed / 60_000));
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h ago`;
+  return `${Math.floor(hours / 24)} d ago`;
+}
 
 const LEVELS = ["public", "employee", "department", "confidential"];
 const DEPARTMENTS = ["engineering", "security", "people", "finance"];
@@ -313,6 +338,14 @@ export default function AdminPage() {
             </button>
           </div>
         </div>
+        {chain ? (
+          <p className="mono border-b border-[var(--border)] px-4 py-2 text-[10px] text-[var(--text-muted)]">
+            last verified {isoClock(chain.verified_at) ?? "—"} · checkpoint{" "}
+            {chain.checkpoint_id
+              ? `#${chain.checkpoint_id} advanced ${isoAge(chain.checkpoint_at) ?? "—"}`
+              : "not created yet"}
+          </p>
+        ) : null}
         <table className="w-full text-left text-sm">
           <thead className="bg-[var(--panel-2)] text-[var(--text-muted)]">
             <tr>

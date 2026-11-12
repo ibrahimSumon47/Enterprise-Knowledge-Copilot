@@ -7,6 +7,7 @@ import json
 import logging
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from typing import Any, AsyncIterator
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -599,6 +600,7 @@ async def audit_verify(
     reports `complete: false` rather than pretending the log was verified.
     """
     checkpoint = None if full else await db.audit_checkpoint()
+    checkpoint_at = checkpoint["updated_at"] if checkpoint else None
     start = 0
     if checkpoint is not None:
         anchor = await db.audit_row(int(checkpoint["last_id"]))
@@ -607,6 +609,7 @@ async def audit_verify(
         else:
             logger.warning("audit checkpoint %s no longer matches; full re-verify", checkpoint["last_id"])
             checkpoint = None
+            checkpoint_at = None
 
     rows: list[dict[str, Any]] = []
     after = start
@@ -621,6 +624,7 @@ async def audit_verify(
 
     initial_prev = str(checkpoint["head"]) if checkpoint else audit.GENESIS
     result = audit.verify_chain(rows, initial_prev=initial_prev)
+    checked_at = datetime.now(timezone.utc)
     verified_now = len(rows)
     entries = int(checkpoint["entries"]) + verified_now if checkpoint else verified_now
     anchored = (
@@ -636,6 +640,10 @@ async def audit_verify(
             "first_id": rows[0]["id"] if rows else start or None,
             "last_id": rows[-1]["id"] if rows else start or None,
             "anchored_at_genesis": anchored,
+            "verified_at": checked_at.isoformat(timespec="seconds"),
+            "checkpoint_at": checkpoint_at.isoformat(timespec="seconds")
+            if hasattr(checkpoint_at, "isoformat")
+            else checkpoint_at,
         }
     )
     if checkpoint is not None:
@@ -644,6 +652,7 @@ async def audit_verify(
         await db.save_audit_checkpoint(
             int(rows[-1]["id"]), str(rows[-1]["entry_hash"]), entries, anchored
         )
+        result["checkpoint_at"] = checked_at.isoformat(timespec="seconds")
     return AuditVerifyResponse(**result)
 
 

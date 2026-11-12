@@ -317,7 +317,7 @@ async def audit_checkpoint() -> dict[str, Any] | None:
     await ensure_audit_checkpoint()
     row = await pool().fetchrow(
         """
-        select last_id, head, entries, anchored_at_genesis
+        select last_id, head, entries, anchored_at_genesis, updated_at
         from public.audit_verify_checkpoint
         where id
         """

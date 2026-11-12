@@ -37,8 +37,16 @@ The refusals trace to the score itself, not the cut. Example:
 (`Faq · When do I submit my final reimbursement…`) at rank 1 with RRF 0.016,
 and the cross-encoder scores it **0.0001**. The same reranker gives
 `How do I submit an expense claim?` — a near-identical intent — 0.997 on a
-short chunk. Long chunks, truncated at 192 tokens, lose the sentence that
-answers the question, and the score collapses.
+shorter chunk.
+
+### The truncation hypothesis, tested and rejected
+
+I scored the head and the tail of each chunk as separate passages (two forward
+passes, max of the two) so a sentence at the bottom of a long page would reach the
+cross-encoder. Over the 14 false refusals the top score moved by at most 0.021
+(a22: 0.0055 → 0.0262) and none crossed 0.15. Truncation is therefore not the
+cause either; this TinyBERT cross-encoder scores these pairs near zero regardless
+of which end it reads. The change was measured and reverted.
 
 6 questions that should be refused score above 0.15
 (0.268 – 0.988), so the threshold is not a safe proxy for confidentiality

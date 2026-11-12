@@ -143,6 +143,24 @@ def test_retrieval_uses_sql_permission_filter(monkeypatch: pytest.MonkeyPatch) -
     assert result.confidence == "high"
 
 
+def test_long_chunk_is_scored_head_and_tail() -> None:
+    """A sentence at the bottom of a long page must reach the cross-encoder."""
+    from app.embeddings import _rerank_windows
+
+    long_chunk = {
+        "title": "Expense policy",
+        "heading": "Receipts",
+        "content": ("filler " * 900) + "Submit receipts within 45 days.",
+    }
+    windows = _rerank_windows(long_chunk, 900)
+    assert len(windows) == 2
+    assert windows[1].endswith("Submit receipts within 45 days.")
+    assert windows[0].startswith("Expense policy — Receipts")
+
+    short_chunk = {"title": "T", "heading": "H", "content": "short"}
+    assert len(_rerank_windows(short_chunk, 900)) == 1
+
+
 def test_graph_compiles() -> None:
     """LangGraph rejects a node whose name is also a state key, so build it here."""
     from app.pipeline import build_graph

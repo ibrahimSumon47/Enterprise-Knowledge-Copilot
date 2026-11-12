@@ -57,6 +57,10 @@ class Settings(BaseSettings):
     # 96 tokens cut too much of the passage and cost hit@k; 192 keeps the policy
     # sentence in view at 0.75 of the 256-token scoring cost.
     rerank_max_length: int = 192
+    # The tail of a long chunk is scored as a second passage: one extra forward pass
+    # per candidate, and the sentence at the bottom of a page stops being invisible.
+    rerank_head_tail: bool = True
+    rerank_window_chars: int = 900
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

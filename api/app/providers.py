@@ -75,9 +75,12 @@ class GeminiProvider:
 
     def __init__(self, settings: Settings, model: str | None = None) -> None:
         self._key = settings.gemini_api_key
-        # The model id is configuration, not a constant: the v1beta catalogue
-        # retires ids, and a retired id answers 404 for every request.
-        self._model = model or settings.gemini_model
+        # The model id is configuration, not a constant: the catalogue retires ids
+        # and a retired id answers 404 for every request. The first id that answers
+        # is remembered, so a dead alias costs one failed call, not one per question.
+        primary = model or settings.gemini_model
+        extra = [name.strip() for name in (settings.gemini_fallbacks or "").split(",") if name.strip()]
+        self._models = list(dict.fromkeys([primary, *extra]))
 
     async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
         if not self._key:
@@ -87,21 +90,28 @@ class GeminiProvider:
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": 0.1, "maxOutputTokens": max_tokens},
         }
+        failures: list[str] = []
         async with httpx.AsyncClient(timeout=45) as client:
-            response = await client.post(
-                GEMINI_URL.format(model=self._model),
-                params={"key": self._key},
-                json=payload,
-            )
-        if response.status_code >= 400:
-            raise ProviderError(f"gemini http {response.status_code}")
-        body = response.json()
-        try:
-            text = body["candidates"][0]["content"]["parts"][0]["text"].strip()
-        except (KeyError, IndexError) as exc:
-            raise ProviderError("gemini returned no text") from exc
-        tokens = int(body.get("usageMetadata", {}).get("totalTokenCount", 0))
-        return Completion(text=text, provider=self.name, tokens=tokens)
+            for model in self._models:
+                response = await client.post(
+                    GEMINI_URL.format(model=model),
+                    params={"key": self._key},
+                    json=payload,
+                )
+                if response.status_code >= 400:
+                    failures.append(f"{model} http {response.status_code}")
+                    continue
+                body = response.json()
+                try:
+                    text = body["candidates"][0]["content"]["parts"][0]["text"].strip()
+                except (KeyError, IndexError) as exc:
+                    failures.append(f"{model} no text")
+                    continue
+                tokens = int(body.get("usageMetadata", {}).get("totalTokenCount", 0))
+                self._models.remove(model)
+                self._models.insert(0, model)
+                return Completion(text=text, provider=self.name, tokens=tokens)
+        raise ProviderError("gemini " + "; ".join(failures))
 
 
 async def list_gemini_models(api_key: str) -> dict[str, Any]:

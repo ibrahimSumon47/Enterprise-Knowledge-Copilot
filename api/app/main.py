@@ -18,7 +18,7 @@ from .auth import AuthUser, current_user, decode_token, require_admin
 from .config import Settings, get_settings
 from .embeddings import rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
-from .providers import build_router, list_gemini_models, probe_gemini
+from .providers import GeminiProvider, build_router, list_gemini_models, probe_gemini
 from .redact import hash_identifier
 from .schemas import (
     AuditVerifyResponse,
@@ -431,6 +431,7 @@ async def start_ingest(user: AuthUser = Depends(require_admin)) -> IngestRespons
 @app.get("/admin/providers/models", tags=["admin"])
 async def provider_models(
     probe: bool = False,
+    answer: bool = False,
     models: str = "",
     settings: Settings = Depends(get_settings),
     _: AuthUser = Depends(require_admin),
@@ -441,6 +442,20 @@ async def provider_models(
     silent outage; this answers the question without putting the key anywhere.
     With `probe=true` it also runs a one-word generation per candidate.
     """
+    if answer:
+        # Exercises the real provider, including the model chain, without needing
+        # Groq to fail first.
+        try:
+            completion = await GeminiProvider(settings).complete(
+                "You are a health check.", "Reply with the single word OK.", max_tokens=8
+            )
+            return {
+                "provider": completion.provider,
+                "tokens": completion.tokens,
+                "chars": len(completion.text),
+            }
+        except Exception as exc:  # noqa: BLE001 - the answer is the diagnostic
+            return {"provider": "none", "error": str(exc)[:240]}
     if probe:
         requested = [name.strip() for name in models.split(",") if name.strip()]
         candidates = requested or [

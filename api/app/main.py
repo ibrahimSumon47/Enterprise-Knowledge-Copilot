@@ -19,8 +19,8 @@ from .config import Settings, get_settings
 from .embeddings import rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
 from .providers import GeminiProvider, build_router, list_gemini_models, probe_gemini
-from .retrieval import retrieve
 from .redact import hash_identifier
+from .retrieval import retrieve
 from .schemas import (
     AuditVerifyResponse,
     ChatRequest,

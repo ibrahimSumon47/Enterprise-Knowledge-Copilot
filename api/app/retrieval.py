@@ -95,9 +95,11 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
             rerank, question, [candidate.__dict__ for candidate in candidates[:depth]], settings
         )
         best = max((item.get("rerank_score", 0.0) for item in reranked), default=0.0)
-        if depth < len(candidates) and best < settings.high_confidence_score:
-            # The shortlist did not produce a confident passage, so the answer may
-            # sit deeper. Score only the rest and merge: the head is already scored.
+        if depth < len(candidates) and best < settings.min_answer_score:
+            # Nothing in the shortlist is quotable, so the evidence may sit deeper.
+            # The bar is the refusal threshold, not high confidence: on the measured
+            # set a 0.45 bar escalated 14 of 15 questions and saved nothing.
+            # Score only the rest and merge: the head is already scored.
             deeper = await asyncio.to_thread(
                 rerank, question, [candidate.__dict__ for candidate in candidates[depth:]], settings
             )

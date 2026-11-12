@@ -3,6 +3,7 @@
 import { Database, Loader2, RefreshCw, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { isStaleCheckpoint } from "@/lib/audit";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 type Job = {
@@ -70,18 +71,6 @@ function isoAge(value?: string | null) {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} h ago`;
   return `${Math.floor(hours / 24)} d ago`;
-}
-
-// The scheduled check advances the checkpoint every six hours whenever there is
-// anything new, and the weekly full pass always does, so an older resume point
-// means verification has not moved in a while.
-const CHECKPOINT_STALE_MS = 6 * 60 * 60 * 1000;
-
-function isStaleCheckpoint(value?: string | null) {
-  if (!value) return false;
-  const updated = new Date(value).getTime();
-  if (!Number.isFinite(updated)) return false;
-  return Date.now() - updated > CHECKPOINT_STALE_MS;
 }
 
 const LEVELS = ["public", "employee", "department", "confidential"];

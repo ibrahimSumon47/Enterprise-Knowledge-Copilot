@@ -92,12 +92,11 @@ hold torch plus two transformer models.
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
 3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens; providers are
-   hedged with a 1.5 s delay. Last full run: 84/84 scored,
-   hit@k 0.333, citation precision 0.274, refusal accuracy
-   0.607, leakage 0, p50 3125 ms,
-   p95 8960 ms. Hedge cost measured from `/health`: 1
-   of 55 calls actually hedged. `docs/reports/eval_providers.md`
-   has all four runs and the provider split.
+   hedged at 1.5 s with the backup capped at 12 s. Last full run: 84/84
+   scored, hit@k 0.406, citation precision 0.333, refusal
+   accuracy 0.679, leakage 0, p50
+   2980 ms, p95 6687 ms, slowest 12137 ms.
+   `docs/reports/eval_providers.md` has all five runs and the provider split.
 4. **Adaptive rerank depth: tried and reverted.** Both RRF-based triggers fired on
    2 of 27 and 1 of 46 questions, and a high-confidence escalation bar escalated 14
    of 15, so the shortlist never paid for itself. The refusal-threshold variant was

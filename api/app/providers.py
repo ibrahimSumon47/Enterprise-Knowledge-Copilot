@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 import httpx
 
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+GEMINI_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
 
 class ProviderError(RuntimeError):
@@ -72,9 +73,11 @@ class GroqProvider:
 class GeminiProvider:
     name = "gemini"
 
-    def __init__(self, settings: Settings, model: str = "gemini-2.5-flash") -> None:
+    def __init__(self, settings: Settings, model: str | None = None) -> None:
         self._key = settings.gemini_api_key
-        self._model = model
+        # The model id is configuration, not a constant: the v1beta catalogue
+        # retires ids, and a retired id answers 404 for every request.
+        self._model = model or settings.gemini_model
 
     async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
         if not self._key:
@@ -99,6 +102,23 @@ class GeminiProvider:
             raise ProviderError("gemini returned no text") from exc
         tokens = int(body.get("usageMetadata", {}).get("totalTokenCount", 0))
         return Completion(text=text, provider=self.name, tokens=tokens)
+
+
+async def list_gemini_models(api_key: str) -> dict[str, Any]:
+    """Model ids this key can actually call, so a 404 is diagnosable."""
+    if not api_key:
+        return {"models": [], "error": "gemini key missing"}
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.get(GEMINI_MODELS_URL, params={"key": api_key})
+    if response.status_code >= 400:
+        return {"models": [], "error": f"http {response.status_code}"}
+    body = response.json()
+    names = [
+        str(model.get("name", "")).removeprefix("models/")
+        for model in body.get("models", [])
+        if "generateContent" in (model.get("supportedGenerationMethods") or [])
+    ]
+    return {"models": names, "error": None}
 
 
 class MockProvider:

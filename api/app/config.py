@@ -19,6 +19,9 @@ class Settings(BaseSettings):
 
     groq_api_key: str = ""
     gemini_api_key: str = ""
+    # Gemini ids are retired; the default is the current Flash alias, and the
+    # admin diagnostic lists what the key can actually reach if it 404s.
+    gemini_model: str = "gemini-flash-latest"
 
     allowed_origins: str = "http://localhost:3000"
 

@@ -18,7 +18,7 @@ from .auth import AuthUser, current_user, decode_token, require_admin
 from .config import Settings, get_settings
 from .embeddings import rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
-from .providers import build_router
+from .providers import build_router, list_gemini_models
 from .redact import hash_identifier
 from .schemas import (
     AuditVerifyResponse,
@@ -426,6 +426,19 @@ async def start_ingest(user: AuthUser = Depends(require_admin)) -> IngestRespons
         actor_role=user.role,
     )
     return IngestResponse(job_id=job_id, status="queued")
+
+
+@app.get("/admin/providers/models", tags=["admin"])
+async def provider_models(
+    settings: Settings = Depends(get_settings),
+    _: AuthUser = Depends(require_admin),
+) -> dict[str, Any]:
+    """Which Gemini model ids the configured key can call.
+
+    Exists because a retired id answers 404 and the fallback provider turns into a
+    silent outage; this answers the question without putting the key anywhere.
+    """
+    return await list_gemini_models(settings.gemini_api_key)
 
 
 @app.get("/admin/ingest/{job_id}", tags=["admin"])

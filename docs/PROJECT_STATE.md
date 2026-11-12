@@ -108,9 +108,9 @@ hold torch plus two transformer models.
    when no model answered, and `eval/run_eval.py` drops those rows from hit@k,
    precision and refusal accuracy, reports `scored_questions` and
    `excluded_no_model`, and exits 2 without touching the published report if every
-   row is an outage. Verified against a stub: all-outage run exited 2 with the
-   report hash unchanged; a half-outage run scored 6 of 12. The full rerun is
-   pending: the free Groq quota is exhausted, so every live question is an outage.
+   row is an outage. Verified against a stub (all-outage run exited 2 with the
+   report hash unchanged; a half-outage run scored 6 of 12) and then on real traffic:
+   the hedged run had 0 outages and scored all 84 questions.
 
 - **Provider fallback actually works now.** Gemini answered 404 for every request
   because the fallback used the retired `gemini-2.5-flash` id ("no longer available

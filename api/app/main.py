@@ -479,15 +479,18 @@ async def retrieval_debug(
     question: str,
     role: str = "admin",
     department: str | None = None,
+    all_candidates: bool = False,
     settings: Settings = Depends(get_settings),
     _: AuthUser = Depends(require_admin),
 ) -> dict[str, Any]:
     """Ranking and scores for one question, without calling a language model.
 
     Refusal is decided by a single number, the top rerank score. This returns it so
-    a threshold can be tuned against the corpus instead of guessed at.
+    a threshold can be tuned against the corpus instead of guessed at. With
+    `all_candidates=true` every scored passage is returned, which is what the
+    model-free evaluation needs to compare fused order, rerank order and blends.
     """
-    result = await retrieve(question, role, department, settings)
+    result = await retrieve(question, role, department, settings, all_candidates)
     return {
         "confidence": result.confidence,
         "top_score": result.top_score,
@@ -502,6 +505,7 @@ async def retrieval_debug(
                 "rerank_score": round(candidate.rerank_score, 4),
                 "rrf_score": round(candidate.rrf_score, 4),
                 "is_synthetic": candidate.is_synthetic,
+                "snippet": (candidate.content or "")[:240],
             }
             for candidate in result.candidates
         ],

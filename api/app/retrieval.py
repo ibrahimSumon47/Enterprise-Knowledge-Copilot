@@ -55,7 +55,13 @@ class RetrievalResult:
         return bool(self.candidates)
 
 
-async def retrieve(question: str, role: str, department: str | None, settings: Settings) -> RetrievalResult:
+async def retrieve(
+    question: str,
+    role: str,
+    department: str | None,
+    settings: Settings,
+    all_candidates: bool = False,
+) -> RetrievalResult:
     """Run the full retrieval path. The access predicate is applied by SQL."""
     # ONNX inference is CPU-bound; keep the event loop free for health checks.
     embedding = await asyncio.to_thread(embed_query, question, settings)
@@ -109,11 +115,16 @@ async def retrieve(question: str, role: str, department: str | None, settings: S
         seen_documents.add(document_id)
         deduped.append(item)
 
-    kept = [
-        item
-        for item in deduped
-        if item["rerank_score"] >= settings.min_rerank_score
-    ][: settings.rerank_top_k]
+    # `all_candidates` exists for measurement: the evaluation needs every scored
+    # passage, not the three that survive the cut.
+    if all_candidates:
+        kept = deduped[: settings.candidate_limit]
+    else:
+        kept = [
+            item
+            for item in deduped
+            if item["rerank_score"] >= settings.min_rerank_score
+        ][: settings.rerank_top_k]
     if not kept:
         return RetrievalResult()
 

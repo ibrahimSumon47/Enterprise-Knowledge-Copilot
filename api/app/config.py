@@ -41,11 +41,11 @@ class Settings(BaseSettings):
     # 0.067 GB, 384 dims, same schema. Non-Latin questions are translated to
     # English before they are embedded (pipeline._retrieval_question).
     embedding_model: str = "BAAI/bge-small-en-v1.5"
-    # TinyBERT scored correct long passages near zero on this corpus; the 12-layer
-    # MiniLM is the strongest cross-encoder flashrank ships in a 34 MB ONNX file.
-    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-12-v2"
+    reranker_model: str = "cross-encoder/ms-marco-TinyBERT-L-2-v2"
 
     # Retrieval knobs. Kept explicit so the evaluation report can cite them.
+    # MiniLM-L-12 was tried and killed the 512 MB instance (402 MB resident right
+    # after load, then a restart), so the small cross-encoder stays.
     # With bge-small the encoder peaks near 110 MB, so the TinyBERT cross-encoder
     # fits inside 512 MB again and precision matters more than the saving.
     rerank_enabled: bool = True

@@ -431,6 +431,7 @@ async def start_ingest(user: AuthUser = Depends(require_admin)) -> IngestRespons
 @app.get("/admin/providers/models", tags=["admin"])
 async def provider_models(
     probe: bool = False,
+    models: str = "",
     settings: Settings = Depends(get_settings),
     _: AuthUser = Depends(require_admin),
 ) -> dict[str, Any]:
@@ -441,13 +442,14 @@ async def provider_models(
     With `probe=true` it also runs a one-word generation per candidate.
     """
     if probe:
-        candidates = [
+        requested = [name.strip() for name in models.split(",") if name.strip()]
+        candidates = requested or [
             settings.gemini_model,
-            "gemini-2.5-flash",
-            "gemini-2.5-flash-lite",
+            "gemini-3.1-flash-lite",
             "gemini-3.5-flash",
+            "gemini-3.6-flash",
         ]
-        return {"probe": await probe_gemini(settings.gemini_api_key, candidates)}
+        return {"probe": await probe_gemini(settings.gemini_api_key, candidates[:6])}
     return await list_gemini_models(settings.gemini_api_key)
 
 

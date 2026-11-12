@@ -3,8 +3,16 @@ name: Audit integrity
 on:
   schedule:
     # Every six hours, off the hour so it does not race the other schedules.
+    # The checkpoint makes these runs cheap; they only hash new rows.
     - cron: "17 */6 * * *"
+    # Weekly full pass from genesis, so a forged checkpoint cannot hide an edit.
+    - cron: "43 4 * * 0"
   workflow_dispatch:
+    inputs:
+      full:
+        description: Re-hash the whole log from genesis instead of the checkpoint
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -26,4 +34,6 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
-        run: python scripts/check_audit_chain.py
+        run: >-
+          python scripts/check_audit_chain.py
+          ${{ (inputs.full || github.event.schedule == '43 4 * * 0') && '--full' || '' }}

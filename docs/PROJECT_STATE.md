@@ -102,9 +102,10 @@ not behaviour, so treat this table as the behavioural view.
   the hash covered a `created_at` the insert never stored. `db.insert_audit` now
   persists it, `audit.verify_chain` decodes jsonb and anchors the window, and
   `scripts/repair_audit_chain.py` re-hashed the existing rows (backup in `.tmp/`).
-  `/audit/verify` pages the whole log (newest is not enough), and the
-  six-hourly `audit-integrity` workflow fails on a break, a missing prefix or an
-  unverified tail.
+  `/audit/verify` pages the whole log (newest is not enough) but resumes from a
+  stored checkpoint, so the six-hourly workflow only hashes new rows and the
+  weekly run does a full pass. It fails on a break, a missing prefix, an
+  unverified tail or an ignored `--full`.
 
 1. **Recall is the weak point.** 14 answerable questions retrieve the right
    document at rank 1 and are still scored near zero by TinyBERT

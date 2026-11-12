@@ -16,12 +16,16 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 import urllib.error
 import urllib.request
 
 DEFAULT_API = "https://enterprise-knowledge-copilot-2u57.onrender.com"
 DEFAULT_EMAIL = "admin@ekc.local"
+# The weekly run and a manual dispatch can force a pass from genesis, so a
+# forged checkpoint cannot hide an old edit from every scheduled run.
+FULL = "--full" in sys.argv[1:]
 TIMEOUT = 120
 # The free API instance sleeps after 15 idle minutes; the first request of a
 # scheduled run can land while it wakes, so transport errors are retried.
@@ -86,7 +90,7 @@ def main() -> int:
     for attempt in range(1, RETRIES + 1):
         try:
             result = http_json(
-                f"{api}/audit/verify",
+                f"{api}/audit/verify{'?full=true' if FULL else ''}",
                 "POST",
                 {},
                 {"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
@@ -118,6 +122,9 @@ def main() -> int:
     anchor = result.get("anchor_id")
     genesis = result.get("anchored_at_genesis")
     complete = result.get("complete", True)
+    mode = result.get("mode", "full")
+    verified_now = result.get("verified_now", entries)
+    checkpoint = result.get("checkpoint_id")
     first_id = result.get("first_id")
     last_id = result.get("last_id")
 
@@ -126,7 +133,8 @@ def main() -> int:
         return 1
 
     print(
-        f"audit chain: rows={first_id}..{last_id} entries={entries} intact={intact} "
+        f"audit chain: mode={mode} rows={first_id}..{last_id} entries={entries} "
+        f"verified_now={verified_now} checkpoint={checkpoint} intact={intact} "
         f"broken={len(broken)} complete={complete} at_genesis={genesis} anchor={anchor}"
     )
     summarize(
@@ -147,6 +155,9 @@ def main() -> int:
         return 1
     if not genesis:
         print("::error::audit chain does not start at genesis; the oldest rows are missing")
+        return 1
+    if FULL and mode != "full":
+        print(f"::error::--full was requested but the API verified in {mode} mode")
         return 1
     return 0
 

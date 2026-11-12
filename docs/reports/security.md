@@ -9,7 +9,7 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
 | Authorisation inside SQL | `search_chunks` takes `role` and `department` and applies `can_read` in the query; a post-filter would be a bug. `supabase/migrations/20261111000100_init.sql`. |
 | Row Level Security | Policies on `documents`, `chunks`, `profiles`, `audit_log`, `eval_runs`; verified by querying as a role account through PostgREST. |
 | Identity from token | The API verifies the Supabase JWT against the project JWKS, then loads the role from `profiles`; `require_admin` rejects employees. |
-| Audit chain | Each row stores the previous hash; `/audit/verify` pages the **whole log** from the genesis row (1000-row pages, 50 000-row ceiling reported as `complete: false`) and reports the first break. `.github/workflows/audit-integrity.yml` runs `scripts/check_audit_chain.py` every six hours and fails the run when the deployed chain does not verify, when the endpoint is unreachable, or when the response is malformed. |
+| Audit chain | Each row stores the previous hash; `/audit/verify` pages the **whole log** (1000-row pages, 50 000-row ceiling reported as `complete: false`). A successful pass advances a single-row checkpoint (`audit_verify_checkpoint`), so scheduled runs hash only new rows; the checkpointed row must still exist and hash to the stored head or the run falls back to a full pass, `?full=true` forces one, and the weekly scheduled run uses it. `.github/workflows/audit-integrity.yml` runs `scripts/check_audit_chain.py` every six hours and fails the run when the deployed chain does not verify, when the endpoint is unreachable, or when the response is malformed. |
 | Secret separation | Only the anon key is in the browser bundle; the service-role key exists on the API host only. `.env.example` lists names, no values. |
 | Secret scanning | CI installs the pinned gitleaks CLI and scans full history; the job is green. |
 | Dependency audit | `pnpm audit --audit-level high`: one moderate advisory, below the gate. `pip-audit` against `api/requirements.txt`: see the finding below. Both run in `.github/workflows/security.yml` and attach their reports as the `dependency-audit` artifact. |
@@ -42,7 +42,9 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
    were re-hashed in id order by `scripts/repair_audit_chain.py`, which backs up
    the old hashes first and rewrites only `prev_hash`/`entry_hash`. Verification
    now walks the whole log (`db.audit_rows`), so the window anchor is gone and a
-   deleted prefix is reported as `anchored_at_genesis: false`.
+   deleted prefix is reported as `anchored_at_genesis: false`. A checkpoint row
+   lets repeat runs skip the already-verified prefix; it is never trusted on its
+   own and a full pass runs weekly.
 3. **Recorded — base image CVEs.** Trivy reports HIGH/CRITICAL advisories in
    `python:3.12-slim` OS packages. They are uploaded as SARIF and printed in the
    job log, and the gate is advisory because only a newer base image can fix

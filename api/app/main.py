@@ -583,16 +583,33 @@ async def audit_log(limit: int = 100, _: AuthUser = Depends(require_admin)) -> d
 
 
 @app.post("/audit/verify", response_model=AuditVerifyResponse, tags=["admin"])
-async def audit_verify(_: AuthUser = Depends(require_admin)) -> AuditVerifyResponse:
-    """Verify the whole log, oldest row first.
+async def audit_verify(
+    full: bool = False, _: AuthUser = Depends(require_admin)
+) -> AuditVerifyResponse:
+    """Verify the audit chain from the last checkpoint, or from genesis.
 
-    The previous version checked the newest 500 rows and anchored on the window
-    edge, so any tampering older than that window was invisible. The cap only
-    exists so a runaway table cannot pin the free instance: a run that hits it
-    reports `complete: false` instead of pretending the log was verified.
+    Re-hashing 1 600 rows on every run is wasted work once a prefix has been
+    verified, so a successful run stores the head it reached and the next run
+    starts there. That is only safe because the checkpoint is not trusted
+    blindly: the row it names must still exist and hash to the stored head, and
+    the first new row is checked against it, so a stale or rewritten checkpoint
+    falls back to a full pass. `?full=true` forces that pass and is what the
+    weekly schedule uses, so a forged checkpoint cannot hide an edit for long.
+    The row ceiling keeps a runaway table from pinning the free instance; it
+    reports `complete: false` rather than pretending the log was verified.
     """
+    checkpoint = None if full else await db.audit_checkpoint()
+    start = 0
+    if checkpoint is not None:
+        anchor = await db.audit_row(int(checkpoint["last_id"]))
+        if anchor is not None and anchor["entry_hash"] == checkpoint["head"]:
+            start = int(checkpoint["last_id"])
+        else:
+            logger.warning("audit checkpoint %s no longer matches; full re-verify", checkpoint["last_id"])
+            checkpoint = None
+
     rows: list[dict[str, Any]] = []
-    after = 0
+    after = start
     reached_end = False
     while len(rows) < AUDIT_VERIFY_MAX_ROWS:
         batch = await db.audit_rows(after, AUDIT_VERIFY_PAGE)
@@ -601,10 +618,32 @@ async def audit_verify(_: AuthUser = Depends(require_admin)) -> AuditVerifyRespo
             reached_end = True
             break
         after = batch[-1]["id"]
-    result = audit.verify_chain(rows)
-    result["complete"] = reached_end
-    result["first_id"] = rows[0]["id"] if rows else None
-    result["last_id"] = rows[-1]["id"] if rows else None
+
+    initial_prev = str(checkpoint["head"]) if checkpoint else audit.GENESIS
+    result = audit.verify_chain(rows, initial_prev=initial_prev)
+    verified_now = len(rows)
+    entries = int(checkpoint["entries"]) + verified_now if checkpoint else verified_now
+    anchored = (
+        bool(checkpoint["anchored_at_genesis"]) if checkpoint else result["anchored_at_genesis"]
+    )
+    result.update(
+        {
+            "complete": reached_end,
+            "entries": entries,
+            "verified_now": verified_now,
+            "mode": "incremental" if checkpoint else "full",
+            "checkpoint_id": int(checkpoint["last_id"]) if checkpoint else None,
+            "first_id": rows[0]["id"] if rows else start or None,
+            "last_id": rows[-1]["id"] if rows else start or None,
+            "anchored_at_genesis": anchored,
+        }
+    )
+    if checkpoint is not None:
+        result["anchor_id"] = int(checkpoint["last_id"])
+    if result["intact"] and reached_end and rows:
+        await db.save_audit_checkpoint(
+            int(rows[-1]["id"]), str(rows[-1]["entry_hash"]), entries, anchored
+        )
     return AuditVerifyResponse(**result)
 
 

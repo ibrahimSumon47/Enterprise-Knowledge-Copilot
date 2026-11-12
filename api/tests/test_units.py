@@ -105,8 +105,8 @@ def test_audit_chain_detects_tampering() -> None:
     assert audit.verify_chain(rows)["intact"] is False
 
 
-def test_audit_chain_verifies_a_window_without_the_genesis_row() -> None:
-    """The log outgrows the 500-row page; the window edge is not a break."""
+def test_audit_chain_verifies_from_a_checkpoint_head() -> None:
+    """An incremental run starts at the stored head instead of genesis."""
     payload = {
         "action": "chat.question",
         "resource_type": "conversation",
@@ -127,11 +127,14 @@ def test_audit_chain_verifies_a_window_without_the_genesis_row() -> None:
         {"id": 11, "prev_hash": outside, "entry_hash": first, **first_payload},
         {"id": 12, "prev_hash": first, "entry_hash": second, **second_payload},
     ]
-    result = audit.verify_chain(window)
+    result = audit.verify_chain(window, initial_prev=outside)
     assert result["intact"] is True
     assert result["anchored_at_genesis"] is False
+    # A checkpoint that does not match the row before the window is not trusted:
+    # the first row stops being linked and the run falls back to a full pass.
+    assert audit.verify_chain(window, initial_prev="stale-head")["intact"] is False
     window[1]["prev_hash"] = "not-the-previous-hash"
-    assert audit.verify_chain(window)["intact"] is False
+    assert audit.verify_chain(window, initial_prev=outside)["intact"] is False
 
 
 def test_audit_chain_accepts_jsonb_detail_as_text() -> None:

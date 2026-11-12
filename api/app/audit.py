@@ -49,20 +49,28 @@ async def record(
     return entry_hash
 
 
-def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Recompute hashes bottom-up. Rows are expected newest-first.
+def verify_chain(
+    rows: list[dict[str, Any]], initial_prev: str = GENESIS
+) -> dict[str, Any]:
+    """Recompute hashes bottom-up from `initial_prev`.
 
-    The caller passes a window (the newest N rows), not the whole log. The first
-    row of that window is an anchor: its `prev_hash` points at a row outside the
-    window, so it is checked against its own payload rather than against
-    `genesis`. Treating the window edge as a break reported the entire log as
-    tampered once the log outgrew the page size.
+    Rows are the log from the checkpoint upward, oldest first. A full run starts
+    at `genesis`; an incremental run starts at the head hash it recorded, so the
+    first row is still checked for linkage — a missing, stale or forged
+    checkpoint leaves the first row unlinked instead of being trusted.
     """
     ordered = sorted(rows, key=lambda row: row["id"])
+    anchored = initial_prev == GENESIS
     if not ordered:
-        return {"entries": 0, "intact": True, "broken_ids": [], "head": GENESIS, "anchor_id": None}
-    anchor = ordered[0]["prev_hash"]
-    prev = anchor
+        return {
+            "entries": 0,
+            "intact": True,
+            "broken_ids": [],
+            "head": initial_prev,
+            "anchor_id": None,
+            "anchored_at_genesis": anchored,
+        }
+    prev = initial_prev
     broken: list[int] = []
     for position, row in enumerate(ordered):
         # asyncpg hands jsonb back as text, and the row was hashed from a dict,
@@ -87,8 +95,7 @@ def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
             else str(row["created_at"]),
         }
         expected = compute_hash(row["prev_hash"], payload)
-        linked = position == 0 or row["prev_hash"] == prev
-        if not linked or expected != row["entry_hash"]:
+        if row["prev_hash"] != prev or expected != row["entry_hash"]:
             broken.append(int(row["id"]))
         prev = row["entry_hash"]
     return {
@@ -97,5 +104,5 @@ def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "broken_ids": broken,
         "head": prev,
         "anchor_id": int(ordered[0]["id"]),
-        "anchored_at_genesis": anchor == GENESIS,
+        "anchored_at_genesis": anchored,
     }

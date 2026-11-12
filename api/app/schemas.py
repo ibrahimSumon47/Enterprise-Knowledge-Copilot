@@ -93,8 +93,11 @@ class AuditVerifyResponse(BaseModel):
     intact: bool
     broken_ids: list[int]
     head: str
-    # The verifier checks a window of the newest rows, not the whole log, so the
-    # first row in that window is an anchor rather than a chain break.
+    # Orders verify from a stored checkpoint; `mode` says whether this run
+    # re-hashed the whole log or only the rows after `checkpoint_id`.
+    mode: str = "full"
+    checkpoint_id: int | None = None
+    verified_now: int = 0
     anchor_id: int | None = None
     anchored_at_genesis: bool = False
     complete: bool = True

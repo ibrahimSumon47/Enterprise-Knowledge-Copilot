@@ -284,6 +284,84 @@ async def audit_rows(after_id: int = 0, limit: int = 1000) -> list[dict[str, Any
     return [dict(row) for row in rows]
 
 
+_checkpoint_ready = False
+
+_CHECKPOINT_DDL = """
+create table if not exists public.audit_verify_checkpoint (
+  id boolean primary key default true check (id),
+  last_id bigint not null,
+  head text not null,
+  entries bigint not null,
+  anchored_at_genesis boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+alter table public.audit_verify_checkpoint enable row level security;
+"""
+
+
+async def ensure_audit_checkpoint() -> None:
+    """Create the single-row checkpoint table on first use.
+
+    Migrations are applied by hand here, and verification must not fail just
+    because the newest one has not run yet; `create table if not exists` is
+    idempotent, so it costs one round trip per process.
+    """
+    global _checkpoint_ready
+    if _checkpoint_ready:
+        return
+    await pool().execute(_CHECKPOINT_DDL)
+    _checkpoint_ready = True
+
+
+async def audit_checkpoint() -> dict[str, Any] | None:
+    await ensure_audit_checkpoint()
+    row = await pool().fetchrow(
+        """
+        select last_id, head, entries, anchored_at_genesis
+        from public.audit_verify_checkpoint
+        where id
+        """
+    )
+    return dict(row) if row else None
+
+
+async def audit_row(row_id: int) -> dict[str, Any] | None:
+    """The checkpoint anchor row, used to detect a stale or rewritten checkpoint."""
+    row = await pool().fetchrow(
+        "select id, entry_hash from public.audit_log where id = $1", row_id
+    )
+    return dict(row) if row else None
+
+
+async def save_audit_checkpoint(
+    last_id: int, head: str, entries: int, anchored_at_genesis: bool
+) -> None:
+    """Advance the checkpoint. It never moves backwards.
+
+    A concurrent run that verified a shorter prefix cannot roll the pointer back,
+    and a failed verification never reaches this function at all.
+    """
+    await ensure_audit_checkpoint()
+    await pool().execute(
+        """
+        insert into public.audit_verify_checkpoint
+          (id, last_id, head, entries, anchored_at_genesis, updated_at)
+        values (true, $1, $2, $3, $4, now())
+        on conflict (id) do update
+          set last_id = excluded.last_id,
+              head = excluded.head,
+              entries = excluded.entries,
+              anchored_at_genesis = excluded.anchored_at_genesis,
+              updated_at = now()
+          where excluded.last_id >= public.audit_verify_checkpoint.last_id
+        """,
+        last_id,
+        head,
+        entries,
+        anchored_at_genesis,
+    )
+
+
 async def audit_page(limit: int = 100) -> list[dict[str, Any]]:
     rows = await pool().fetch(
         """

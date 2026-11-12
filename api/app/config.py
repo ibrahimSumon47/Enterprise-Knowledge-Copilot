@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     rerank_max_length: int = 192
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
+    # The cross-encoder scores correct long passages near zero, so a low score
+    # alone is not a refusal; the model gets to check the top three passages.
+    grader_enabled: bool = True
     min_rerank_score: float = 0.0
     min_answer_score: float = 0.15
     high_confidence_score: float = 0.45

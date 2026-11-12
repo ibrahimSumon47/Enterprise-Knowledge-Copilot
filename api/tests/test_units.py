@@ -143,6 +143,15 @@ def test_retrieval_uses_sql_permission_filter(monkeypatch: pytest.MonkeyPatch) -
     assert result.confidence == "high"
 
 
+def test_grader_verdict_parsing() -> None:
+    from app.pipeline import _parse_verdict
+
+    assert _parse_verdict('{"answerable": true}') is True
+    assert _parse_verdict('{"answerable": false}') is False
+    assert _parse_verdict('Answerable: yes, the passage covers it.') is True
+    assert _parse_verdict('I cannot tell') is None
+
+
 def test_graph_compiles() -> None:
     """LangGraph rejects a node whose name is also a state key, so build it here."""
     from app.pipeline import build_graph

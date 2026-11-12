@@ -90,8 +90,8 @@ export default function Home() {
         <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { k: "Documents", v: "handbook slice" },
-            { k: "Embeddings", v: "multilingual e5" },
-            { k: "Reranker", v: "cross-encoder" },
+            { k: "Embeddings", v: "bge-small-en-v1.5" },
+            { k: "Reranker", v: "TinyBERT cross-encoder" },
             { k: "Leakage gate", v: "0 allowed" },
           ].map((item) => (
             <div key={item.k} className="panel-2 px-4 py-3">

@@ -72,6 +72,17 @@ class Settings(BaseSettings):
     rrf_high_score: float = 0.032
     rrf_medium_score: float = 0.016
 
+    # Optional second-opinion reranker on Cloudflare Workers AI. The free plan
+    # gives 10,000 Neurons a day with no card, and bge-reranker-base costs 283
+    # Neurons per million input tokens, so a day of questions is a rounding
+    # error. Unset by default: without an account id and token the local
+    # cross-encoder is the only scorer, and the same read timeout keeps a slow
+    # third party from holding an answer hostage.
+    cloudflare_account_id: str = ""
+    cloudflare_api_token: str = ""
+    cloudflare_rerank_model: str = "@cf/baai/bge-reranker-base"
+    cloudflare_rerank_timeout: float = 3.0
+
     # Rate limits (per user, sliding window in Postgres).
     rate_limit_requests: int = 20
     rate_limit_window_seconds: int = 60

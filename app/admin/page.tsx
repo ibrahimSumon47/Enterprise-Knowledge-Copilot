@@ -70,7 +70,7 @@ export default function AdminPage() {
     try {
       const audit = await apiFetch<AuditPage>("/audit?limit=25", token);
       setEntries(audit.entries ?? []);
-      setChain(await apiFetch<ChainCheck>("/audit/verify", token));
+      setChain(await apiFetch<ChainCheck>("/audit/verify", token, { method: "POST" }));
       const docs = await apiFetch<{ documents: DocumentRow[] }>("/documents", token);
       setDocuments(docs.documents ?? []);
     } catch (caught) {

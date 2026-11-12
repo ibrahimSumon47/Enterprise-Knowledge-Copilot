@@ -118,10 +118,55 @@ def _rrf_fallback(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _cloudflare_rerank(
+    question: str, candidates: list[dict[str, Any]], settings: Settings
+) -> list[dict[str, Any]] | None:
+    """Ask Workers AI's reranker; None means "use the local model instead"."""
+    import json
+    import urllib.request
+
+    url = (
+        "https://api.cloudflare.com/client/v4/accounts/"
+        f"{settings.cloudflare_account_id}/ai/run/{settings.cloudflare_rerank_model}"
+    )
+    payload = json.dumps(
+        {"query": question, "top_k": len(candidates), "contexts": [{"text": _rerank_text(c)} for c in candidates]}
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {settings.cloudflare_api_token}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=settings.cloudflare_rerank_timeout) as response:
+            body = json.loads(response.read().decode("utf-8"))
+        rows = (body.get("result") or {}).get("response") or []
+        scores = [float(row["score"]) for row in rows]
+        if len(scores) != len(candidates):
+            raise ValueError(f"expected {len(candidates)} scores, got {len(scores)}")
+    except Exception as exc:  # noqa: BLE001 - a third party must never break retrieval
+        logger.warning("cloudflare rerank unavailable, using the local model: %s", exc)
+        return None
+    scored = [
+        {**candidate, "rerank_score": score, "reranked": True}
+        for candidate, score in zip(candidates, scores, strict=True)
+    ]
+    scored.sort(key=lambda item: item["rerank_score"], reverse=True)
+    return scored
+
+
 def rerank(question: str, candidates: list[dict[str, Any]], settings: Settings) -> list[dict[str, Any]]:
     """Score each candidate against the question with a cross-encoder."""
     if not candidates:
         return []
+    if settings.cloudflare_account_id and settings.cloudflare_api_token:
+        remote = _cloudflare_rerank(question, candidates, settings)
+        if remote is not None:
+            return remote
     global _rerank_error
     try:
         model = _load_reranker(settings)

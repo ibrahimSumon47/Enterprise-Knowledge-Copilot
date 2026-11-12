@@ -110,8 +110,9 @@ async def hardening(request: Request, call_next):
 
 
 @app.get("/health", tags=["ops"])
-async def health() -> dict[str, Any]:
+async def health(request: Request) -> dict[str, Any]:
     settings = get_settings()
+    router = getattr(request.app.state, "router", None)
     return {
         "status": "ok",
         "service": "ekc-api",
@@ -119,6 +120,7 @@ async def health() -> dict[str, Any]:
         "model": settings.embedding_model,
         "rerank": settings.rerank_enabled,
         "rerank_state": rerank_state(),
+        "providers": router.stats() if router is not None else {},
     }
 
 

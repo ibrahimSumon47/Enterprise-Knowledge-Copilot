@@ -201,6 +201,8 @@ class ProviderRouter:
         self._hedge = hedge_seconds
         self._failures: dict[str, int] = {}
         self._open_until: dict[str, float] = {}
+        # Counts so the hedge cost can be read from /health instead of guessed.
+        self._stats = {"calls": 0, "hedged": 0, "backup_won": 0, "failed_over": 0}
 
     def _available(self, provider: LLMProvider) -> bool:
         return time.monotonic() >= self._open_until.get(provider.name, 0)
@@ -218,7 +220,9 @@ class ProviderRouter:
             try:
                 await asyncio.wait_for(start_now.wait(), timeout=delay)
             except asyncio.TimeoutError:
-                pass
+                # The primary was still running when the timer expired: this is the
+                # double-spend case, paid in exchange for the latency bound.
+                self._stats["hedged"] += 1
         return await provider.complete(system, prompt, max_tokens)
 
     async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
@@ -226,6 +230,7 @@ class ProviderRouter:
         if not usable:
             raise ProviderError("every provider circuit is open")
 
+        self._stats["calls"] += 1
         errors: list[str] = []
         start_now = asyncio.Event()
         tasks = {
@@ -259,14 +264,21 @@ class ProviderRouter:
                         errors.append(f"{provider.name}: {type(exc).__name__} {str(exc)[:80]}")
                         # A fast failure should not wait out the hedge timer.
                         start_now.set()
+                        if provider is usable[0]:
+                            self._stats["failed_over"] += 1
                         continue
                     self._failures[provider.name] = 0
+                    if provider is not usable[0]:
+                        self._stats["backup_won"] += 1
                     return completion
             raise ProviderError("; ".join(errors) or "no provider answered")
         finally:
             for task in tasks:
                 if not task.done():
                     task.cancel()
+
+    def stats(self) -> dict[str, int]:
+        return dict(self._stats)
 
     def health(self) -> dict[str, str]:
         return {

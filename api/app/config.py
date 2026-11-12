@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     gemini_timeout_seconds: float = 30.0
     # Start the backup this long after the primary instead of waiting for the
     # primary to fail: a hung provider otherwise owns the whole latency budget.
-    provider_hedge_seconds: float = 3.0
+    provider_hedge_seconds: float = 1.5
 
     allowed_origins: str = "http://localhost:3000"
 

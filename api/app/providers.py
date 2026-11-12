@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from dataclasses import dataclass
@@ -181,34 +182,91 @@ class MockProvider:
 
 
 class ProviderRouter:
-    """Tries providers in order and opens a circuit after repeated failures."""
+    """Hedged provider calls: the backup starts on a timer, not on failure.
 
-    def __init__(self, providers: list[LLMProvider], cooldown_seconds: int = 60) -> None:
+    A quota-limited provider can hang instead of returning 429, and waiting for it
+    to time out cost the evaluation a 24 s p95. Each provider is started after a
+    short stagger, the first success wins, and a fast failure starts the rest
+    immediately instead of waiting out the timer.
+    """
+
+    def __init__(
+        self,
+        providers: list[LLMProvider],
+        cooldown_seconds: int = 60,
+        hedge_seconds: float = 3.0,
+    ) -> None:
         self._providers = providers
         self._cooldown = cooldown_seconds
+        self._hedge = hedge_seconds
         self._failures: dict[str, int] = {}
         self._open_until: dict[str, float] = {}
 
     def _available(self, provider: LLMProvider) -> bool:
         return time.monotonic() >= self._open_until.get(provider.name, 0)
 
-    async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
-        errors: list[str] = []
-        for provider in self._providers:
-            if not self._available(provider):
-                errors.append(f"{provider.name}: circuit open")
-                continue
+    async def _call(
+        self,
+        provider: LLMProvider,
+        delay: float,
+        start_now: asyncio.Event,
+        system: str,
+        prompt: str,
+        max_tokens: int,
+    ) -> Completion:
+        if delay:
             try:
-                completion = await provider.complete(system, prompt, max_tokens)
-                self._failures[provider.name] = 0
-                return completion
-            except Exception as exc:  # noqa: BLE001 - any provider failure must fall through
-                logger.warning("provider %s failed: %s", provider.name, type(exc).__name__)
-                self._failures[provider.name] = self._failures.get(provider.name, 0) + 1
-                if self._failures[provider.name] >= 2:
-                    self._open_until[provider.name] = time.monotonic() + self._cooldown
-                errors.append(f"{provider.name}: {type(exc).__name__} {str(exc)[:80]}")
-        raise ProviderError("; ".join(errors) or "no provider configured")
+                await asyncio.wait_for(start_now.wait(), timeout=delay)
+            except asyncio.TimeoutError:
+                pass
+        return await provider.complete(system, prompt, max_tokens)
+
+    async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
+        usable = [provider for provider in self._providers if self._available(provider)]
+        if not usable:
+            raise ProviderError("every provider circuit is open")
+
+        errors: list[str] = []
+        start_now = asyncio.Event()
+        tasks = {
+            asyncio.create_task(
+                self._call(
+                    provider,
+                    self._hedge * index,
+                    start_now,
+                    system,
+                    prompt,
+                    max_tokens,
+                )
+            ): provider
+            for index, provider in enumerate(usable)
+        }
+        try:
+            pending = set(tasks)
+            while pending:
+                done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
+                for task in done:
+                    provider = tasks[task]
+                    try:
+                        completion = task.result()
+                    except asyncio.CancelledError:
+                        continue
+                    except Exception as exc:  # noqa: BLE001 - fall through to the rest
+                        logger.warning("provider %s failed: %s", provider.name, type(exc).__name__)
+                        self._failures[provider.name] = self._failures.get(provider.name, 0) + 1
+                        if self._failures[provider.name] >= 2:
+                            self._open_until[provider.name] = time.monotonic() + self._cooldown
+                        errors.append(f"{provider.name}: {type(exc).__name__} {str(exc)[:80]}")
+                        # A fast failure should not wait out the hedge timer.
+                        start_now.set()
+                        continue
+                    self._failures[provider.name] = 0
+                    return completion
+            raise ProviderError("; ".join(errors) or "no provider answered")
+        finally:
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
 
     def health(self) -> dict[str, str]:
         return {
@@ -225,4 +283,4 @@ def build_router(settings: Settings) -> ProviderRouter:
         providers.append(GeminiProvider(settings))
     if not providers:
         providers.append(MockProvider())
-    return ProviderRouter(providers)
+    return ProviderRouter(providers, hedge_seconds=settings.provider_hedge_seconds)

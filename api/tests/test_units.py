@@ -153,3 +153,70 @@ def test_graph_compiles() -> None:
 
     graph = build_graph(DummyRouter(), Settings(supabase_url="https://example.test"))  # type: ignore[arg-type]
     assert graph is not None
+
+
+def test_router_hedges_slow_primary() -> None:
+    """A hanging primary must not own the latency budget."""
+    import time
+
+    from app.providers import Completion, ProviderRouter
+
+    class Slow:
+        name = "slow"
+
+        async def complete(self, system, prompt, max_tokens=700):
+            await asyncio.sleep(5)
+            return Completion(text="slow", provider="slow", tokens=1)
+
+    class Fast:
+        name = "fast"
+
+        async def complete(self, system, prompt, max_tokens=700):
+            return Completion(text="fast", provider="fast", tokens=1)
+
+    router = ProviderRouter([Slow(), Fast()], hedge_seconds=0.05)
+    started = time.monotonic()
+    completion = asyncio.run(router.complete("system", "prompt"))
+    assert completion.provider == "fast"
+    assert time.monotonic() - started < 1.0
+
+
+def test_router_fails_over_without_waiting_for_the_timer() -> None:
+    """A fast 429 should start the backup immediately, not after the hedge delay."""
+    import time
+
+    from app.providers import Completion, ProviderError, ProviderRouter
+
+    class Broken:
+        name = "broken"
+
+        async def complete(self, system, prompt, max_tokens=700):
+            raise ProviderError("429")
+
+    class Fast:
+        name = "fast"
+
+        async def complete(self, system, prompt, max_tokens=700):
+            return Completion(text="fast", provider="fast", tokens=1)
+
+    router = ProviderRouter([Broken(), Fast()], hedge_seconds=3.0)
+    started = time.monotonic()
+    completion = asyncio.run(router.complete("system", "prompt"))
+    assert completion.provider == "fast"
+    assert time.monotonic() - started < 1.0
+
+
+def test_router_reports_when_every_provider_fails() -> None:
+    import pytest
+
+    from app.providers import ProviderError, ProviderRouter
+
+    class Broken:
+        name = "broken"
+
+        async def complete(self, system, prompt, max_tokens=700):
+            raise ProviderError("429")
+
+    router = ProviderRouter([Broken()], hedge_seconds=0.0)
+    with pytest.raises(ProviderError):
+        asyncio.run(router.complete("system", "prompt"))

@@ -97,6 +97,15 @@ hold torch plus two transformer models.
    and 256 tokens. `docs/reports/eval_latency.md` holds the cost curve and the
    rerank-off trade (~2.2 s p95, hit@k ~0.22).
 
+3. **Adaptive rerank depth: tried and reverted.** Both RRF-based triggers fired on
+   2 of 27 and 1 of 46 questions, and a high-confidence escalation bar escalated 14
+   of 15, so the shortlist never paid for itself. The refusal-threshold variant was
+   never measured: the free Groq quota was exhausted and `provider: none` refuses
+   the same way a retrieval miss does. See `docs/reports/adaptive_depth.md`.
+4. **Evaluation needs a provider-outage signal.** The eval counts a 429 refusal as
+   a normal refusal, so a throttled run looks like hit@k 0.0. Record `provider` per
+   question and mark those rows as excluded before the next comparison run.
+
 ## Resolved since the previous snapshot
 
 - Migrations applied and verified; role accounts seeded; corpus ingested.

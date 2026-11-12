@@ -1,8 +1,9 @@
-// Single source of truth for the audit verification cadence. The scheduled
-// workflow runs every AUDIT_CHECK_INTERVAL_HOURS, and the admin panel treats a
-// checkpoint older than one interval as stale. `lib/audit.test.ts` fails if the
-// workflow cron drifts from this value.
-export const AUDIT_CHECK_INTERVAL_HOURS = 6;
+import cadence from "../audit-cadence.json";
+
+// Single source of truth for the audit verification cadence. `audit-cadence.json`
+// is read here for the panel, by scripts/check_audit_chain.py for the workflow
+// summary, and by lib/audit.test.ts, which fails if the workflow cron drifts.
+export const AUDIT_CHECK_INTERVAL_HOURS = cadence.check_interval_hours;
 export const CHECKPOINT_STALE_MS = AUDIT_CHECK_INTERVAL_HOURS * 60 * 60 * 1000;
 
 /** A checkpoint older than one scheduled interval has not advanced in a while. */

@@ -20,6 +20,8 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path
 
 DEFAULT_API = "https://enterprise-knowledge-copilot-2u57.onrender.com"
 DEFAULT_EMAIL = "admin@ekc.local"
@@ -31,6 +33,30 @@ TIMEOUT = 120
 # scheduled run can land while it wakes, so transport errors are retried.
 RETRIES = 5
 RETRY_WAIT = 20
+# The cadence is not duplicated here: the panel, this summary and the workflow
+# cron all derive from audit-cadence.json (lib/audit.test.ts pins the cron).
+CADENCE_FILE = Path(__file__).resolve().parent.parent / "audit-cadence.json"
+
+
+def check_interval_hours() -> float:
+    try:
+        raw = json.loads(CADENCE_FILE.read_text(encoding="utf-8"))
+        return float(raw["check_interval_hours"])
+    except (OSError, KeyError, TypeError, ValueError):
+        print("::warning::audit-cadence.json unreadable; assuming a 6 h interval")
+        return 6.0
+
+
+def age_text(seconds: float) -> str:
+    minutes = int(seconds // 60)
+    if minutes < 1:
+        return "just now"
+    if minutes < 60:
+        return f"{minutes} min ago"
+    hours = minutes / 60
+    if hours < 24:
+        return f"{hours:.1f} h ago"
+    return f"{hours / 24:.1f} d ago"
 
 
 def http_json(url: str, method: str, payload: dict | None, headers: dict[str, str]) -> dict:
@@ -125,6 +151,17 @@ def main() -> int:
     mode = result.get("mode", "full")
     verified_now = result.get("verified_now", entries)
     checkpoint = result.get("checkpoint_id")
+    checkpoint_at = result.get("checkpoint_at")
+    interval = check_interval_hours()
+    checkpoint_age = None
+    if isinstance(checkpoint_at, str):
+        try:
+            stamped = datetime.fromisoformat(checkpoint_at.replace("Z", "+00:00"))
+            checkpoint_age = max(0.0, (datetime.now(timezone.utc) - stamped).total_seconds())
+        except ValueError:
+            checkpoint_age = None
+    stale = checkpoint_age is not None and checkpoint_age > interval * 3600
+    age_label = age_text(checkpoint_age) if checkpoint_age is not None else "unknown"
     first_id = result.get("first_id")
     last_id = result.get("last_id")
 
@@ -134,16 +171,19 @@ def main() -> int:
 
     print(
         f"audit chain: mode={mode} rows={first_id}..{last_id} entries={entries} "
-        f"verified_now={verified_now} checkpoint={checkpoint} intact={intact} "
+        f"verified_now={verified_now} checkpoint={checkpoint} age={age_label} "
+        f"stale={stale} intact={intact} "
         f"broken={len(broken)} complete={complete} at_genesis={genesis} anchor={anchor}"
     )
     summarize(
         "## Audit chain\n\n"
-        f"- entries checked: **{entries}** ({first_id}..{last_id})\n"
+        f"- entries: **{entries}** total, **{verified_now}** hashed this run ({first_id}..{last_id})\n"
         f"- intact: **{intact}**\n"
         f"- broken rows: **{len(broken)}**\n"
         f"- whole log checked: **{complete}**\n"
         f"- anchored at genesis: **{genesis}** (anchor #{anchor})\n"
+        f"- checkpoint: **#{checkpoint if checkpoint is not None else 'none'}**, "
+        f"last advanced **{age_label}** (stale after {interval:g} h: **{stale}**)\n"
     )
 
     if not intact:

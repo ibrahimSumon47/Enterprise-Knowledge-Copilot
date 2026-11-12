@@ -295,7 +295,17 @@ def main() -> int:
 
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(
-        json.dumps({"split": args.split, "repeat": args.repeat, "summary": summary}, indent=2)
+        json.dumps(
+            {
+                "split": args.split,
+                "repeat": args.repeat,
+                "summary": summary,
+                "threshold_sweep": sweep,
+                "best_threshold": best_threshold,
+                "failures": [run["failures"] for run in passes],
+            },
+            indent=2,
+        )
         + "\n",
         encoding="utf-8",
     )

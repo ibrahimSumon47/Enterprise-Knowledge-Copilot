@@ -65,7 +65,7 @@ report, and it is the only phase that fails (`docs/reports/eval.json` and
   (Groq → Gemini → mock) with circuit breaker, cross-encoder rerank, citation verification,
   PII redaction, SSE streaming endpoint, admin and evaluation endpoints.
 - Evaluation: `docs/reports/eval.json`, `eval.md` and `eval_comparison.md` hold
-  the full run -- 84 questions, hit@k 0.29, MRR 0.275, citation precision 0.232,
+  the full run -- 84 questions, hit@k 0.29, MRR 0.290, citation precision 0.232,
   refusal accuracy 0.595, p95 5047 ms, leakage 0. The pre-rerank run is kept in
   `eval_baseline.json`.
 
@@ -91,11 +91,11 @@ hold torch plus two transformer models.
    encoder is English-only. Verified: `POST /chat` returned 200 in 5.5 s with no
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
-3. **Answer quality.** Reranking is back on and the full run improved: hit@k
-   0.275 (was 0.275), citation precision 0.232
-   (was 0.173), refusal accuracy 0.595,
-   leakage still 0. p95 latency is 3819 ms because the
-   cross-encoder scores 40 candidates on 0.1 CPU; trimming that pool is next.
+3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens: hit@k
+   0.290 (0.217 with rerank off), citation precision 0.232 (0.173), refusal
+   accuracy 0.595, leakage 0. p95 is 5047 ms, down from 6942 ms at 40 candidates
+   and 256 tokens. `docs/reports/eval_latency.md` holds the cost curve and the
+   rerank-off trade (~2.2 s p95, hit@k ~0.22).
 
 ## Resolved since the previous snapshot
 
@@ -139,4 +139,4 @@ hold torch plus two transformer models.
 - Login works end to end: `/chat` and `/admin` answer 307 to `/login?next=...`
   when signed out, and the seven seeded accounts sign in.
 - Evaluation: `docs/reports/eval.json` and `eval.md` now hold the full run --
-  84 questions, hit@k 0.29, MRR 0.275, citation precision 0.232, refusal accuracy 0.595, p95 5047 ms, leakage 0.
+  84 questions, hit@k 0.29, MRR 0.290, citation precision 0.232, refusal accuracy 0.595, p95 5047 ms, leakage 0.

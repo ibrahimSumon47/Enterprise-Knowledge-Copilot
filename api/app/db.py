@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime
 from typing import Any
 
 import asyncpg
@@ -254,8 +255,9 @@ async def insert_audit(entry: dict[str, Any]) -> None:
         json.dumps(entry.get("detail", {})),
         # The hash covers created_at, so the row must store the same instant.
         # Letting the column default to now() stored a later, microsecond-precise
-        # value and made every entry fail its own hash check.
-        entry["created_at"],
+        # value and made every entry fail its own hash check. asyncpg wants a
+        # datetime here, not the ISO string the hash is computed over.
+        datetime.fromisoformat(entry["created_at"]),
     )
 
 

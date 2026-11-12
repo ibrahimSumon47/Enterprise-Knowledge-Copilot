@@ -98,6 +98,11 @@ not behaviour, so treat this table as the behavioural view.
   because it doubles model calls against a free quota.
 - **`langgraph` 0.2.x advisories.** Accepted risk, explained in
   `docs/reports/security.md`; fixing means a 1.x migration.
+- **Audit chain repair.** Entries written before 2026-11-12 could not verify:
+  the hash covered a `created_at` the insert never stored. `db.insert_audit` now
+  persists it, `audit.verify_chain` decodes jsonb and anchors the window, and
+  `scripts/repair_audit_chain.py` re-hashed the existing rows (backup in `.tmp/`).
+  `/audit/verify` on the deployed API is the check that matters.
 
 1. **Recall is the weak point.** 14 answerable questions retrieve the right
    document at rank 1 and are still scored near zero by TinyBERT

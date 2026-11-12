@@ -239,8 +239,8 @@ async def insert_audit(entry: dict[str, Any]) -> None:
         """
         insert into public.audit_log
           (prev_hash, entry_hash, actor_id, actor_role, action, resource_type,
-           resource_id, outcome, ip_hash, detail)
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)
+           resource_id, outcome, ip_hash, detail, created_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::timestamptz)
         """,
         entry["prev_hash"],
         entry["entry_hash"],
@@ -252,6 +252,10 @@ async def insert_audit(entry: dict[str, Any]) -> None:
         entry.get("outcome", "ok"),
         entry.get("ip_hash"),
         json.dumps(entry.get("detail", {})),
+        # The hash covers created_at, so the row must store the same instant.
+        # Letting the column default to now() stored a later, microsecond-precise
+        # value and made every entry fail its own hash check.
+        entry["created_at"],
     )
 
 

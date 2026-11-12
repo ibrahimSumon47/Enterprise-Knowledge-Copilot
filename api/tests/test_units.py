@@ -132,6 +132,28 @@ def test_audit_chain_verifies_a_window_without_the_genesis_row() -> None:
     assert audit.verify_chain(window)["intact"] is False
 
 
+def test_audit_chain_accepts_jsonb_detail_as_text() -> None:
+    """asyncpg returns jsonb as a string; the verifier must decode it first."""
+    payload = {
+        "action": "document.access_changed",
+        "resource_type": "document",
+        "resource_id": "d1",
+        "actor_id": "u1",
+        "actor_role": "admin",
+        "outcome": "ok",
+        "ip_hash": None,
+        "detail": {"access_level": "confidential"},
+        "created_at": "2026-11-11T10:00:00+00:00",
+    }
+    entry = audit.compute_hash(audit.GENESIS, payload)
+    row = {**payload, "id": 1, "prev_hash": audit.GENESIS, "entry_hash": entry}
+    assert audit.verify_chain([row])["intact"] is True
+    row["detail"] = '{"access_level": "confidential"}'
+    assert audit.verify_chain([row])["intact"] is True
+    row["detail"] = '{"access_level": "public"}'
+    assert audit.verify_chain([row])["intact"] is False
+
+
 def test_retrieval_uses_sql_permission_filter(monkeypatch: pytest.MonkeyPatch) -> None:
     captured: dict[str, Any] = {}
 

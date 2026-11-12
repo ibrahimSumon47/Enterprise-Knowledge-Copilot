@@ -30,11 +30,16 @@ Date: 2026-11-11. Scope: this repository and the two deployed origins.
    moves `starlette` off 0.41.3). The remaining advisories are all in the
    `langgraph` 0.2 family; fixing them means a 1.x migration of the graph code,
    which is not a dependency-only change and is recorded as accepted risk below.
-2. **Fixed — audit verification reported the whole log as tampered.** The verify
-   endpoint checks the newest 500 rows, and treated the first row's `prev_hash`
-   (which points outside the window) as a break once the log passed 500 entries
-   (1157–1656 were all listed). `verify_chain` now anchors on the window edge,
-   reports `anchor_id`/`anchored_at_genesis`, and a unit test covers it.
+2. **Fixed — the audit chain could never verify.** Three faults stacked up:
+   (a) verification treated the first row of its 500-row window as a chain break;
+   (b) `asyncpg` returns `jsonb` as text, so the verifier hashed a string where the
+   writer hashed a dict; (c) the insert never stored `created_at`, so the column
+   defaulted to `now()` with microseconds while the hash covered the app's
+   second-precision timestamp. The verifier was right to fail; the rows were never
+   edited. Fixed in `api/app/audit.py` (window anchor, jsonb decode) and
+   `api/app/db.py` (persist `created_at`), with unit tests for each. Existing rows
+   were re-hashed in id order by `scripts/repair_audit_chain.py`, which backs up
+   the old hashes first and rewrites only `prev_hash`/`entry_hash`.
 3. **Recorded — base image CVEs.** Trivy reports HIGH/CRITICAL advisories in
    `python:3.12-slim` OS packages. They are uploaded as SARIF and printed in the
    job log, and the gate is advisory because only a newer base image can fix

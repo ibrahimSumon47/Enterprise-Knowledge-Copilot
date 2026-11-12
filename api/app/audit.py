@@ -65,6 +65,14 @@ def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
     prev = anchor
     broken: list[int] = []
     for position, row in enumerate(ordered):
+        # asyncpg hands jsonb back as text, and the row was hashed from a dict,
+        # so a raw string here made every entry fail its own hash check.
+        detail = row.get("detail") or {}
+        if isinstance(detail, str):
+            try:
+                detail = json.loads(detail)
+            except json.JSONDecodeError:
+                detail = {}
         payload = {
             "action": row["action"],
             "resource_type": row["resource_type"],
@@ -73,7 +81,7 @@ def verify_chain(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "actor_role": row.get("actor_role"),
             "outcome": row["outcome"],
             "ip_hash": row.get("ip_hash"),
-            "detail": row.get("detail") or {},
+            "detail": detail,
             "created_at": row["created_at"].isoformat(timespec="seconds")
             if hasattr(row["created_at"], "isoformat")
             else str(row["created_at"]),

@@ -91,14 +91,14 @@ hold torch plus two transformer models.
    encoder is English-only. Verified: `POST /chat` returned 200 in 5.5 s with no
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
-3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens. The fallback
-   run scored 82 questions: hit@k 0.343, citation precision
-   0.28, refusal accuracy 0.634, leakage
-   0. p95 is 24098 ms, and that number is a
-   provider problem, not retrieval: a hung Groq call plus a slow Gemini retry costs
-   up to 49 s on two serial attempts. `docs/reports/eval_providers.md` has the
-   per-provider split and the cause; `eval_latency.md` has the rerank cost curve.
-
+3. **Answer quality.** Reranking is on at 24 candidates / 192 tokens; providers are
+   hedged (backup starts after 3 s). Last full run: 84/84 scored,
+   hit@k 0.391, citation precision 0.317, refusal accuracy
+   0.667, leakage 0, p50 3541 ms,
+   p95 9963 ms (was 24098 ms before hedging). Gemini
+   answered 41 questions with hit@k
+   0.675. `docs/reports/eval_providers.md` has the
+   three-run comparison and the per-provider split.
 4. **Adaptive rerank depth: tried and reverted.** Both RRF-based triggers fired on
    2 of 27 and 1 of 46 questions, and a high-confidence escalation bar escalated 14
    of 15, so the shortlist never paid for itself. The refusal-threshold variant was

@@ -163,8 +163,8 @@ def test_shortlist_depth_follows_branch_agreement() -> None:
     agreed = [Retrieved_stub(0.032)] + [Retrieved_stub(0.010)] * 23
     assert _shortlist_depth(agreed, settings) == settings.rerank_fast_depth
 
-    one_branch_only = [Retrieved_stub(0.016)] + [Retrieved_stub(0.008)] * 23
-    assert _shortlist_depth(one_branch_only, settings) == 24
+    crowded = [Retrieved_stub(0.016)] + [Retrieved_stub(0.014)] * 23
+    assert _shortlist_depth(crowded, settings) == 24
 
     flat = [Retrieved_stub(0.032)] + [Retrieved_stub(0.030)] * 23
     assert _shortlist_depth(flat, settings) == 24

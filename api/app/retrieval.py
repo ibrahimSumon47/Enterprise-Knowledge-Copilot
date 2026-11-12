@@ -58,9 +58,9 @@ class RetrievalResult:
 def _shortlist_depth(candidates: list[Retrieved], settings: Settings) -> int:
     """How many passages the cross-encoder should read.
 
-    Both branches ranking the same passage first, with a clear gap to fourth, is
-    the signal that the hybrid order is trustworthy: the reranker then only has to
-    confirm the top few instead of re-scoring the whole pool.
+    A leader that RRF already ranks first in some branch, with fourth place clearly
+    behind it, is the signal that the hybrid order is trustworthy: the reranker
+    then only has to confirm the top few instead of re-scoring the whole pool.
     """
     if not settings.rerank_adaptive or len(candidates) <= settings.rerank_fast_depth:
         return len(candidates)
@@ -68,7 +68,7 @@ def _shortlist_depth(candidates: list[Retrieved], settings: Settings) -> int:
     if top < settings.rerank_agree_score:
         return len(candidates)
     fourth = candidates[min(3, len(candidates) - 1)].rrf_score
-    if top - fourth < settings.rerank_agree_margin:
+    if fourth > top * settings.rerank_margin_ratio:
         return len(candidates)
     return settings.rerank_fast_depth
 

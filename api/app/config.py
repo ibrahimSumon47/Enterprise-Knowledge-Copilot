@@ -49,11 +49,14 @@ class Settings(BaseSettings):
     # the full price only when that shortlist comes back weak.
     rerank_adaptive: bool = True
     rerank_fast_depth: int = 8
-    # A passage ranked first by both branches scores 2/61 ~= 0.0328 in RRF; near
-    # that means agreement rather than one branch carrying the result alone.
-    rerank_agree_score: float = 0.030
-    # The fourth passage has to sit clearly behind the first, too.
-    rerank_agree_margin: float = 0.004
+    # RRF awards 1/61 for a first place in either branch, so this floor means
+    # "at least one branch ranked it first". Requiring both branches to agree was
+    # measured at 2 of 27 questions: plainto_tsquery ANDs every term, so the text
+    # branch often returns nothing on the whole handbook.
+    rerank_agree_score: float = 0.016
+    # The fourth passage must sit at most 75% of the leader's score, otherwise
+    # the pool is a tie and the reranker has to see all of it.
+    rerank_margin_ratio: float = 0.75
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     min_rerank_score: float = 0.0

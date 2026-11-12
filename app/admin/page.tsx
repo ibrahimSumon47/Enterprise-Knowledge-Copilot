@@ -34,6 +34,9 @@ type ChainCheck = {
   complete?: boolean;
   first_id?: number | null;
   last_id?: number | null;
+  mode?: "full" | "incremental";
+  checkpoint_id?: number | null;
+  verified_now?: number;
 };
 
 type DocumentRow = {
@@ -240,15 +243,24 @@ export default function AdminPage() {
           <h2 className="text-sm font-semibold">Audit trail</h2>
           {chain ? (
             <span
+              title={
+                chain.mode === "incremental"
+                  ? `Resumed from checkpoint #${chain.checkpoint_id ?? "?"}; ${chain.verified_now ?? 0} new rows hashed this run.`
+                  : `Re-hashed the whole log from genesis; ${chain.verified_now ?? chain.entries} rows hashed this run.`
+              }
               className={`mono flex items-center gap-1 text-[11px] ${
                 chain.intact ? "text-[var(--ok)]" : "text-[var(--danger)]"
               }`}
             >
               <ShieldCheck size={13} />
               {chain.intact
-                ? `chain ok · ${chain.entries} entries${
-                    chain.complete === false ? " · partial log" : ""
-                  }${chain.anchored_at_genesis === false ? " · prefix missing" : ""}`
+                ? `chain ok · ${chain.entries} entries · ${
+                    chain.mode === "incremental"
+                      ? `checkpoint #${chain.checkpoint_id ?? "?"} (+${chain.verified_now ?? 0})`
+                      : "full pass"
+                  }${chain.complete === false ? " · partial log" : ""}${
+                    chain.anchored_at_genesis === false ? " · prefix missing" : ""
+                  }`
                 : `chain broken · ${chain.broken_ids.length} entries`}
             </span>
           ) : null}

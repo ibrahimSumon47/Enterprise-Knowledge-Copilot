@@ -104,7 +104,7 @@ class GeminiProvider:
                 body = response.json()
                 try:
                     text = body["candidates"][0]["content"]["parts"][0]["text"].strip()
-                except (KeyError, IndexError) as exc:
+                except (KeyError, IndexError):
                     failures.append(f"{model} no text")
                     continue
                 tokens = int(body.get("usageMetadata", {}).get("totalTokenCount", 0))

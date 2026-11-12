@@ -65,8 +65,8 @@ report, and it is the only phase that fails (`docs/reports/eval.json` and
   (Groq → Gemini → mock) with circuit breaker, cross-encoder rerank, citation verification,
   PII redaction, SSE streaming endpoint, admin and evaluation endpoints.
 - Evaluation: `docs/reports/eval.json`, `eval.md` and `eval_comparison.md` hold
-  the full run -- 84 questions, hit@k 0.275, MRR 0.275, citation precision 0.22,
-  refusal accuracy 0.571, p95 3819 ms, leakage 0. The pre-rerank run is kept in
+  the full run -- 84 questions, hit@k 0.29, MRR 0.275, citation precision 0.232,
+  refusal accuracy 0.595, p95 5047 ms, leakage 0. The pre-rerank run is kept in
   `eval_baseline.json`.
 
 ## Deployment path
@@ -92,8 +92,8 @@ hold torch plus two transformer models.
    restart. Retrieval stays empty until the re-embed of all 754 documents finishes,
    because the stored vectors are still in the old model space.
 3. **Answer quality.** Reranking is back on and the full run improved: hit@k
-   0.275 (was 0.275), citation precision 0.22
-   (was 0.173), refusal accuracy 0.571,
+   0.275 (was 0.275), citation precision 0.232
+   (was 0.173), refusal accuracy 0.595,
    leakage still 0. p95 latency is 3819 ms because the
    cross-encoder scores 40 candidates on 0.1 CPU; trimming that pool is next.
 
@@ -139,4 +139,4 @@ hold torch plus two transformer models.
 - Login works end to end: `/chat` and `/admin` answer 307 to `/login?next=...`
   when signed out, and the seven seeded accounts sign in.
 - Evaluation: `docs/reports/eval.json` and `eval.md` now hold the full run --
-  84 questions, hit@k 0.275, MRR 0.275, citation precision 0.22, refusal accuracy 0.571, p95 6942 ms, leakage 0.
+  84 questions, hit@k 0.29, MRR 0.275, citation precision 0.232, refusal accuracy 0.595, p95 5047 ms, leakage 0.

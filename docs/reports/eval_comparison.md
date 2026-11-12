@@ -31,3 +31,5 @@ and three citations instead of six.
 The cross-encoder scores 40 candidates per question on a 0.1 CPU instance, so
 p95 latency rose from 2.2 s to 6.9 s. That is the honest price of the precision
 gain; cutting the candidate pool or the rerank length is the next lever.
+
+> The reranked column below is the 40-candidate / 256-token run. The shipped setting is 24 / 192; see `eval_latency.md` for that run and the cost curve.

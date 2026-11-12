@@ -99,6 +99,8 @@ hold torch plus two transformer models.
    `docs/reports/eval_providers.md` has all five runs and the provider split.
    Why 42 questions are refused, and why the 0.15 threshold is not the
    cause: `docs/reports/retrieval_refusals.md`.
+   A bigger cross-encoder was tried and does not fit the free tier:
+   `docs/reports/reranker_upgrade.md`.
 4. **Adaptive rerank depth: tried and reverted.** Both RRF-based triggers fired on
    2 of 27 and 1 of 46 questions, and a high-confidence escalation bar escalated 14
    of 15, so the shortlist never paid for itself. The refusal-threshold variant was

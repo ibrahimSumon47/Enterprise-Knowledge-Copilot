@@ -47,6 +47,9 @@ class ChatResponse(BaseModel):
     latency_ms: int
     tokens: int
     provider: str
+    # True when no language model answered at all (outage or quota). Clients can
+    # say "try again shortly" instead of implying the handbook has no answer.
+    outage: bool = False
     cached: bool = False
 
 

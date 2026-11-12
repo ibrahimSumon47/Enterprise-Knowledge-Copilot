@@ -239,6 +239,7 @@ async def chat(
         latency_ms=result.latency_ms,
         tokens=result.tokens,
         provider=result.provider,
+        outage=bool(result.reason and result.reason.startswith("no language model available")),
     )
 
 

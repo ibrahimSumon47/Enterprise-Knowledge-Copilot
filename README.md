@@ -19,12 +19,14 @@ audit trail and an evaluation suite that measures all of it.
 | --- | --- |
 | Web shell, design system, deploy pipeline | Working, live on Vercel, auto-deploy on `main` |
 | Postgres schema, RLS, hybrid retrieval SQL | Written and versioned in `supabase/migrations`, applied by CI |
-| FastAPI service (auth, RAG, audit, eval API) | Complete in `api/`, unit-tested; **hosting blocked** — Hugging Face now requires PRO for Docker Spaces (HTTP 402), see `docs/PROJECT_STATE.md` |
+| FastAPI service (auth, RAG, audit, eval API) | **Live** on Render's free Docker tier (512 MB, ~50 s cold start); see `docs/PROJECT_STATE.md` for the measured limits |
 | Corpus | 754 documents (871k words) from the public GitLab Handbook + 12 labelled synthetic confidential documents |
 | Evaluation set | 84 questions across answerable, unanswerable, Bangla, multi-document and cross-role cases |
 
-The full phase-by-phase state lives in `docs/PROJECT_STATE.md`; feature status
-with evidence is in `docs/features.json`.
+Quality of the last full run: **hit@k 0.406**, citation precision 0.333, refusal
+accuracy 0.679, p95 6.7 s, permission leakage **0** over 84 questions. The full
+phase-by-phase state lives in `docs/PROJECT_STATE.md`; feature status with evidence
+is in `docs/features.json`.
 
 ## What it does
 
@@ -107,8 +109,14 @@ node scripts/check-done.mjs --phase P0
 
 ## Limitations
 
-- The API host is blocked on the free tier (see Status). The image is portable;
-  any Docker host works with the environment variables in `docs/RUNBOOK.md`.
+- The API runs on a free 512 MB instance: a bigger cross-encoder does not fit
+  (measured at 402 MB RSS before the process died), so re-ranking uses TinyBERT.
+- The free instance sleeps; the first request after idle takes ~50 s.
+- 14 of 84 questions that should be answerable are refused because the cross-encoder
+  scores the correct passage near zero; the analysis is in
+  `docs/reports/retrieval_refusals.md`.
+- Provider quotas are free-tier: Groq throttles to 429 and the Gemini backup is
+  capped at 12 s.
 - Streamed answers are emitted progressively from a single completion; provider
   token streaming is a planned improvement.
 - Faithfulness in CI is a deterministic citation-overlap proxy; the LLM judge is

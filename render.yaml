@@ -15,6 +15,14 @@ services:
     dockerContext: .
     healthCheckPath: /health
     autoDeploy: true
+    # Docs and web commits must not restart the free instance. Render rebuilds
+    # only for paths the image actually contains.
+    buildFilter:
+      paths:
+        - api/**
+        - Dockerfile
+        - render.yaml
+        - data/corpus.jsonl
     envVars:
       - key: SUPABASE_URL
         sync: false

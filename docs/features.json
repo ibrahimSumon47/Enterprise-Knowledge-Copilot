@@ -35,7 +35,7 @@
       "description": "Permission-aware hybrid retrieval with the access predicate inside SQL",
       "acceptance": "search_chunks filters by role and department; leakage tests return 0",
       "status": "pass",
-      "evidence": "predicate inside search_chunks plus RLS; hedged + capped run: hit@k 0.406, precision 0.333, leakage 0 over 84 questions"
+      "evidence": "predicate inside search_chunks plus RLS; hedged run: hit@k 0.406, precision 0.333, leakage 0 over 84 questions"
     },
     {
       "id": "F-006",
@@ -77,7 +77,7 @@
       "description": "Admin panel for upload, classification and re-index",
       "acceptance": "admin changes a document access level and the audit log records it",
       "status": "partial",
-      "evidence": "app/admin/page.tsx starts ingestion, polls the job and verifies the audit chain; editing a document's access level is not built yet"
+      "evidence": "app/admin/page.tsx starts ingestion, polls the job and verifies the audit chain; editing a document's access level is not built yet (open work 2)"
     },
     {
       "id": "F-012",
@@ -85,6 +85,20 @@
       "acceptance": "docs/security/THREAT_MODEL.md maps controls to OWASP Top 10 and LLM Top 10",
       "status": "pass",
       "evidence": "docs/THREAT_MODEL.md (STRIDE + OWASP LLM Top 10), docs/reports/security.md, SECURITY.md, public/.well-known/security.txt"
+    },
+    {
+      "id": "F-013",
+      "description": "Traces view with per-stage latency and provider data",
+      "acceptance": "an admin sees latency per stage, provider, fallback counts and refusal reasons",
+      "status": "partial",
+      "evidence": "app/traces/page.tsx redirects to /admin; audit_log holds reason, provider and latency per question"
+    },
+    {
+      "id": "F-014",
+      "description": "Command palette (Cmd+K) for navigation and theme",
+      "acceptance": "Cmd+K opens a palette that navigates pages, switches theme and jumps to admin routes by role",
+      "status": "partial",
+      "evidence": "not built; navigation lives in the header only"
     }
   ],
   "summary": {

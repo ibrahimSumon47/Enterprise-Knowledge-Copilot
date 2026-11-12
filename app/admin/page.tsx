@@ -60,6 +60,8 @@ export default function AdminPage() {
   const [busy, setBusy] = useState(false);
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [fullPass, setFullPass] = useState(false);
 
   useEffect(() => {
     const supabase = supabaseBrowser();
@@ -90,6 +92,23 @@ export default function AdminPage() {
       setError(caught instanceof Error ? caught.message : "Request failed");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function verifyChain(full: boolean) {
+    if (!token) return;
+    setVerifying(true);
+    setError(null);
+    try {
+      setChain(
+        await apiFetch<ChainCheck>(`/audit/verify${full ? "?full=true" : ""}`, token, {
+          method: "POST",
+        }),
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Verification failed");
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -239,31 +258,60 @@ export default function AdminPage() {
       </section>
 
       <section className="panel overflow-hidden">
-        <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-          <h2 className="text-sm font-semibold">Audit trail</h2>
-          {chain ? (
-            <span
-              title={
-                chain.mode === "incremental"
-                  ? `Resumed from checkpoint #${chain.checkpoint_id ?? "?"}; ${chain.verified_now ?? 0} new rows hashed this run.`
-                  : `Re-hashed the whole log from genesis; ${chain.verified_now ?? chain.entries} rows hashed this run.`
-              }
-              className={`mono flex items-center gap-1 text-[11px] ${
-                chain.intact ? "text-[var(--ok)]" : "text-[var(--danger)]"
-              }`}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
+          <div className="flex items-center gap-3">
+            <h2 className="text-sm font-semibold">Audit trail</h2>
+            {chain ? (
+              <span
+                title={
+                  chain.mode === "incremental"
+                    ? `Resumed from checkpoint #${chain.checkpoint_id ?? "?"}; ${chain.verified_now ?? 0} new rows hashed this run.`
+                    : `Re-hashed the whole log from genesis; ${chain.verified_now ?? chain.entries} rows hashed this run.`
+                }
+                className={`mono flex items-center gap-1 text-[11px] ${
+                  chain.intact ? "text-[var(--ok)]" : "text-[var(--danger)]"
+                }`}
+              >
+                <ShieldCheck size={13} />
+                {chain.intact
+                  ? `chain ok · ${chain.entries} entries · ${
+                      chain.mode === "incremental"
+                        ? `checkpoint #${chain.checkpoint_id ?? "?"} (+${chain.verified_now ?? 0})`
+                        : "full pass"
+                    }${chain.complete === false ? " · partial log" : ""}${
+                      chain.anchored_at_genesis === false ? " · prefix missing" : ""
+                    }`
+                  : `chain broken · ${chain.broken_ids.length} entries`}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-3">
+            <label
+              className="mono flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]"
+              title="Re-hash the whole log from genesis instead of resuming from the checkpoint"
             >
-              <ShieldCheck size={13} />
-              {chain.intact
-                ? `chain ok · ${chain.entries} entries · ${
-                    chain.mode === "incremental"
-                      ? `checkpoint #${chain.checkpoint_id ?? "?"} (+${chain.verified_now ?? 0})`
-                      : "full pass"
-                  }${chain.complete === false ? " · partial log" : ""}${
-                    chain.anchored_at_genesis === false ? " · prefix missing" : ""
-                  }`
-                : `chain broken · ${chain.broken_ids.length} entries`}
-            </span>
-          ) : null}
+              <input
+                checked={fullPass}
+                className="accent-[var(--accent)]"
+                onChange={(event) => setFullPass(event.target.checked)}
+                type="checkbox"
+              />
+              full pass
+            </label>
+            <button
+              className="btn"
+              disabled={verifying || !token}
+              onClick={() => void verifyChain(fullPass)}
+              type="button"
+            >
+              {verifying ? (
+                <Loader2 className="animate-spin" size={14} />
+              ) : (
+                <ShieldCheck size={14} />
+              )}
+              {verifying ? "Verifying…" : "Re-verify"}
+            </button>
+          </div>
         </div>
         <table className="w-full text-left text-sm">
           <thead className="bg-[var(--panel-2)] text-[var(--text-muted)]">

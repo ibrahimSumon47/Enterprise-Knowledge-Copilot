@@ -152,6 +152,31 @@ def test_grader_verdict_parsing() -> None:
     assert _parse_verdict('I cannot tell') is None
 
 
+def test_shared_admin_cannot_delete_documents() -> None:
+    """The delete route is admin-gated and refuses by design."""
+    from app import main as api
+
+    route = next(
+        route for route in api.app.routes if getattr(route, "path", "") == "/documents/{document_id}"
+        and "DELETE" in getattr(route, "methods", set())
+    )
+    assert route.endpoint.__name__ == "remove_document"
+    source = route.endpoint.__doc__ or ""
+    assert "disabled" in source.lower()
+
+
+def test_document_update_is_admin_only() -> None:
+    """Changing a document's access level must sit behind require_admin."""
+    from app import main as api
+
+    route = next(
+        route for route in api.app.routes if getattr(route, "path", "") == "/documents/{document_id}"
+        and "PATCH" in getattr(route, "methods", set())
+    )
+    names = {dependency.call.__name__ for dependency in route.dependant.dependencies if dependency.call}
+    assert "require_admin" in names
+
+
 def test_graph_compiles() -> None:
     """LangGraph rejects a node whose name is also a state key, so build it here."""
     from app.pipeline import build_graph

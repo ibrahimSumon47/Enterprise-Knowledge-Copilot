@@ -76,6 +76,15 @@ Metrics are produced by `eval/run_eval.py` against the deployed API. The current
 report is in `docs/reports/eval.md`; numbers are only written there by a real run,
 never by hand.
 
+| Split | Questions | hit@k | precision | refusal acc | p95 | leakage |
+| --- | --- | --- | --- | --- | --- | --- |
+| full | 84 | 0.406 | 0.333 | 0.679 | 6 687 ms | 0 |
+| dev | 50 | 0.415 | 0.340 | 0.680 | 7 100 ms | 0 |
+
+The dev/test split is fixed in `eval/golden_dev.jsonl` / `golden_test.jsonl`; the
+sprint that measured recall and the evidence grader is in
+`docs/reports/retrieval_sprint.md`.
+
 Hard gate: **permission leakage must be exactly 0**.
 
 ## Stack and why
@@ -121,6 +130,22 @@ node scripts/check-done.mjs --phase P0
   token streaming is a planned improvement.
 - Faithfulness in CI is a deterministic citation-overlap proxy; the LLM judge is
   used only in the manual full run.
+
+## Shared accounts and what they may do
+
+Seven role accounts exist so a reviewer can see every access level without
+registering. They are shared, so they are constrained:
+
+- passwords live only in the deployment secret, never in the repository;
+- the admin account **cannot delete documents** (`DELETE /documents/{id}` answers 403
+  and writes a `document.delete_denied` audit entry);
+- changes to a document's access level are written to the hash-chained audit log and
+  **reversed nightly** by `.github/workflows/reset-admin-edits.yml` against
+  `data/access_baseline.json`;
+- sign-in is rate-limited and every question, refusal and admin action is audited.
+
+Tests: `api/tests/test_units.py::test_shared_admin_cannot_delete_documents` and
+`::test_document_update_is_admin_only`.
 
 ## Credits
 

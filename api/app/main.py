@@ -399,17 +399,20 @@ async def update_document(
 
 @app.delete("/documents/{document_id}", tags=["documents"])
 async def remove_document(document_id: str, user: AuthUser = Depends(require_admin)) -> dict[str, str]:
-    deleted = await db.delete_document(document_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="document not found")
+    """Deletion is disabled on the shared deployment.
+
+    The admin account is shared with reviewers, so a delete would remove corpus
+    documents no reviewer could restore. Ingestion can still refresh documents, and
+    the nightly reset workflow reverses access-level edits.
+    """
     await audit.record(
-        action="document.deleted",
+        action="document.delete_denied",
         resource_type="document",
         resource_id=document_id,
         actor_id=user.id,
         actor_role=user.role,
     )
-    return {"status": "deleted"}
+    raise HTTPException(status_code=403, detail="document deletion is disabled on this deployment")
 
 
 @app.post("/admin/ingest", response_model=IngestResponse, tags=["admin"])

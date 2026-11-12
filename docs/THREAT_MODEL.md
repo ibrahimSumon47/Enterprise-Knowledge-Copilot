@@ -64,3 +64,10 @@ in this system.
    multi-region failover.
 5. **No independent penetration test.** Controls are tested by the repository's
    own suite, not by a third party.
+
+## Shared admin account
+
+The admin account is shared with reviewers, which turns two ordinary admin powers
+into threats: destructive edits and silent permission changes. Controls: document
+deletion is refused (403, audited), access-level edits are audited and reset
+nightly, and both behaviours have tests in `api/tests/test_units.py`.

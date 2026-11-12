@@ -26,6 +26,17 @@ type AuditPage = { entries: Entry[] };
 
 type ChainCheck = { ok: boolean; checked?: number; broken_at?: string | null };
 
+type DocumentRow = {
+  id: string;
+  title: string;
+  access_level: string;
+  department: string | null;
+  is_synthetic?: boolean;
+};
+
+const LEVELS = ["public", "employee", "department", "confidential"];
+const DEPARTMENTS = ["engineering", "security", "people", "finance"];
+
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -34,6 +45,8 @@ export default function AdminPage() {
   const [chain, setChain] = useState<ChainCheck | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [documents, setDocuments] = useState<DocumentRow[]>([]);
+  const [saving, setSaving] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = supabaseBrowser();
@@ -58,10 +71,35 @@ export default function AdminPage() {
       const audit = await apiFetch<AuditPage>("/audit?limit=25", token);
       setEntries(audit.entries ?? []);
       setChain(await apiFetch<ChainCheck>("/audit/verify", token));
+      const docs = await apiFetch<{ documents: DocumentRow[] }>("/documents", token);
+      setDocuments(docs.documents ?? []);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Request failed");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function saveDocument(row: DocumentRow, accessLevel: string, department: string | null) {
+    if (!token) return;
+    setSaving(row.id);
+    setError(null);
+    try {
+      await apiFetch(`/documents/${row.id}`, token, {
+        method: "PATCH",
+        body: JSON.stringify({ access_level: accessLevel, department }),
+      });
+      setDocuments((current) =>
+        current.map((item) =>
+          item.id === row.id ? { ...item, access_level: accessLevel, department } : item,
+        ),
+      );
+      const audit = await apiFetch<AuditPage>("/audit?limit=25", token);
+      setEntries(audit.entries ?? []);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update the document");
+    } finally {
+      setSaving(null);
     }
   }
 
@@ -150,6 +188,44 @@ export default function AdminPage() {
       ) : null}
 
       <section className="panel overflow-hidden">
+        <div className="border-b border-[var(--border)] px-4 py-3">
+          <h2 className="text-sm font-semibold">Document access</h2>
+          <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+            Changing a level writes an audit entry and applies on the next retrieval query.
+          </p>
+        </div>
+        <div className="max-h-80 overflow-y-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+              <tr>
+                <th className="px-4 py-2">document</th>
+                <th className="px-4 py-2">level</th>
+                <th className="px-4 py-2">department</th>
+                <th className="px-4 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {documents.slice(0, 60).map((row) => (
+                <DocumentRowEditor
+                  busy={saving === row.id}
+                  key={row.id}
+                  onSave={(level, department) => void saveDocument(row, level, department)}
+                  row={row}
+                />
+              ))}
+              {documents.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-3 text-[var(--text-muted)]" colSpan={4}>
+                    Press Refresh to load documents.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="panel overflow-hidden">
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
           <h2 className="text-sm font-semibold">Audit trail</h2>
           {chain ? (
@@ -203,5 +279,71 @@ export default function AdminPage() {
         </table>
       </section>
     </div>
+  );
+}
+
+function DocumentRowEditor({
+  row,
+  busy,
+  onSave,
+}: {
+  row: DocumentRow;
+  busy: boolean;
+  onSave: (level: string, department: string | null) => void;
+}) {
+  const [level, setLevel] = useState(row.access_level);
+  const [department, setDepartment] = useState(row.department ?? "");
+  const dirty =
+    level !== row.access_level || (level === "department" && department !== (row.department ?? ""));
+
+  return (
+    <tr>
+      <td className="max-w-[22rem] truncate px-4 py-2" title={row.title}>
+        {row.title}
+        {row.is_synthetic ? (
+          <span className="mono ml-2 text-[10px] text-[var(--text-muted)]">synthetic</span>
+        ) : null}
+      </td>
+      <td className="px-4 py-2">
+        <select
+          aria-label={`Access level for ${row.title}`}
+          className="mono rounded border border-[var(--border)] bg-transparent px-2 py-1 text-[11px]"
+          onChange={(event) => setLevel(event.target.value)}
+          value={level}
+        >
+          {LEVELS.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-4 py-2">
+        <select
+          aria-label={`Department for ${row.title}`}
+          className="mono rounded border border-[var(--border)] bg-transparent px-2 py-1 text-[11px]"
+          disabled={level !== "department"}
+          onChange={(event) => setDepartment(event.target.value)}
+          value={department}
+        >
+          <option value="">—</option>
+          {DEPARTMENTS.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="px-4 py-2 text-right">
+        <button
+          className="btn"
+          disabled={!dirty || busy || (level === "department" && !department)}
+          onClick={() => onSave(level, level === "department" ? department : null)}
+          type="button"
+        >
+          {busy ? "Saving…" : "Save"}
+        </button>
+      </td>
+    </tr>
   );
 }

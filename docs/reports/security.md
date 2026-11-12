@@ -38,3 +38,15 @@ node scripts/check-done.mjs --phase P1
 gh run list --workflow=ci.yml --limit 1
 curl -s https://enterprise-knowledge-copilot-2u57.onrender.com/health
 ```
+
+## Shared accounts
+
+The seven seeded accounts exist for reviewers and are shared, so three controls
+bound them:
+
+- `DELETE /documents/{id}` is refused with 403 and audited as
+  `document.delete_denied`; test: `test_shared_admin_cannot_delete_documents`.
+- Document access-level changes are audited and reverted nightly by
+  `.github/workflows/reset-admin-edits.yml` against `data/access_baseline.json`.
+- Changing an access level requires `require_admin`; test:
+  `test_document_update_is_admin_only`.

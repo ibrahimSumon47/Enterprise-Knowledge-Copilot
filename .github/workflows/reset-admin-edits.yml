@@ -1,0 +1,31 @@
+name: Reset shared admin edits
+
+# The admin account is shared with reviewers, so its access-level changes are
+# reversed every night. Every reset goes through the admin API, which means each
+# one is written into the audit chain.
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: reset-admin-edits
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reset drifted document access
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EKC_API_URL: ${{ secrets.EKC_API_URL }}
+          EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
+        run: python scripts/reset_admin_edits.py

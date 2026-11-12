@@ -1,0 +1,3002 @@
+{
+"content-handbook-engineering-ai-agent-foundations-agent-developer-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-agent-foundations-ai-catalog-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-agent-foundations-ai-catalog-slack-app-release-process": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-agent-foundations-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-catalog-ux-principles-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-developer-clients-duo-cli-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-developer-clients-glab-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-developer-clients-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-developer-clients-jetbrains-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-developer-clients-vscode-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-duo-chat-chat-engine-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-duo-chat-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-duo-chat-web-chat-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-duo-client-sdk-duo-client-sdk-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-duo-client-sdk-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-clients-ownership": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-code-review-dap-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-dap-events-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-feature-stewardship-code-suggestions-development-guide-implementation-guidelin": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-feature-stewardship-code-suggestions-development-guide-model-evaluation-guide": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-feature-stewardship-code-suggestions-development-guide-model-rollout-guide": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-feature-stewardship-code-suggestions-development-guide-testing-guide": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-feature-stewardship-code-suggestions-engineering-overview": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-feature-stewardship-code-suggestions-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-how-we-work-async-updates": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-how-we-work-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-coding-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-ai-core-infra-duo-service-infra-index": {
+"access_level": "department",
+"department": "engineering"
+},
+"content-handbook-engineering-ai-ai-core-infra-how-we-work-index": {
+"access_level": "department",
+"department": "engineering"
+},
+"content-handbook-engineering-ai-ai-core-infra-semantic-code-search-index": {
+"access_level": "department",
+"department": "engineering"
+},
+"content-handbook-engineering-ai-ai-model-services-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-duo-chat-technical-strategy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-search-es-rollout-timeline": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-ai-search-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-abstractions-candidate-backend-languages": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-abstractions-candidate-nats": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-abstractions-candidate-sidekiq": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-abstractions-db-standards-matrix": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-abstractions-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-abstractions-postgresql": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ai-context-abstraction-layer-active-context-tasks": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ai-context-abstraction-layer-decisions-003-embedding-model-re": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ai-context-abstraction-layer-embedding-models": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ai-context-management-decisions-001-policy-on-the-client": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ai-gateway-decisions-002-proxy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-agreements-auth": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-agreements-infrastructure": {
+"access_level": "department",
+"department": "engineering"
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-agreements-organizations": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-001-organizations-as-anchor-point": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-002-storage-deduplication-scope": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-003-system-requirements": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-004-data-and-application-limits": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-005-artifact-delivery-mode": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-006-technology-stack": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-007-database-schema": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-008-content-addressable-storage": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-009-api-design": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-010-data-retention": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-011-data-reconciliation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-012-usage-data-collection": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-013-storage-backend-interaction": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-014-frontend-to-artifact-registry": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-020-authentication-flow": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-021-authorization": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-022-namespace-decoupling": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-023-code-structure-and-enforcemen": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-024-infrastructure-delivery": {
+"access_level": "department",
+"department": "engineering"
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-025-garbage-collection": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-decisions-027-replicating-registry-data-to-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-artifact-registry-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-automated-dependency-updates-decisions-001-bounded-severity-p": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-automated-dependency-updates-decisions-002-trigger-via-sbom-i": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-automated-dependency-updates-decisions-003-single-service-acc": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-automated-dependency-updates-decisions-004-package-release-co": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-automated-dependency-updates-decisions-005-refresh-instead-of": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-backup-and-restore-glossary": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cdot-e2e-tests-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cdot-plan-managment-decisions-001-jsonb-for-classification-me": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-001-routing-technology": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-003-num-gke-clusters-per-cell": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-004-vpc-subnet-design": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-005-flexible-reference-architectures": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-007-internal-customers": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-008-database-sequences": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-009-cell-initial-sizing": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-010-http-router-rules-and-cache": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-011-cell-specific-configuration": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-012-cell-unique-identifier": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-013-cell-restore-from-backup": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-014-clusterwide-syncing-in-cells-1-0": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-022-ring-definition-for-protocells": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-023-database-configuration": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-024-disaster-recovery-cells": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-025-separate-worker-for-jobs-request-endpoint": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-026-hono-for-http-router": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-028-membrane-and-global-feature-flag-service-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-decisions-028-observability-federation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-diagrams-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-goals": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-http-routing-service": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cells-routable-tokens": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ci-build-speed-benchmark": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-ci-builds-runner-fleet-metrics-ci-insights": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-clickhouse-usage-self-managed-costs-and-requirements": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cloud-connector-authentication-architecture": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cloud-connector-authentication-decisions-auth-001-lb-entry-po": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cloud-connector-fulfillment-decisions-prov-001-unit-primitive": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cloud-connector-fulfillment-decisions-prov-002-operators": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cloud-native-development-decisions-001-component-level-editin": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-cloud-native-development-decisions-002-containerized-service-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-ad-hoc-indexing": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-chunking": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-code-embeddings": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-decisions-001-semantic-code-search": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-decisions-002-reduce-storage-with-ad": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-decisions-003-expose-semantic-code-s": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-codebase-as-chat-context-semantic-code-search": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-compliance-security-policy-relationship": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-compliance-standards-adherence-dashboar": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-001-triggering-checks": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-002-custom-adherence-report": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-003-custom-controls": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-004-time-based-triggers": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-005-violations-engine": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-006-storing-controls-in-a-sep": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-007-external-controls": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-decisions-008-policy-relationships": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-frameworks-scalability-review": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-compliance-policy-instance-level-management-decisions-001-mir": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-data-insights-platform-querying-api-decisions-001-structured-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-data-insights-platform-querying-api-decisions-002-rails-dip-i": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-database-size-limits-decisions-002-limit-new-columns": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-database-size-limits-decisions-003-limit-new-indexes": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-dependency-scanning-analyzer-decisions-001-graph-export-only": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-dependency-scanning-analyzer-decisions-002-vulnerability-scan": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-dependency-scanning-analyzer-decisions-003-dependency-resolut": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-dependency-scanning-engine-decisions-001-gitlab-sbom-vulnerab": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-dependency-scanning-engine-decisions-002-continuous-vulnerabl": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-dependency-scanning-engine-decisions-003-sbom-based-scans-for": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-001-migrate-to-ai-gateway": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-002-add-websocket-support": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-003-rewrite-workflow-executor-in-types": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-004-workhorse-as-a-duo-workflow-servic": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-005-deprecate-checkpoint-field": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-007-support-workspace-agent-skills": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-duo-workflow-decisions-008-duo-messaging-service": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-epss-decisions-001-export-all-epss": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-epss-decisions-002-use-new-bucket": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-epss-decisions-003-switch-from-api-to-csv-file": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-epss-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-ci-events-decisions-001-hierarchical-events": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-ci-events-proposal-4-creating-events-via-ci-files": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-ci-events-proposal-5-combined-proposal": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-data-exploration-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-duo-rag-elasticsearch": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-duo-rag-postgresql": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-duo-rag-vertex-ai-search": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-rag-elasticsearch": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-rag-postgresql": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-rag-vertex-ai-search": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-decisions-001-initial-support": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-expression-language": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-gitlab-ci": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-implementation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-nix-package-manager": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-runner-integration": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-step-definition": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-steps-steps-syntactic-sugar": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-gitlab-workload-identity-federation-decisions-002-merge-glgo-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-google-artifact-registry-integration-backend": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-google-artifact-registry-integration-ui-ux": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-group-and-project-deletions-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-group-and-project-operations-and-state-management-decisions-0": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-001-traffic-cutover": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-002-chart-and-images": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-003-release-topology": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-004-zone-locality": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-005-configuration-inputs": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-006-observability": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-haproxy-kubernetes-decisions-007-ci-network-placement": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-internal-releases-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-kev-decisions-001-unify-kev-and-epss-as-cve-enrichments": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-labkit-north-star-strategy-decisions-001-http-routing-approac": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-machine-identity-alternative-solutions": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-mfe-platform-decisions-001-tooling-repository-strategy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-mfe-platform-decisions-002-reusable-testing-approach": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-mfe-platform-decisions-003-module-carried-packaging-and-servi": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-mfe-platform-decisions-004-packages-group-and-shared-setup": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-bounded-contexts": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-decisions-001-modular-application-domain": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-decisions-002-bounded-contexts-definition": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-decisions-003-stewardship": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-decisions-004-library-extraction": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-domain-layer": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-frontend-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-hexagonal-monolith-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-library-extraction": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-proof-of-concepts": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-references": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-modular-monolith-transport-layer": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-notifications-adr-001-database-schema": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-observability-field-standardisation-decisions-001-logging-fie": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-omnibus-adjacent-kubernetes-decisions-001-dont-package-or-ble": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-omnibus-adjacent-kubernetes-decisions-002-oak-testing-and-int": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-omnibus-adjacent-kubernetes-decisions-003-omnibus-agnostic-k8": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-omnibus-adjacent-kubernetes-decisions-004-multi-node-omnibus-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-omnibus-adjacent-kubernetes-decisions-005-zero-downtime-upgra": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-omnibus-adjacent-kubernetes-decisions-006-no-automated-databa": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-orbit-decisions-01-delivery": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-cells": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-contexts": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-current-organization": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-data-migration-cohort0": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-data-migration-cohorts-criteria-cohort-b": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-data-migration-decisions-002-rollback-strategy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-data-migration-dms-blueprint": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-data-migration-dms-instrumentor-integration": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-001-organization-context-resolution": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-004-path-scope": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-005-organization-login": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-006-administration-and-settings": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-007-self-managed-dedicated-single-orga": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-008-non-isolated-organizations-gitlab-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-009-state-machine": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-010-organization-maintenance-mode": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-011-onboarding": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-012-organization-space": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-013-warn-on-tlg-creation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-015-non-isolation-is-permanent": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-016-user-context": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-017-organization-roles-permissions-art": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-018-isolation-is-four-facts": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-019-isolation-severance-process": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-decisions-020-organizations-charter-and-invarian": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-faq": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-isolation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-lifecycle": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-login": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-release-process": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-settings": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-organization-users": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-passkeys-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-rapid-diffs-features": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-release-manifest-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-runner-suspendable-environments-fleeting": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-runner-suspendable-environments-kubernetes": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-runner-technical-vision-problems": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-sast-ide-integration-decisions-001-provide-api-based-security": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-sast-ide-integration-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-scaling-git-clustering-routing": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-001-use-ruby-push-check-approach-w": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-002-store-the-secret-detection-gem": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-003-run-scan-within-subprocess": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-004-secret-detection-scanner-servi": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-005-use-runway-for-deployment": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-006-support-for-all-environments": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-007-switch-to-go-scan-engine": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-008-unified-scanner": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-decisions-009-generic-secrets": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-validity-checks-decisions-001-use-sidekiq-wo": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-validity-checks-decisions-002-use-rest-over-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-validity-checks-decisions-003-use-sdrs-servi": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-validity-checks-decisions-005-use-token-type": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-detection-validity-checks-decisions-006-map-token-type": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-001-envelop-encryption": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-002-gcp-kms": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-004-stateless-kms": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-006-approle-authentication-rails": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-007-openbao": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-008-no-database": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-009-request-flows": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-010-secret-rotation-metadata-storage": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-012-jwt-separation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-013-openbao-separate-database": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-014-non-ci-api-access": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-015-audit-relay": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-decisions-016-cells-global-service": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-secret-manager-studies-ci-job-secrets": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-001-verification-component": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-002-provenance-generation-location": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-003-attest-sign-location": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-004-attestation-in-sidekiq": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-005-perform-sha256-in-service": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-006-signing-with-sbom-and-provenance-i": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-007-attestations-private-dedicated-sel": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-slsa-level-3-decisions-008-signing-local-ca-attestations": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-decision-log": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-downstream-consumers": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-human-in-the-loop": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-readiness": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-wi-mr-relationship": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-workplan": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-spec-driven-development-workplan-flow": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-appendices-a-dual-purpose-group-problem": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-appendices-b-customer-pain-points-research": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-appendices-c-industry-and-competitive-context": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-appendices-d-proposal-reconciliation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-001-teams-complement-groups": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-002-teams-are-organization-scoped": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-003-a-team-is-a-principal-not-a-container": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-004-team-membership-is-an-ordinary-membership": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-005-grants-target-namespaces": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-006-the-teams-api-surface": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-007-parity-before-migration": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-teams-decisions-008-a-team-derived-membership-is-its-own-row": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-telescope-engine-underneath": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-template": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-001-protobuf-as-preferred-s": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-002-one-interface-many-bind": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-003-enterprise-binding-surv": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-004-independent-vs-bundled-": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-005-labkit-go-native-go-lib": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-006-lab-bench-assemblies-ar": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-007-prefer-labkit-library-o": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-decisions-008-openapi-specification-f": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-theseus-platform-vision-openapi-publishing": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-transfer-data-repository": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-traversal-ids-on-issues-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-work-item-rest-api-endpoints": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-architecture-kubernetes-setup": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-002-provision-compute-and-storage": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-003-authorizing-user-to-create-and-acces": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-004-authentication-of-user-traffic-to-ac": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-005-explicitly-set-user-group-id-of-cont": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-009-allow-mapping-of-agentk-to-groups": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-010-extensions-marketplace-for-vscode": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-012-automatic-suspension-of-workspace": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-013-create-workspace-from-private-contai": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-016-allow-users-to-run-sudo-commands": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-017-allow-users-to-build-and-run-contain": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-design-documents-workspaces-decisions-018-remove-gitlab-workspaces-setup": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-guidelines-data-lifecycle-data-retention": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-guidelines-data-lifecycle-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-guidelines-database": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-non-linear-productivity-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-practice-availability-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-practice-scalability-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-roadmap": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-architecture-workflow-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-ic-leadership-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-ic-leadership-tech-lead": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-management-group-retrospectives": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-management-hiring": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-management-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-management-management-career-development": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-management-project-management": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-training-em-role-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-training-em-role-work-of-a-manager": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-training-ic-to-manager": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-training-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-training-staff-engineers": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-careers-training-staff-plus-role": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-cto-leadership-team": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-infrastructure": {
+"access_level": "department",
+"department": "engineering"
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-monitoring-troubleshooting": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-reference-agents-and-flows": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-technical-blueprint-current-state-adop": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-technical-blueprint-current-state-inte": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-technical-blueprint-current-state-serv": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-analytics-instrumentation-technical-blueprint-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-optimize": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-analytics-platform-insights": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-architecture-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-automation-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-activity-log": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-citus": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-container-registry-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-fdw-sharding": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-gitlab-com-database": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-issue-group-search-partitionin": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-lexicon": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-multidb-bg-migrations-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-partitioning": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-root-namespace-sharding-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-strategy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-doc-workload-analysis-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-postgresql-upgrade-cadence": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-frameworks-stable": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-health-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-database-operations-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-help": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-database-excellence-self-managed-database-experience-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-pre-mortems": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-priorities-tracker": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-data-engineering-quarterly-planning": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-deployments-and-releases-deployments-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-deployments-and-releases-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-data-science-ai-powered-model-validation-model-evaluation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-database": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-fulfillment-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-fulfillment-monetization-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-ai-prompts-epic-summary-prompt": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-ai-prompts-follow-up-issue-enhancement-prompt": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-engineering-dri": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-experimentation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-fast-boot": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-initiative-refinement-estimation": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-modular-code": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-operating-model-growth": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-technical-spikes": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-growth-trials-ownership": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-monetization-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-principles": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-development-required-approvals": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-engineering-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-finance-accounting-finance-ops-billing-ops-gpo-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-accounting-finance-ops-billing-ops-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-accounts-payable-corp-credit-cards": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-accounts-payable-coupa-virtual-card-guide-for-accounts-payable": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-accounts-payable-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-accounts-payable-tech-stack-guide-coupa": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-committee-composition": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-financial-planning-and-analysis-adaptive-insights": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-financial-planning-and-analysis-corporate-finance": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-financial-planning-and-analysis-headcount-metrics-and-processes": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-growth-and-development-career-growth": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-growth-and-development-cfo-shadow-program": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-growth-and-development-finbt-mentorship": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-growth-and-development-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-growth-and-development-learning-development": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-growth-and-development-mentorship": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-investor-relations": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-jihu-support-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-jihu-support-jihu-contribution-process": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-jihu-support-jihu-database-change-process": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-jihu-support-jihu-security-review-process": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-jihu-support-jihu-validation-pipelines": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-jihu-support-release-certification": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-consultants": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-contingent-worker-policy": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-coupa-faq": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-field-marketing-events": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-individual-use-software": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-tips-for-submitting-a-zip-request": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-vendor-guidelines-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-vendor-guidelines-legacy-vendor-agreement-v1": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-vendor-guidelines-mutual-non-disclosure-agreement": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-vendor-guidelines-po-terms": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-vendor-guidelines-vendor-agreement": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-procurement-vendor-guidelines-vendor-security-addendum": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-readmes-danielle-ritter": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-readmes-james-gladen": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-readmes-jessica-ross": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-readmes-julie-malloy": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-readmes-yao-chew": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-spending-company-money": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-tax-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-travel-index": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-finance-travel-sponsored": {
+"access_level": "department",
+"department": "finance"
+},
+"content-handbook-legal-acceptable-use-policy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-agile-planning-terms": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-agile-planning-terms-v1": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-ai-functionality-terms": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-ai-functionality-terms-v1": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-ai-functionality-terms-v2": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-ai-functionality-terms-v3": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-ai-functionality-terms-v4": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-anti-corruption-policy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-anti-fraud-policy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-anti-retaliation-policy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-api-terms": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-commercial-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-competitor-discussion-guidelines": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-conference-sweepstakes-rules": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-conference-sweepstakes-rules-french": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-conference-sweepstakes-rules-german-version": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-corporate-communications": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-customer-negotiations": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-dmca": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-dora": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-dsa": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-education-agreement": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-employment-law": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-esg-earth-month-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-esg-esg-training": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-esg-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-esg-team-member-sustainability-guide-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-ethics-compliance-program-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-legal-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-360-feedback": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-celebrations": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-competencies": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-contracts-probation-periods": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-directly-responsible-individuals": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-employment-branding-content-library": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-employment-branding-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-employment-branding-people-communications": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-employment-solutions": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-general-onboarding-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-general-onboarding-mr-buddies": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-general-onboarding-onboarding-buddies": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-general-onboarding-tanewki-tips": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-givelab-volunteer-initiatives": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-guidance-on-feedback": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-incident-response": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-career-development-igp-guide": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-career-development-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-elevate-programs-elevate-applied-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-elevate-programs-elevate-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-elevate-programs-elevate-prep-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-elevate-programs-elevateplus-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-elevate-programs-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-growth-and-development-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-growth-and-development-tax": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-hone": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-internship-for-learning": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-level-up-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-manager-development-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-self-paced-learning": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-learning-and-development-team-workshops-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-offboarding-faq": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-offboarding-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-organizational-change-management": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-orientation-identity": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-compliance-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-group-program-management": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-operations-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-people-analytics-data-governance": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-people-analytics-data-guide": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-people-analytics-index": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-people-analytics-office-hours": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-people-analytics-people-tableau": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-people-ops-tech-analytics-people-analytics-survey-support": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-promotion-document-style-guide": {
+"access_level": "department",
+"department": "people"
+},
+"content-handbook-people-group-pronouns": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-quarterly-talent-review": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-talent-development-program": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-team-member-relations": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-time-off-and-absence-leave-types": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-time-off-and-absence-time-away-philosophy": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-time-off-and-absence-time-off-types": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-people-group-visas": {
+"access_level": "public",
+"department": null
+},
+"content-handbook-security-ai-ato-program-plan": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-best-practices-google-cloud-security-best-practices": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-best-practices-supply-chain-security-for-dependencies": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-contributing-to-gitlab-the-product": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-automation-google-workspace-deprovisioning-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-engineering-devices-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-engineering-identity-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-engineering-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-how-we-work-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-services-onboarding-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-support-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-support-usb-encryption-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-1password-setup-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-backblaze-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-apps-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-calendar-delegation-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-chrome-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-drive-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-drive-internal-sharing-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-groups-automated-groups-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-google-groups-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-linux-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-linux-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-linux-setup-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-lumos-access-reviews-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-lumos-ar-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-macos-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-api-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-app-nomenclature-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-app-scim-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-app-setup-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-group-hybrid-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-group-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-group-managed-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-group-manual-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-group-nomenclature-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-okta-workday-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-policy-device-posture-checks-device-posture-android-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-policy-device-posture-checks-device-posture-chrome-device-trust-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-policy-device-posture-checks-device-posture-ios-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-policy-device-posture-checks-device-posture-macos-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-policy-device-posture-checks-device-posture-windows-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-okta-workflows-flows-google-deprovsioner-flow": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-sentinelone-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-sentinelone-setup-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-sentinelone-troubleshooting-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-slack-apps-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-vpn-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-vpn-setup-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-vpn-troubleshooting-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-yubikey-2fa-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-systems-yubikey-purchasing-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-corporate-team-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-customer-requests": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-ecosystem": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-engaging-with-security": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-external-secret-storage": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-external-security-communications-procedure": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-gearing-ratios": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-gitlab-security-resource-center": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-gitleaks": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-identity-boundaries-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-identity-counterparts-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-identity-gitops-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-identity-infrastructure-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-identity-kingdoms-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-individual-development-plan": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-information-system-contingency-plan-iscp": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-internship": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-learning-and-development": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-maturity-models": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-network-isolation": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-okr": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-password-guidelines": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-pgp-process": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-planning-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-planning-security-development-deployment-requirements": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-policies-and-standards-gitlab-projects-baseline-requirements": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-policies-and-standards-security-logging-standard": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-policies-and-standards-token-management-standard": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-application-security-runbooks-vulnerability-triage": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-data-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-infrastructure-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-infrastructure-security-issue-lifecycle": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-infrastructure-security-metrics-capacity": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-mentorship": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-handling-s1p1": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-holiday-coverage": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-psirt-case-lifecycle": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-unintended-vuln-disclosure": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-verifying-security-fixes": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-psirt-runbooks-working-with-sirt": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-application-security-aut": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-appsec-async": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-appsec-operations-appsec": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-appsec-operations-psirt-": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-appsec-operations-sdd-se": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-appsec-organization": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-appsec-reviews": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-classification": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-inventory": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-metrics-capacity": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-metrics-key-performance-": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-milestone-planning": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-reproducible-builds": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-reproducible-vulnerabili": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-faq": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-federal-appsec-": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-holiday-coverag": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-investigating-p": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-jihu-contributi": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-local-setup": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-review-process": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-scw-engagement-": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-security-dashbo": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-runbooks-triage-rotation": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-secure-code-review-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-threat-modeling-howto": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-threat-modeling-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-application-security-vulnerability-management": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-guiding-principles": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-detailed-workflo": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-runbooks-hackero": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-runbooks-rotate-": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-runbooks-runway-": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-runbooks-sbom-ba": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-product-security-engineering-runbooks-team-me": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-risk-register-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-risk-register-well-articulated-prodsec-risks": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-architecture-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-architecture-zero-trust": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-interlock-customer-zero-triage-proce": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-interlock-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-interlock-prodsec-to-product-workflo": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-interlock-request-customer-zero-vali": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-platforms-architecture-security-research-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-security-review-framework": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-supply-chain-risk-management-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-automation": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-closing-issues": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-customer-scan-review-requests": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-development-and-code-review": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-development-labels": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-incident-response-guidance": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-infrastructure-vulnerability-procedure": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-labels": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-lifecycle": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-runbooks-fixing-vulnerabilities": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-runbooks-so-you-have-a-vulnerability-finding": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-runbooks-supply-chain-investigations": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-runbooks-weekly-triage": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-sla": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-sla-exceptions": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-vulnerability-management-team-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-what-does-fixed-mean": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-what-is-a-vulnerability": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-product-security-vulnerability-management-why-should-we-fix-vulnerabilities": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-readmes-chaim-mazal": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-responding-to-ransomware": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-root-cause-analysis": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-secure-coding-training": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-and-technology-policy-exception": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-automation-and-compliance": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-answerbase-quality-guide": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-customer-security-assessment-process": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-evangelism": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-field-security-observation-and-ofi-quality-guide": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-field-security-research-program": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-field-security-rfp": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-field-security-study": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-fsstp": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-independent-security-assurance": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-knowledge-base": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-field-security-qbrs": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-governance-automation-library": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-governance-index": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-governance-sec-awareness-training": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-governance-security-assurance-automation": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-governance-security-training": {
+"access_level": "department",
+"department": "security"
+},
+"content-handbook-security-security-assurance-index": {
+"access_level": "department",
+"department": "security"
+},
+"synthetic/engineering-oncall-compensation": {
+"access_level": "confidential",
+"department": "engineering"
+},
+"synthetic/finance-forecast-fy27": {
+"access_level": "confidential",
+"department": "finance"
+},
+"synthetic/finance-travel-limits": {
+"access_level": "confidential",
+"department": "finance"
+},
+"synthetic/incident-postmortem-auth": {
+"access_level": "confidential",
+"department": "security"
+},
+"synthetic/incident-postmortem-payments": {
+"access_level": "confidential",
+"department": "engineering"
+},
+"synthetic/legal-hold-procedure": {
+"access_level": "confidential",
+"department": "people"
+},
+"synthetic/people-performance-process": {
+"access_level": "confidential",
+"department": "people"
+},
+"synthetic/salary-bands-engineering": {
+"access_level": "confidential",
+"department": "engineering"
+},
+"synthetic/salary-bands-people": {
+"access_level": "confidential",
+"department": "people"
+},
+"synthetic/security-incident-response": {
+"access_level": "confidential",
+"department": "security"
+},
+"synthetic/security-key-management": {
+"access_level": "confidential",
+"department": "security"
+},
+"synthetic/vendor-security-review": {
+"access_level": "confidential",
+"department": "security"
+}
+}

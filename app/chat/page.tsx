@@ -4,6 +4,7 @@ import { AlertTriangle, CornerDownLeft, Loader2, LogOut, Quote, ShieldAlert } fr
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiFetch, type Citation } from "@/lib/api";
+import { WarmupBanner } from "@/components/warmup-banner";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 type Answer = {
@@ -64,6 +65,16 @@ export default function ChatPage() {
     if (!text || !token || busy) return;
     setBusy(true);
     setQuestion("");
+    try {
+      const kept = JSON.parse(localStorage.getItem("ekc-recent-questions") ?? "[]") as unknown;
+      const list = Array.isArray(kept) ? kept.filter((item): item is string => typeof item === "string") : [];
+      localStorage.setItem(
+        "ekc-recent-questions",
+        JSON.stringify([text, ...list.filter((item) => item !== text)].slice(0, 8)),
+      );
+    } catch {
+      /* storage can be blocked; the palette list is a convenience only */
+    }
     setTurns((current) => [...current, { question: text }]);
     try {
       const result = await apiFetch<Answer>("/chat", token, {
@@ -87,6 +98,17 @@ export default function ChatPage() {
     }
   }
 
+  useEffect(() => {
+    if (!token) return;
+    const asked = new URLSearchParams(window.location.search).get("ask");
+    if (!asked) return;
+    window.history.replaceState({}, "", "/chat");
+    const timer = window.setTimeout(() => void ask(asked), 0);
+    return () => window.clearTimeout(timer);
+    // one-shot deep link from the command palette
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   async function signOut() {
     await supabaseBrowser().auth.signOut();
     router.replace("/login");
@@ -107,6 +129,8 @@ export default function ChatPage() {
             <LogOut size={14} /> Sign out
           </button>
         </header>
+
+        <WarmupBanner />
 
         {CONFIGURED ? null : (
           <p className="mt-4 rounded-lg border border-[var(--warn)] px-3 py-2 text-xs leading-6 text-[var(--warn)]">

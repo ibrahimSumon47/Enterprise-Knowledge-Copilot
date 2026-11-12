@@ -63,7 +63,7 @@ class Settings(BaseSettings):
     # thresholds live on that scale: anything above 0.15 is worth answering from.
     # The cross-encoder scores correct long passages near zero, so a low score
     # alone is not a refusal; the model gets to check the top three passages.
-    grader_enabled: bool = True
+    grader_enabled: bool = False
     min_rerank_score: float = 0.0
     min_answer_score: float = 0.15
     high_confidence_score: float = 0.45

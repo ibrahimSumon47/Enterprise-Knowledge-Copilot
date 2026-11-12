@@ -50,8 +50,8 @@ Reports: `docs/reports/eval.md`, `eval_providers.md` (five transport runs),
 | P2 | ingestion and corpus | **done** — 754 documents, 12 032 chunks |
 | P3 | permission-aware retrieval | **done** — predicate inside `search_chunks` and RLS, leakage 0 |
 | P4 | pipeline, citations, refusal, providers | **done** — `/chat` answers, hedged providers, citations verified |
-| P5 | chat UI, source drawer, palette | **partial** — palette not built |
-| P6 | admin, audit log, traces | **partial** — ingestion and audit chain work; `/traces` redirects to `/admin`; no document access-level editor |
+| P5 | chat UI, source drawer, palette | **done** — palette on Cmd+K, cold-start banner |
+| P6 | admin, audit log, traces | **done** — ingestion, audit chain, document access editor and a real `/traces` view |
 | P7 | evaluation suite | **done** — 84-question set, runner, report, CI subset |
 | P8 | security hardening and documentation | **done** — threat model, security report, scanners |
 | P9 | polish, README, handoff | **done** — ADR, facts, `llms.txt`, credits |
@@ -75,12 +75,18 @@ not behaviour, so treat this table as the behavioural view.
 
 ## Open work
 
-1. Retrieval sprint: gold-set audit, recall@50 by mode, contextual chunks, query
-   rewriting, refusal by combined evidence — see `docs/reports/retrieval_sprint.md`.
-2. Admin document editor (classification, department, visibility, audit entry,
-   re-index) — F-011.
-3. `/traces` with real per-stage data instead of a redirect — F-013.
-4. Command palette (Cmd+K) — F-014.
+1. **Retrieval target missed and documented.** Gold audit is clean, recall@50 is
+   0.875 on dev, and the blocker is the cross-encoder, not the candidate list;
+   `docs/reports/retrieval_sprint.md` has the numbers, the grader experiment and the
+   exact reason the target was not reached.
+2. **One reranker option left unmeasured:** `Xenova/ms-marco-MiniLM-L-6-v2` through
+   fastembed (~80 MB). It needs an eval with enough free quota to run three times.
+3. **Query rewriting** before retrieval (one extra model call) is the other untried
+   lever; the evidence grader showed how quickly a second call eats the quota.
+
+Done in this sprint: admin document editor with audit entries, `/traces` with real
+audit data, Cmd+K palette, cold-start banner, nightly reset workflow and the
+delete lock on the shared admin account.
 
 ## Deployment notes
 

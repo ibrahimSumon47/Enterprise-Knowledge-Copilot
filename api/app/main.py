@@ -19,6 +19,7 @@ from .config import Settings, get_settings
 from .embeddings import rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
 from .providers import GeminiProvider, build_router, list_gemini_models, probe_gemini
+from .retrieval import retrieve
 from .redact import hash_identifier
 from .schemas import (
     AuditVerifyResponse,
@@ -468,6 +469,40 @@ async def provider_models(
         ]
         return {"probe": await probe_gemini(settings.gemini_api_key, candidates[:6])}
     return await list_gemini_models(settings.gemini_api_key)
+
+
+@app.get("/admin/retrieval", tags=["admin"])
+async def retrieval_debug(
+    question: str,
+    role: str = "admin",
+    department: str | None = None,
+    settings: Settings = Depends(get_settings),
+    _: AuthUser = Depends(require_admin),
+) -> dict[str, Any]:
+    """Ranking and scores for one question, without calling a language model.
+
+    Refusal is decided by a single number, the top rerank score. This returns it so
+    a threshold can be tuned against the corpus instead of guessed at.
+    """
+    result = await retrieve(question, role, department, settings)
+    return {
+        "confidence": result.confidence,
+        "top_score": result.top_score,
+        "refused": not result.usable or result.confidence == "low",
+        "min_answer_score": settings.min_answer_score,
+        "high_confidence_score": settings.high_confidence_score,
+        "candidates": [
+            {
+                "id": candidate.citation_id,
+                "title": candidate.title,
+                "heading": candidate.heading,
+                "rerank_score": round(candidate.rerank_score, 4),
+                "rrf_score": round(candidate.rrf_score, 4),
+                "is_synthetic": candidate.is_synthetic,
+            }
+            for candidate in result.candidates
+        ],
+    }
 
 
 @app.get("/admin/ingest/{job_id}", tags=["admin"])

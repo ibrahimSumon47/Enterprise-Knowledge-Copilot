@@ -93,6 +93,10 @@ class AuditVerifyResponse(BaseModel):
     intact: bool
     broken_ids: list[int]
     head: str
+    # The verifier checks a window of the newest rows, not the whole log, so the
+    # first row in that window is an anchor rather than a chain break.
+    anchor_id: int | None = None
+    anchored_at_genesis: bool = False
 
 
 class EvalRun(BaseModel):

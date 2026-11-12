@@ -24,7 +24,14 @@ type Entry = {
 
 type AuditPage = { entries: Entry[] };
 
-type ChainCheck = { ok: boolean; checked?: number; broken_at?: string | null };
+type ChainCheck = {
+  entries: number;
+  intact: boolean;
+  broken_ids: number[];
+  head: string;
+  anchor_id?: number | null;
+  anchored_at_genesis?: boolean;
+};
 
 type DocumentRow = {
   id: string;
@@ -231,11 +238,15 @@ export default function AdminPage() {
           {chain ? (
             <span
               className={`mono flex items-center gap-1 text-[11px] ${
-                chain.ok ? "text-[var(--ok)]" : "text-[var(--danger)]"
+                chain.intact ? "text-[var(--ok)]" : "text-[var(--danger)]"
               }`}
             >
               <ShieldCheck size={13} />
-              {chain.ok ? `chain ok · ${chain.checked ?? 0} entries` : "chain broken"}
+              {chain.intact
+                ? `chain ok · ${chain.entries} entries${
+                    chain.anchored_at_genesis ? "" : ` · window from #${chain.anchor_id ?? "?"}`
+                  }`
+                : `chain broken · ${chain.broken_ids.length} entries`}
             </span>
           ) : null}
         </div>

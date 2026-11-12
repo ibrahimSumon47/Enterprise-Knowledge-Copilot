@@ -121,6 +121,28 @@ async def list_gemini_models(api_key: str) -> dict[str, Any]:
     return {"models": names, "error": None}
 
 
+async def probe_gemini(api_key: str, models: list[str]) -> list[dict[str, Any]]:
+    """One tiny generation per model, so a 404 is attributable to a model id."""
+    if not api_key:
+        return [{"model": model, "status": "no key"} for model in models]
+    results: list[dict[str, Any]] = []
+    async with httpx.AsyncClient(timeout=30) as client:
+        for model in models:
+            payload = {
+                "contents": [{"role": "user", "parts": [{"text": "ping"}]}],
+                "generationConfig": {"maxOutputTokens": 8},
+            }
+            try:
+                response = await client.post(
+                    GEMINI_URL.format(model=model), params={"key": api_key}, json=payload
+                )
+                detail = None if response.status_code < 400 else response.text[:160]
+                results.append({"model": model, "status": response.status_code, "detail": detail})
+            except Exception as exc:  # noqa: BLE001 - diagnostic must not raise
+                results.append({"model": model, "status": "error", "detail": type(exc).__name__})
+    return results
+
+
 class MockProvider:
     """Deterministic provider for tests and the offline evaluation subset."""
 

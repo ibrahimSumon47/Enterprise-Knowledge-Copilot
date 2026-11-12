@@ -18,7 +18,7 @@ from .auth import AuthUser, current_user, decode_token, require_admin
 from .config import Settings, get_settings
 from .embeddings import rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
-from .providers import build_router, list_gemini_models
+from .providers import build_router, list_gemini_models, probe_gemini
 from .redact import hash_identifier
 from .schemas import (
     AuditVerifyResponse,
@@ -430,6 +430,7 @@ async def start_ingest(user: AuthUser = Depends(require_admin)) -> IngestRespons
 
 @app.get("/admin/providers/models", tags=["admin"])
 async def provider_models(
+    probe: bool = False,
     settings: Settings = Depends(get_settings),
     _: AuthUser = Depends(require_admin),
 ) -> dict[str, Any]:
@@ -437,7 +438,16 @@ async def provider_models(
 
     Exists because a retired id answers 404 and the fallback provider turns into a
     silent outage; this answers the question without putting the key anywhere.
+    With `probe=true` it also runs a one-word generation per candidate.
     """
+    if probe:
+        candidates = [
+            settings.gemini_model,
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-3.5-flash",
+        ]
+        return {"probe": await probe_gemini(settings.gemini_api_key, candidates)}
     return await list_gemini_models(settings.gemini_api_key)
 
 

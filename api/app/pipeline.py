@@ -181,7 +181,7 @@ def parse_grounded_reply(text: str) -> dict[str, Any] | None:
             payload = json.loads(candidate)
         except json.JSONDecodeError:
             continue
-        if isinstance(payload, dict) and "answerable" in payload:
+        if isinstance(payload, dict) and isinstance(payload.get("evidence"), list):
             return payload
     return None
 

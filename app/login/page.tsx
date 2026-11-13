@@ -2,9 +2,20 @@
 
 import { KeyRound, Loader2, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { ROLES, ROLE_LABEL } from "@/lib/site";
 import { supabaseBrowser } from "@/lib/supabase/client";
+
+/** Hydration marker: false in SSR HTML, true once React is running. */
+const subscribeToHydration = () => () => {};
+const hydrated = () => true;
+const serverSnapshot = () => false;
+
+/** Only same-site paths are accepted so `next` cannot become an open redirect. */
+function safeNext(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/chat";
+  return value;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,13 +23,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // The form is inert until React has hydrated. Without this, a browser that
+  // autofills and submits before the bundle runs performs a native GET submit,
+  // which reloads /login and puts the password in the URL. That was the
+  // "sign-in keeps bouncing back to /login" report.
+  const ready = useSyncExternalStore(subscribeToHydration, hydrated, serverSnapshot);
 
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!ready) return;
     setBusy(true);
     setError(null);
     try {
-      const { error: authError } = await supabaseBrowser().auth.signInWithPassword({
+      const { data, error: authError } = await supabaseBrowser().auth.signInWithPassword({
         email,
         password,
       });
@@ -26,7 +43,11 @@ export default function LoginPage() {
         setError(authError.message);
         return;
       }
-      router.replace("/chat");
+      if (!data.session) {
+        setError("This account is not confirmed yet. Ask an administrator to confirm it.");
+        return;
+      }
+      router.replace(safeNext(new URLSearchParams(window.location.search).get("next")));
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Sign-in failed");
@@ -64,7 +85,12 @@ export default function LoginPage() {
           </p>
         </section>
 
-        <form className="panel p-6" onSubmit={signIn}>
+        <form
+          className="panel p-6"
+          data-auth-version="2"
+          method="post"
+          onSubmit={signIn}
+        >
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <KeyRound size={15} className="text-[var(--accent)]" /> Email and password
           </h2>
@@ -97,10 +123,19 @@ export default function LoginPage() {
               {error}
             </p>
           ) : null}
-          <button className="btn btn-primary mt-5 w-full justify-center" disabled={busy} type="submit">
+          <button
+            className="btn btn-primary mt-5 w-full justify-center"
+            disabled={busy || !ready}
+            type="submit"
+          >
             {busy ? <Loader2 className="animate-spin" size={15} /> : <ShieldCheck size={15} />}
             {busy ? "Signing in" : "Sign in"}
           </button>
+          <noscript>
+            <p className="mt-4 text-xs leading-5 text-[var(--danger)]">
+              Sign-in needs JavaScript. Enable it and reload this page.
+            </p>
+          </noscript>
           <p className="mt-4 text-[11px] leading-5 text-[var(--text-muted)]">
             Sessions are issued by Supabase Auth. The browser only ever holds the anon key; the
             service-role key stays on the API.

@@ -61,12 +61,13 @@ class Settings(BaseSettings):
     rerank_max_length: int = 192
     # flashrank returns a sigmoid score in 0..1, not raw logits, so the
     # thresholds live on that scale: anything above 0.15 is worth answering from.
-    # The cross-encoder scores correct long passages near zero, so the floor is
-    # only a guard against obviously unrelated questions; the single grounded
-    # model call decides answerability for everything above it.
+    # The cross-encoder scores correct long passages near zero, so any positive
+    # floor refuses questions the passages do answer. The single grounded model
+    # call makes the answerability decision; this floor only applies when there
+    # are no candidates at all (0.0 disables the pre-model refusal).
     grader_enabled: bool = False
     min_rerank_score: float = 0.0
-    min_answer_score: float = 0.01
+    min_answer_score: float = 0.0
     high_confidence_score: float = 0.45
     # Reciprocal-rank fusion never exceeds 2/61, so the hybrid fallback needs its
     # own scale instead of comparing against cross-encoder logits.

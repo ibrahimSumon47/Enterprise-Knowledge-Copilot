@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -129,6 +130,9 @@ async def health(request: Request) -> dict[str, Any]:
         "rerank": settings.rerank_enabled,
         "rerank_state": rerank_state(),
         "providers": router.stats() if router is not None else {},
+        # RENDER_GIT_COMMIT is injected by the host, so the deployed build can be
+        # identified without logging into the dashboard.
+        "commit": (os.environ.get("RENDER_GIT_COMMIT") or "unknown")[:12],
     }
 
 
@@ -644,7 +648,7 @@ async def audit_log(limit: int = 100, _: AuthUser = Depends(require_admin)) -> d
 
 @app.post("/audit/verify", response_model=AuditVerifyResponse, tags=["admin"])
 async def audit_verify(
-    full: bool = False, _: AuthUser = Depends(require_admin)
+    full: bool = False, user: AuthUser = Depends(require_admin)
 ) -> AuditVerifyResponse:
     """Verify the audit chain from the last checkpoint, or from genesis.
 
@@ -705,6 +709,18 @@ async def audit_verify(
             else checkpoint_at,
         }
     )
+    # A resume point that has not moved in a day and a run that hashed nothing
+    # new means verification is stuck, not that the log is quiet. Re-check the
+    # whole log instead of trusting the same checkpoint again.
+    if (
+        not full
+        and checkpoint is not None
+        and verified_now == 0
+        and isinstance(checkpoint_at, datetime)
+        and (datetime.now(timezone.utc) - checkpoint_at).total_seconds() > 24 * 3600
+    ):
+        logger.warning("checkpoint is over 24 h old with nothing new; escalating to a full pass")
+        return await audit_verify(full=True, user=user)
     if checkpoint is not None:
         result["anchor_id"] = int(checkpoint["last_id"])
     if result["intact"] and reached_end and rows:

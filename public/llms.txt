@@ -1,46 +1,43 @@
 # Enterprise Knowledge Copilot
 
-> A role-aware RAG copilot over the public GitLab Handbook plus clearly labelled
-> synthetic confidential documents. Answers cite the passage they came from and
-> refuse when the evidence is weak. Access control is enforced in SQL, not after
-> retrieval.
+> A knowledge copilot over company documents. Answers carry citations to the
+> passage they came from, refuse when the documents do not cover the question,
+> and only retrieve documents the signed-in role may read.
 
 ## What it is
 
-- Live web app: https://enterprise-knowledge-copilot-wine.vercel.app
-- API: https://enterprise-knowledge-copilot-2u57.onrender.com (health at /health)
-- Source: https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot
+- Live product: https://enterprise-knowledge-copilot-wine.vercel.app
+- Sample workspace: “Open sample workspace” on the home page signs a visitor in
+  as a read-only guest, with no account.
+- API health: https://enterprise-knowledge-copilot-2u57.onrender.com/health
 
 ## How it works
 
-1. The question is classified (policy, compensation, security, unclear).
+1. The question and the caller's role are sent to the API with a bearer token.
 2. Hybrid retrieval runs inside Postgres: pgvector similarity plus full-text,
-   fused with reciprocal rank fusion. The caller's role and department are part
-   of the SQL predicate, so unauthorised passages never leave the database.
-3. An ONNX cross-encoder can rerank the candidates where memory allows.
-4. The model answers only from the numbered passages and must cite each claim.
-5. Every citation is verified against the retrieved chunks; weak evidence or an
-   uncited sentence produces an explicit refusal.
+   fused with reciprocal rank fusion. The role and department predicate is part
+   of the SQL, so a document outside the caller's permissions is never selected.
+3. An ONNX cross-encoder ranks the candidates.
+4. One grounded model call returns whether the passages answer the question, the
+   answer, and the passage numbers it used.
+5. Citations are checked against the retrieved passages. A refusal carries the
+   closest documents and is queued for an administrator as an unanswered question.
 
 ## Access model
 
 - guest: public
 - employee: public + employee
 - engineering / security / hr / finance: public + employee + own department
-- admin: everything, including the synthetic confidential set
-
-## Corpus and licences
-
-GitLab Handbook content under CC BY-SA 4.0, with source URL, licence and
-attribution stored per chunk. Confidential documents are synthetic and marked
-`synthetic` in metadata and in the UI.
+- admin: everything, including the confidential set
 
 ## Pages
 
-- / — overview and access matrix
-- /login — role accounts (password held by the owner)
-- /chat — ask a question, read answers with citations
-- /trust — controls linked to the code that implements them
-- /evals — evaluation metrics and current status
-- /credits — corpus and model attribution
-- /.well-known/security.txt — disclosure policy
+- / — product overview and the sample workspace
+- /product — walkthrough
+- /security — practical controls
+- /privacy, /terms — what is stored and the terms of use
+- /contact — email
+- /licenses — corpus attribution and model licences
+- /login — email and password sign-in
+- /chat, /library — the workspace
+- /admin, /admin/quality — administrators only

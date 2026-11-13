@@ -51,6 +51,14 @@ type DocumentRow = {
 };
 
 
+type Unanswered = {
+  id: string;
+  role: string | null;
+  question: string;
+  reason: string | null;
+  created_at: string;
+};
+
 const LEVELS = ["public", "employee", "department", "confidential"];
 const DEPARTMENTS = ["engineering", "security", "people", "finance"];
 
@@ -63,6 +71,8 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
+  const [unanswered, setUnanswered] = useState<Unanswered[]>([]);
+  const [resolving, setResolving] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
 
@@ -91,6 +101,8 @@ export default function AdminPage() {
       setChain(await apiFetch<ChainCheck>("/audit/verify", token, { method: "POST" }));
       const docs = await apiFetch<{ documents: DocumentRow[] }>("/documents", token);
       setDocuments(docs.documents ?? []);
+      const queue = await apiFetch<{ questions: Unanswered[] }>("/admin/unanswered?limit=25", token);
+      setUnanswered(queue.questions ?? []);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Request failed");
     } finally {
@@ -135,6 +147,20 @@ export default function AdminPage() {
       setError(caught instanceof Error ? caught.message : "Could not update the document");
     } finally {
       setSaving(null);
+    }
+  }
+
+  async function resolveQuestion(id: string) {
+    if (!token) return;
+    setResolving(id);
+    setError(null);
+    try {
+      await apiFetch(`/admin/unanswered/${id}/resolve`, token, { method: "POST", body: "{}" });
+      setUnanswered((current) => current.filter((question) => question.id !== id));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not close the question");
+    } finally {
+      setResolving(null);
     }
   }
 
@@ -261,6 +287,44 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="panel overflow-hidden">
+        <div className="border-b border-[var(--border)] px-4 py-3">
+          <h2 className="text-sm font-semibold">Unanswered questions</h2>
+          <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+            Questions the documents did not cover. Add or update a document, then close the item.
+          </p>
+        </div>
+        <ul className="divide-y divide-[var(--border)]">
+          {unanswered.length === 0 ? (
+            <li className="px-4 py-4 text-xs text-[var(--text-muted)]">
+              Nothing waiting. Refusals appear here automatically.
+            </li>
+          ) : (
+            unanswered.map((question) => (
+              <li key={question.id} className="flex flex-wrap items-start gap-3 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm">{question.question}</p>
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                    {question.role ?? "unknown role"} · {question.reason ?? "not covered"}
+                  </p>
+                </div>
+                <button
+                  className="btn"
+                  disabled={resolving === question.id}
+                  onClick={() => void resolveQuestion(question.id)}
+                  type="button"
+                >
+                  {resolving === question.id ? (
+                    <Loader2 className="animate-spin" size={13} />
+                  ) : null}
+                  Mark resolved
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
       </section>
 
       <section className="panel overflow-hidden">

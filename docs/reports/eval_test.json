@@ -2,33 +2,33 @@
   "mode": "test",
   "questions": 34,
   "summary": {
-    "hit@k": 0.071,
-    "MRR": 0.071,
-    "citation_precision": 0.059,
+    "hit@k": 0.036,
+    "MRR": 0.036,
+    "citation_precision": 0.029,
     "faithfulness": 1.0,
-    "refusal_accuracy": 0.441,
-    "p50_latency_ms": 3412,
-    "p95_latency_ms": 5049,
+    "refusal_accuracy": 0.412,
+    "p50_latency_ms": 3435,
+    "p95_latency_ms": 4793,
     "permission_leakage": 0,
     "scored_questions": 34,
     "excluded_no_model": 0
   },
   "by_provider": {
     "groq": {
-      "questions": 16,
-      "hit@k": 0.133,
-      "citation_precision": 0.125,
-      "refusal_accuracy": 0.25,
-      "p50_latency_ms": 4439,
-      "p95_latency_ms": 5123
+      "questions": 18,
+      "hit@k": 0.062,
+      "citation_precision": 0.056,
+      "refusal_accuracy": 0.222,
+      "p50_latency_ms": 4134,
+      "p95_latency_ms": 5436
     },
     "none": {
-      "questions": 18,
+      "questions": 16,
       "hit@k": 0.0,
       "citation_precision": 0.0,
-      "refusal_accuracy": 0.611,
-      "p50_latency_ms": 2886,
-      "p95_latency_ms": 3633
+      "refusal_accuracy": 0.625,
+      "p50_latency_ms": 2486,
+      "p95_latency_ms": 2914
     }
   },
   "results": [
@@ -44,7 +44,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4215,
+      "latency_ms": 12168,
       "answer_len": 49
     },
     {
@@ -59,7 +59,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5049,
+      "latency_ms": 4793,
       "answer_len": 49
     },
     {
@@ -74,7 +74,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5702,
+      "latency_ms": 4132,
       "answer_len": 49
     },
     {
@@ -89,7 +89,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2940,
+      "latency_ms": 2721,
       "answer_len": 49
     },
     {
@@ -104,7 +104,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5045,
+      "latency_ms": 4516,
       "answer_len": 49
     },
     {
@@ -119,7 +119,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3685,
+      "latency_ms": 2722,
       "answer_len": 49
     },
     {
@@ -128,14 +128,14 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4829,
-      "answer_len": 503
+      "latency_ms": 4134,
+      "answer_len": 49
     },
     {
       "id": "a26",
@@ -143,14 +143,14 @@
       "role": "engineering",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4843,
-      "answer_len": 211
+      "latency_ms": 3896,
+      "answer_len": 49
     },
     {
       "id": "a27",
@@ -164,7 +164,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2512,
+      "latency_ms": 2633,
       "answer_len": 49
     },
     {
@@ -179,7 +179,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2995,
+      "latency_ms": 2629,
       "answer_len": 49
     },
     {
@@ -194,23 +194,23 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2322,
+      "latency_ms": 2076,
       "answer_len": 49
     },
     {
       "id": "a30",
       "category": "answerable",
       "role": "engineering",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2383,
-      "answer_len": 49
+      "latency_ms": 4226,
+      "answer_len": 493
     },
     {
       "id": "u10",
@@ -224,7 +224,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2744,
+      "latency_ms": 2486,
       "answer_len": 49
     },
     {
@@ -239,7 +239,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2711,
+      "latency_ms": 2914,
       "answer_len": 49
     },
     {
@@ -254,14 +254,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2361,
+      "latency_ms": 2202,
       "answer_len": 49
     },
     {
       "id": "u13",
       "category": "unanswerable",
       "role": "guest",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -269,7 +269,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3045,
+      "latency_ms": 3708,
       "answer_len": 49
     },
     {
@@ -284,7 +284,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4212,
+      "latency_ms": 3435,
       "answer_len": 49
     },
     {
@@ -299,7 +299,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3223,
+      "latency_ms": 2279,
       "answer_len": 49
     },
     {
@@ -314,7 +314,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4312,
+      "latency_ms": 4430,
       "answer_len": 49
     },
     {
@@ -329,7 +329,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5123,
+      "latency_ms": 5436,
       "answer_len": 49
     },
     {
@@ -344,7 +344,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4439,
+      "latency_ms": 4779,
       "answer_len": 49
     },
     {
@@ -359,7 +359,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1650,
+      "latency_ms": 1786,
       "answer_len": 49
     },
     {
@@ -374,7 +374,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3633,
+      "latency_ms": 3235,
       "answer_len": 49
     },
     {
@@ -389,7 +389,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3412,
+      "latency_ms": 3559,
       "answer_len": 49
     },
     {
@@ -404,7 +404,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3822,
+      "latency_ms": 4095,
       "answer_len": 49
     },
     {
@@ -419,7 +419,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4281,
+      "latency_ms": 4237,
       "answer_len": 49
     },
     {
@@ -434,7 +434,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4718,
+      "latency_ms": 2999,
       "answer_len": 49
     },
     {
@@ -449,7 +449,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4075,
+      "latency_ms": 4087,
       "answer_len": 49
     },
     {
@@ -464,7 +464,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3196,
+      "latency_ms": 2609,
       "answer_len": 49
     },
     {
@@ -479,7 +479,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2357,
+      "latency_ms": 1199,
       "answer_len": 49
     },
     {
@@ -494,7 +494,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2886,
+      "latency_ms": 2481,
       "answer_len": 49
     },
     {
@@ -509,7 +509,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2830,
+      "latency_ms": 3691,
       "answer_len": 49
     },
     {
@@ -524,7 +524,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3202,
+      "latency_ms": 1993,
       "answer_len": 49
     },
     {
@@ -539,7 +539,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1863,
+      "latency_ms": 1461,
       "answer_len": 49
     }
   ]

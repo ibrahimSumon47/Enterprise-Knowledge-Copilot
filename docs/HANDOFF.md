@@ -1,13 +1,13 @@
 # HANDOFF
 
-How any person or AI resumes this project from zero context.
+How a person or an AI resumes this project from zero context.
 
 ## 1. Read, in this order
 
 1. `AGENTS.md` — rules, stack, commands, definition of done.
-2. `docs/PROJECT_STATE.md` — what is done, what is blocked, the exact next step.
-3. `docs/DECISIONS.md` and `docs/adr/` — why the stack looks like this.
-4. `docs/features.json` — feature status with evidence.
+2. `docs/PROJECT_STATE.md` — what is done, what is blocked, the next step.
+3. `docs/features.json` — feature status with evidence.
+4. `docs/DEMO_SCRIPT.md` — the 90-second walkthrough a reviewer will follow.
 
 ## 2. Get the environment running
 
@@ -15,46 +15,51 @@ How any person or AI resumes this project from zero context.
 pnpm install
 pnpm dev            # http://localhost:3000
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
+node scripts/check-done.mjs
 ```
 
-Web environment variables (`.env.local`, never committed):
+Web variables (`.env.local`, never committed):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://ctfatevadhojxycuplsh.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-NEXT_PUBLIC_API_BASE_URL=...
+NEXT_PUBLIC_API_BASE_URL=https://enterprise-knowledge-copilot-2u57.onrender.com
+EKC_GUEST_PASSWORD=...      # server-only, powers "Open sample workspace"
 ```
 
-API environment variables (Space or any Docker host):
+API variables (Render): `SUPABASE_URL`, `SUPABASE_DB_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`GROQ_API_KEY`, `GEMINI_API_KEY`, `ALLOWED_ORIGINS`.
 
-```
-SUPABASE_URL=...
-SUPABASE_DB_URL=...        # must be the Session pooler string
-SUPABASE_SERVICE_ROLE_KEY=...
-GROQ_API_KEY=...
-GEMINI_API_KEY=...
-ALLOWED_ORIGINS=https://enterprise-knowledge-copilot-wine.vercel.app
-```
+## 3. The two surfaces
 
-## 3. Deploy
+- Public site: `/`, `/product`, `/security`, `/privacy`, `/terms`, `/contact`,
+  `/licenses`. Product copy only; engineering evidence belongs in this repository.
+- App: `/chat`, `/library`, `/admin`, `/admin/quality`. Admin quality holds the
+  answer-quality report and the performance view; it is not linked publicly.
 
-- Web: pushes to `main` deploy through the linked Vercel project.
-- Database: `gh workflow run db-migrate.yml` applies `supabase/migrations/*.sql`
-  with the `SUPABASE_DB_URL` secret.
-- Role accounts: `gh workflow run seed-users.yml` (needs `EKC_DEMO_PASSWORD`).
-- API: Render free Docker web service from `render.yaml` (live at
-  `https://enterprise-knowledge-copilot-2u57.onrender.com`). `buildFilter` only
-  rebuilds for `api/**`, `Dockerfile`, `render.yaml` and `data/corpus.jsonl`.
-  Hugging Face Docker Spaces need PRO and are retired for this project.
-- Corpus: `python scripts/build_corpus.py` regenerates `data/corpus.jsonl` from
-  the checkout in `.corpus-src/` (see `docs/RUNBOOK.md`).
+`POST /api/sample-workspace` signs a visitor into the shared guest account with
+the password in `EKC_GUEST_PASSWORD` and redirects to `/chat`. Without that
+variable the button falls back to `/login`.
 
-## 4. Ready-to-paste resume prompt
+## 4. Deploy
+
+- Web: pushes to `main` deploy on Vercel.
+- API: Render free Docker service from `render.yaml` (`buildFilter` only rebuilds
+  for `api/**`, `Dockerfile`, `render.yaml`, `data/corpus.jsonl`).
+- Database: `gh workflow run db-migrate.yml`.
+- Accounts: `gh workflow run seed-users.yml`; ingestion: `gh workflow run ingest.yml`.
+- Sign-in e2e: `.github/workflows/e2e-auth.yml` waits for the deployed build, then
+  signs in as all seven roles through the real form (needs `EKC_DEMO_PASSWORD`).
+- Keep-warm: `.github/workflows/keep-warm.yml` pings `/health` every ten minutes.
+
+## 5. Ready-to-paste resume prompt
 
 > You are continuing the Enterprise Knowledge Copilot repository. Read AGENTS.md,
-> docs/PROJECT_STATE.md and docs/features.json first. The stack is Next.js 16 on
-> Vercel, FastAPI in api/, Supabase Postgres with pgvector and RLS, free LLM
-> providers behind a router. Do not change the access model: the permission
-> predicate belongs inside the SQL. Resume from the "Next step" section in
-> PROJECT_STATE.md, run `node scripts/check-done.mjs --phase P5` when the phase is
-> finished, and update PROJECT_STATE.md and features.json before you stop.
+> docs/PROJECT_STATE.md, docs/features.json and docs/HANDOFF.md first. The public
+> site and the app are separate surfaces; do not put engineering evidence back
+> into product copy. The stack is Next.js 16 on Vercel, FastAPI in `api/`,
+> Supabase Postgres with pgvector and RLS, and free model providers behind a
+> router. Do not change the access model: the permission predicate belongs inside
+> the SQL. Resume from the next step in PROJECT_STATE.md, run
+> `node scripts/check-done.mjs`, and update PROJECT_STATE.md and features.json
+> before you stop.

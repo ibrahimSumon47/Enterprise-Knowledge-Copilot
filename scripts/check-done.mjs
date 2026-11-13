@@ -46,6 +46,23 @@ const minLinesCheck = (label, path, minimum) => ({
   },
 });
 
+const bannedWordsCheck = (label, files, words) => ({
+  label,
+  run: () => {
+    const hits = [];
+    for (const path of files) {
+      const text = read(path).toLowerCase();
+      for (const word of words) {
+        if (text.includes(word.toLowerCase())) hits.push(`${path}: ${word}`);
+      }
+    }
+    return {
+      ok: hits.length === 0,
+      evidence: hits.length === 0 ? `${files.length} product pages clean` : hits.join(", "),
+    };
+  },
+});
+
 const urlCheck = (label, url) => ({
   label,
   run: async () => {
@@ -111,6 +128,44 @@ const phases = {
   P8: [
     fileCheck("evaluation report", "docs/reports/eval.json"),
     fileCheck("gold published", "docs/reports/gold.json"),
+  ],
+  P10: [
+    fileCheck("public product page", "app/product/page.tsx"),
+    fileCheck("public security page", "app/security/page.tsx"),
+    fileCheck("privacy page", "app/privacy/page.tsx"),
+    fileCheck("terms page", "app/terms/page.tsx"),
+    fileCheck("contact page", "app/contact/page.tsx"),
+    fileCheck("licenses page", "app/licenses/page.tsx"),
+    fileCheck("one-click sample workspace", "app/api/sample-workspace/route.ts"),
+    fileCheck("workspace library", "app/library/page.tsx"),
+    fileCheck("admin quality view", "app/admin/quality/page.tsx"),
+    containsCheck("sample workspace CTA", "app/page.tsx", ["Open sample workspace"]),
+    containsCheck("every role signs in on production", "e2e/auth.spec.ts", [
+      "guest@ekc.local",
+      "employee@ekc.local",
+      "engineering@ekc.local",
+      "security@ekc.local",
+      "hr@ekc.local",
+      "finance@ekc.local",
+      "admin@ekc.local",
+    ]),
+    fileCheck("sign-in e2e workflow", ".github/workflows/e2e-auth.yml"),
+    fileCheck("demo script", "docs/DEMO_SCRIPT.md"),
+    fileCheck("deployment guide", "docs/DEPLOY.md"),
+    fileCheck("landing screenshot", "docs/screenshots/01-landing.png"),
+    fileCheck("chat screenshot", "docs/screenshots/04-chat-citations.png"),
+    bannedWordsCheck(
+      "no project language on the public pages",
+      [
+        "app/page.tsx",
+        "app/product/page.tsx",
+        "app/security/page.tsx",
+        "app/contact/page.tsx",
+        "app/privacy/page.tsx",
+        "app/terms/page.tsx",
+      ],
+      ["portfolio", "synthetic", "demo access", "audit chain", "groq", "gemini", "\"eval"],
+    ),
   ],
   P9: [
     fileCheck("project facts", "docs/PROJECT_FACTS.json"),

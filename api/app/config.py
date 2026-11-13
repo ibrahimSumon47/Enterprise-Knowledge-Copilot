@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     # roughly halving the scoring work.
     candidate_limit: int = 24
     # Three citations keeps the answer tight; six was diluting citation precision.
-    rerank_top_k: int = 6
+    rerank_top_k: int = 8
     # 96 tokens cut too much of the passage and cost hit@k; 192 keeps the policy
     # sentence in view at 0.75 of the 256-token scoring cost.
     rerank_max_length: int = 192

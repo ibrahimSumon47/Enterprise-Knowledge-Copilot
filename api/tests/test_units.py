@@ -77,11 +77,11 @@ def test_answer_with_real_citation_passes() -> None:
 
 def test_grounded_reply_needs_the_json_contract() -> None:
     payload = parse_grounded_reply(
-        'Sure: {"answerable": true, "answer": "Receipts within 45 days [1].", "citations": [1]}'
+        'Sure: {"answer": "Receipts within 45 days.", "evidence": [{"passage_id": 1, "quote": "within 45 days"}]}'
     )
     assert payload is not None
-    assert payload["answerable"] is True
-    assert payload["citations"] == [1]
+    assert payload["answer"] == "Receipts within 45 days."
+    assert payload["evidence"][0]["passage_id"] == 1
     assert parse_grounded_reply("Employees must submit receipts within 45 days.") is None
 
 
@@ -420,3 +420,44 @@ def test_declared_citation_is_enough_when_the_answer_omits_the_marker():
     # declaration before calling it, so this test checks the shared helper's
     # inline path and the node-level promotion is covered by the pipeline test.
     assert verify_answer("Alcohol expenses are not reimbursable [4].", [candidate])[0]
+
+
+def _evidence_candidate():
+    from app.retrieval import Retrieved
+
+    return Retrieved(
+        chunk_id="c1", document_id="d1", title="Expenses", heading="Receipts",
+        content="Upload the receipt to Navan within 30 days of the purchase date.",
+        access_level="public", department=None, is_synthetic=False,
+        source_url=None, license="CC BY-SA 4.0", attribution="GitLab",
+        rrf_score=0.03, rerank_score=0.001, citation_id=1,
+    )
+
+
+def test_quote_verification_normalises_whitespace_and_case():
+    from app.pipeline import verify_evidence
+
+    result = verify_evidence(
+        "How do I submit a receipt?",
+        [{"passage_id": 1, "quote": "UPLOAD  THE RECEIPT to Navan within 30 days"}],
+        [_evidence_candidate()],
+    )
+    assert result["accepted"]
+    assert result["citations"][0]["quote"].startswith("UPLOAD")
+
+
+def test_unverified_quote_is_rejected_and_a_relevant_quote_is_needed():
+    from app.pipeline import verify_evidence
+
+    fake = verify_evidence(
+        "How do I submit a receipt?",
+        [{"passage_id": 1, "quote": "Receipts are optional and can be skipped"}],
+        [_evidence_candidate()],
+    )
+    assert not fake["accepted"]
+    unrelated = verify_evidence(
+        "What is the parental leave policy?",
+        [{"passage_id": 1, "quote": "Upload the receipt to Navan within 30 days"}],
+        [_evidence_candidate()],
+    )
+    assert not unrelated["accepted"]

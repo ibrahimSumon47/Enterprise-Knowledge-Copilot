@@ -35,6 +35,7 @@ class Citation(BaseModel):
     access_level: str
     is_synthetic: bool = False
     score: float
+    quote: str | None = None
 
 
 class RetrievalCandidate(BaseModel):

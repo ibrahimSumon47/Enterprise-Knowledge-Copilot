@@ -12,6 +12,7 @@ type Answer = {
   confidence?: string;
   refused?: boolean;
   citations: Citation[];
+  suggestions?: Citation[];
   provider?: string;
   latency_ms?: number;
   reason?: string;
@@ -183,10 +184,32 @@ export default function ChatPage() {
               {turn.result ? (
                 <div className="space-y-3">
                   {turn.result.refused ? (
-                    <p className="flex items-start gap-2 rounded-xl border border-[var(--border-strong)] px-3 py-2 text-sm text-[var(--text-muted)]">
-                      <ShieldAlert className="mt-0.5 shrink-0" size={15} />
-                      {turn.result.answer}
-                    </p>
+                    <div className="rounded-xl border border-[var(--border-strong)] px-3 py-3">
+                      <p className="flex items-start gap-2 text-sm text-[var(--text-muted)]">
+                        <ShieldAlert className="mt-0.5 shrink-0" size={15} />
+                        {turn.result.answer}
+                      </p>
+                      {turn.result.suggestions && turn.result.suggestions.length > 0 ? (
+                        <div className="mt-3 border-t border-[var(--border)] pt-3">
+                          <p className="text-xs text-[var(--text-muted)]">
+                            These documents may help:
+                          </p>
+                          <ul className="mt-2 space-y-1">
+                            {turn.result.suggestions.map((suggestion) => (
+                              <li key={suggestion.chunk_id} className="flex gap-2 text-sm">
+                                <Quote className="mt-1 shrink-0 text-[var(--accent)]" size={12} />
+                                <span>
+                                  {suggestion.title}
+                                  {suggestion.heading ? (
+                                    <span className="text-[var(--text-muted)]"> · {suggestion.heading}</span>
+                                  ) : null}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
                   ) : (
                     <div className="text-sm leading-7 whitespace-pre-wrap">{turn.result.answer}</div>
                   )}
@@ -200,17 +223,13 @@ export default function ChatPage() {
                             {citation.heading ? (
                               <span className="text-[var(--text-muted)]">· {citation.heading}</span>
                             ) : null}
-                            {citation.is_synthetic ? (
-                              <span className="chip mono text-[10px]">synthetic</span>
-                            ) : null}
                           </p>
                           <p className="mt-1 text-[12px] leading-6 text-[var(--text-muted)]">
                             {citation.snippet}
                           </p>
-                          <p className="mono mt-2 flex flex-wrap gap-3 text-[10px] text-[var(--text-muted)]">
-                            <span>{citation.access_level}</span>
+                          <p className="mt-2 flex flex-wrap gap-3 text-[11px] text-[var(--text-muted)]">
+                            <span className="capitalize">{citation.access_level}</span>
                             <span>{citation.license}</span>
-                            <span>score {citation.score.toFixed(3)}</span>
                             {citation.source_url ? (
                               <a
                                 className="underline decoration-dotted"
@@ -226,13 +245,6 @@ export default function ChatPage() {
                       ))}
                     </ul>
                   ) : null}
-                  <p className="mono flex flex-wrap gap-3 text-[10px] text-[var(--text-muted)]">
-                    <span>confidence {turn.result.confidence ?? "unknown"}</span>
-                    <span>provider {turn.result.provider ?? "none"}</span>
-                    {typeof turn.result.latency_ms === "number" ? (
-                      <span>{turn.result.latency_ms} ms</span>
-                    ) : null}
-                  </p>
                 </div>
               ) : null}
             </article>
@@ -276,18 +288,18 @@ export default function ChatPage() {
           <h2 className="text-sm font-semibold">How to read an answer</h2>
           <ul className="mt-3 space-y-3 text-[12px] leading-6 text-[var(--text-muted)]">
             <li>Every claim carries a marker that maps to one retrieved passage.</li>
-            <li>A refusal means the evidence was below the threshold, not that the app broke.</li>
+            <li>A refusal means the documents did not support an answer, not that the app broke.</li>
             <li>Department and confidential documents only appear for roles that may read them.</li>
-            <li>The audit log records the question, the role and the returned citations.</li>
+            <li>Open a source to read the passage and its licence.</li>
           </ul>
         </div>
         <div className="panel-2 p-4">
-          <p className="mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-            Free-tier note
+          <p className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
+            Response times
           </p>
           <p className="mt-2 text-[12px] leading-6 text-[var(--text-muted)]">
-            The API runs on a 512 MB instance that sleeps after 15 idle minutes. The first answer
-            after a quiet period can take a minute while it wakes.
+            After a quiet period the first answer can take a moment while the service warms up.
+            Answers usually arrive in a few seconds.
           </p>
         </div>
       </aside>

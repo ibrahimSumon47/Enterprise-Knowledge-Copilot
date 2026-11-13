@@ -1,243 +1,161 @@
-import {
-  ArrowRight,
-  FileCheck2,
-  GitBranch,
-  Lock,
-  ScanSearch,
-  ShieldCheck,
-  SquareTerminal,
-  Waypoints,
-} from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ACCESS_LEVELS, ROLE_LABEL, ROLES, site } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Role-aware answers with proof" };
+export const metadata: Metadata = {
+  title: "Answers your team can check",
+  description:
+    "Search company documents in one place. Every answer cites the passage it came from, and the copilot says so when the documents do not cover the question.",
+};
 
-const pipeline = [
+const benefits = [
   {
-    icon: Waypoints,
-    title: "Route",
-    body: "The question is classified: policy lookup, people question, security question or out of scope.",
+    title: "Every answer shows its source",
+    body: "Citations open the exact passage, with the document, section and licence. Reviewers can check a claim in seconds instead of searching for the paragraph themselves.",
   },
   {
-    icon: ScanSearch,
-    title: "Retrieve",
-    body: "Hybrid search over pgvector and Postgres full-text, fused with reciprocal rank fusion, filtered by the caller's role inside the query.",
+    title: "Access follows the person asking",
+    body: "Public, employee, department and confidential material is filtered in the database query. A finance question never surfaces a document the account may not read.",
   },
   {
-    icon: FileCheck2,
-    title: "Grade & answer",
-    body: "A cross-encoder reranks the candidates; the model may only use what survived the grade.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Verify or refuse",
-    body: "Every sentence is checked against the cited chunks. Weak evidence produces an honest “I don't know”.",
-  },
-];
-
-const features = [
-  {
-    title: "Answers with citations",
-    body: "Each claim links to the exact passage. Citation chips open the source drawer with the passage highlighted.",
-  },
-  {
-    title: "Honest refusals",
-    body: "Below the confidence threshold, or when a citation fails verification, the copilot refuses instead of guessing.",
-  },
-  {
-    title: "Access enforced in SQL",
-    body: "Role and department predicates live in the retrieval query and in Row Level Security policies — never applied after the fact.",
-  },
-  {
-    title: "Tamper-evident audit log",
-    body: "Every question, refusal, role and document id is hash-chained, so removing a row breaks the chain and the verify button says so.",
-  },
-  {
-    title: "Measured quality",
-    body: "A golden set of 80+ questions runs in CI: hit@k, MRR, citation precision, faithfulness, refusal accuracy, latency — with zero permission leakage as a hard gate.",
-  },
-  {
-    title: "Traceable cost",
-    body: "Latency, tokens and an estimated cost per answer, per provider, on a traces page.",
+    title: "Refusals point somewhere useful",
+    body: "When the evidence is thin, the copilot says it could not answer and offers the closest documents, then records the gap for an administrator to close.",
   },
 ];
 
 export default function Home() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4">
-      <section className="pt-16 pb-12 sm:pt-24">
-        <span className="chip chip-accent mono">role-aware retrieval · citations · refusals</span>
-        <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-          {site.tagline}
-        </h1>
-        <p className="mt-5 max-w-2xl text-[15px] leading-7 text-[var(--text-muted)]">
-          {site.description} Built on the public GitLab Handbook, plus a small set of clearly
-          labelled synthetic confidential documents that exist only to prove the access model.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link className="btn btn-primary" href="/chat">
-            Open the copilot <ArrowRight size={15} />
-          </Link>
-          <Link className="btn" href="/trust">
-            <Lock size={15} /> Security controls
-          </Link>
-          <a className="btn" href={site.repo} rel="noreferrer noopener" target="_blank">
-            <GitBranch size={15} /> Source
-          </a>
-        </div>
-        <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { k: "Documents", v: "handbook slice" },
-            { k: "Embeddings", v: "bge-small-en-v1.5" },
-            { k: "Reranker", v: "TinyBERT cross-encoder" },
-            { k: "Leakage gate", v: "0 allowed" },
-          ].map((item) => (
-            <div key={item.k} className="panel-2 px-4 py-3">
-              <dt className="mono text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
-                {item.k}
-              </dt>
-              <dd className="mt-1 text-sm">{item.v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <section aria-labelledby="pipeline" className="border-t border-[var(--border)] py-14">
-        <h2 id="pipeline" className="text-2xl font-semibold tracking-tight">
-          How an answer is produced
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm text-[var(--text-muted)]">
-          Five nodes, one graph. Refusing is a successful outcome, not an error.
-        </p>
-        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {pipeline.map((step, index) => (
-            <li key={step.title} className="panel p-5">
-              <div className="flex items-center gap-2">
-                <step.icon size={16} className="text-[var(--accent)]" />
-                <span className="mono text-[11px] text-[var(--text-muted)]">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <h3 className="mt-3 text-sm font-semibold">{step.title}</h3>
-              <p className="mt-2 text-[13px] leading-6 text-[var(--text-muted)]">{step.body}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section aria-labelledby="access" className="border-t border-[var(--border)] py-14">
-        <h2 id="access" className="text-2xl font-semibold tracking-tight">
-          How access control works
-        </h2>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-          <div className="panel overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <caption className="sr-only">Access levels visible to each role</caption>
-              <thead className="bg-[var(--panel-2)] text-[var(--text-muted)]">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-medium">Role</th>
-                  {ACCESS_LEVELS.map((level) => (
-                    <th scope="col" key={level} className="px-4 py-3 font-medium capitalize">
-                      {level}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ROLES.map((role) => (
-                  <tr key={role} className="border-t border-[var(--border)]">
-                    <th scope="row" className="px-4 py-3 font-normal">
-                      {ROLE_LABEL[role]}
-                    </th>
-                    {ACCESS_LEVELS.map((level) => {
-                      const allowed =
-                        role === "admin"
-                          ? true
-                          : role === "guest"
-                            ? level === "public"
-                            : level === "department"
-                              ? false
-                              : level !== "confidential";
-                      return (
-                        <td key={level} className="px-4 py-3">
-                          <span
-                            className={
-                              allowed
-                                ? "mono text-xs text-[var(--ok)]"
-                                : "mono text-xs text-[var(--text-muted)]"
-                            }
-                          >
-                            {allowed ? "allow" : "deny"}
-                          </span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <section className="grid gap-12 py-16 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-24">
+        <div>
+          <p className="mono text-xs uppercase tracking-[0.18em] text-[var(--accent)]">
+            Knowledge copilot
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold leading-[1.08] sm:text-5xl">
+            Answers your team can check.
+          </h1>
+          <p className="mt-5 max-w-xl text-[15px] leading-7 text-[var(--text-muted)]">
+            Enterprise Knowledge Copilot searches your handbook, policies and internal documents,
+            answers in plain language, and shows the passage behind every claim. If the documents do
+            not answer the question, it says so.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <form action="/api/sample-workspace" method="post">
+              <button className="btn btn-primary" type="submit">
+                Open sample workspace <ArrowRight size={15} />
+              </button>
+            </form>
+            <Link className="btn" href="/login">
+              Sign in
+            </Link>
           </div>
-          <div className="space-y-4">
-            <p className="text-sm leading-7 text-[var(--text-muted)]">
-              The predicate is part of the SQL that selects chunks, and the same rule is enforced by
-              Row Level Security for anything that talks to Postgres directly. A denied request
-              explains why it was denied without revealing the title of the document.
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            The sample workspace is read-only and needs no setup.
+          </p>
+        </div>
+
+        <div className="panel overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-3">
+            <p className="text-xs font-medium text-[var(--text-muted)]">Sample workspace</p>
+            <span className="chip text-[10px]">read only</span>
+          </div>
+          <div className="space-y-4 p-5">
+            <p className="w-fit max-w-[90%] rounded-lg bg-[var(--accent-soft)] px-3 py-2 text-sm">
+              How do I submit an expense receipt?
             </p>
-            <p className="text-sm leading-7 text-[var(--text-muted)]">
-              Department-scoped documents are visible to the matching department role and to
-              administrators. Confidential documents in this project are synthetic and labelled as
-              such in metadata and in the UI.
-            </p>
-            <div className="panel-2 p-4">
-              <p className="mono text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
-                CI gate
+            <div className="space-y-2 text-sm leading-7">
+              <p>
+                Submit receipts within 45 days of the purchase through the expense tool. Anything
+                above 25 USD needs an itemised receipt [1].
               </p>
-              <p className="mt-2 text-sm">
-                Cross-role leakage attempts — including paraphrases and prompt injection — must
-                return exactly <span className="mono text-[var(--accent)]">0</span> leaked passages,
-                or the build fails.
+              <p className="text-sm leading-7">
+                Managers approve expenses weekly; finance reviews anything flagged as out of policy
+                [2].
               </p>
+            </div>
+            <div className="space-y-2 border-t border-[var(--border)] pt-3">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+                Sources
+              </p>
+              {[
+                ["Expense policy", "Receipts and deadlines"],
+                ["Approval workflow", "Weekly review"],
+              ].map(([title, heading], index) => (
+                <div key={title} className="flex gap-2 text-xs">
+                  <span className="mono text-[var(--accent)]">[{index + 1}]</span>
+                  <span>
+                    {title} <span className="text-[var(--text-muted)]">· {heading}</span>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section aria-labelledby="features" className="border-t border-[var(--border)] py-14">
-        <h2 id="features" className="text-2xl font-semibold tracking-tight">
-          What is in the product
+      <section aria-labelledby="why" className="border-t border-[var(--border)] py-16">
+        <h2 id="why" className="max-w-2xl text-2xl font-semibold">
+          Built for the questions people ask between meetings.
         </h2>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <article key={feature.title} className="panel p-5">
-              <h3 className="text-sm font-semibold">{feature.title}</h3>
-              <p className="mt-2 text-[13px] leading-6 text-[var(--text-muted)]">{feature.body}</p>
+        <div className="mt-10 grid gap-10 md:grid-cols-3">
+          {benefits.map((benefit, index) => (
+            <article key={benefit.title}>
+              <p className="mono text-xs text-[var(--text-muted)]">0{index + 1}</p>
+              <h3 className="mt-3 text-base font-semibold">{benefit.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">{benefit.body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section aria-labelledby="reviewer" className="border-t border-[var(--border)] py-14">
-        <div className="panel flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
+      <section aria-labelledby="control" className="border-t border-[var(--border)] py-16">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr]">
           <div>
-            <h2 id="reviewer" className="text-lg font-semibold">
-              Reviewing this project?
+            <h2 id="control" className="text-2xl font-semibold">
+              The answer is only half of it.
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
-              Sign in with one of the role accounts from the sign-in page, ask the same question as
-              two different roles, and watch the answers diverge. The security page links every
-              control to the test that proves it.
+            <p className="mt-4 text-sm leading-7 text-[var(--text-muted)]">
+              Administrators see what people ask, where the documents fall short, and who has been
+              reading what. Questions that end in “I could not find this” become a queue of
+              knowledge gaps instead of a dead end.
+            </p>
+            <Link className="btn mt-6" href="/product">
+              See the product <ArrowRight size={15} />
+            </Link>
+          </div>
+          <ul className="space-y-3">
+            {[
+              "Usage by day and by workspace",
+              "Unanswered questions, ready to assign",
+              "Feedback on individual answers",
+              "Activity log with CSV export",
+            ].map((item) => (
+              <li
+                key={item}
+                className="flex items-center gap-3 border-b border-[var(--border)] pb-3 text-sm last:border-0"
+              >
+                <Check size={15} className="text-[var(--accent)]" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--border)] py-16">
+        <div className="panel flex flex-col gap-6 p-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">Try it with the sample documents.</h2>
+            <p className="mt-2 max-w-xl text-sm leading-7 text-[var(--text-muted)]">
+              A read-only workspace over a public handbook slice. Ask a question, open a citation,
+              then ask something the documents do not cover.
             </p>
           </div>
-          <div className="flex shrink-0 gap-3">
-            <Link className="btn btn-primary" href="/login">
-              <SquareTerminal size={15} /> Sign in
-            </Link>
-            <Link className="btn" href="/evals">
-              Evaluation results
-            </Link>
-          </div>
+          <form action="/api/sample-workspace" method="post" className="shrink-0">
+            <button className="btn btn-primary" type="submit">
+              Open sample workspace <ArrowRight size={15} />
+            </button>
+          </form>
         </div>
       </section>
     </div>

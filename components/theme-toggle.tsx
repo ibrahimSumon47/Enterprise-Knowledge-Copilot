@@ -13,11 +13,11 @@ function subscribe(onChange: () => void): () => void {
 }
 
 function snapshot(): Mode {
-  return document.documentElement.classList.contains("light") ? "light" : "dark";
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
 function serverSnapshot(): Mode {
-  return "dark";
+  return "light";
 }
 
 /**

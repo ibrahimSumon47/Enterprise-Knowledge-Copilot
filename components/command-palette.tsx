@@ -11,7 +11,7 @@ const THEME_EVENT = "ekc-theme-change";
 
 function toggleTheme() {
   const root = document.documentElement;
-  const next = root.classList.contains("light") ? "dark" : "light";
+  const next = root.classList.contains("dark") ? "light" : "dark";
   root.classList.toggle("light", next === "light");
   root.classList.toggle("dark", next === "dark");
   try {
@@ -82,9 +82,7 @@ export function CommandPalette() {
     const navigation: Item[] = [
       { id: "home", label: "Home", hint: "landing page", run: go("/") },
       { id: "chat", label: "Chat", hint: "ask the handbook", run: go("/chat") },
-      { id: "evals", label: "Evaluations", hint: "quality report", run: go("/evals") },
-      { id: "trust", label: "Trust", hint: "security controls", run: go("/trust") },
-      { id: "credits", label: "Credits", hint: "licences", run: go("/credits") },
+      { id: "library", label: "Library", hint: "documents", run: go("/library") },
       {
         id: "theme",
         label: "Toggle theme",
@@ -99,7 +97,7 @@ export function CommandPalette() {
       role === "admin"
         ? [
             { id: "admin", label: "Admin", hint: "ingestion, audit, documents", run: go("/admin") },
-            { id: "traces", label: "Traces", hint: "latency, provider, refusal reasons", run: go("/traces") },
+            { id: "quality", label: "Quality", hint: "answer quality and performance", run: go("/admin/quality") },
           ]
         : [];
     const recents: Item[] = recent.map((question) => ({

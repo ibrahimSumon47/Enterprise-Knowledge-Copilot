@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 /** Applies the stored theme before paint so the shell never flashes light. */
-const themeBootstrap = `(function(){try{var t=localStorage.getItem("ekc-theme");var d=t? t==="dark" : !window.matchMedia("(prefers-color-scheme: light)").matches;document.documentElement.classList.add(d?"dark":"light");}catch(e){document.documentElement.classList.add("dark");}})();`;
+const themeBootstrap = `(function(){try{var t=localStorage.getItem("ekc-theme");document.documentElement.classList.add(t==="dark"?"dark":"light");}catch(e){document.documentElement.classList.add("light");}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

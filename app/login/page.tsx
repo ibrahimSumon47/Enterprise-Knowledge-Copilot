@@ -1,9 +1,8 @@
 "use client";
 
-import { KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useSyncExternalStore } from "react";
-import { ROLES, ROLE_LABEL } from "@/lib/site";
+import { useState, useSyncExternalStore } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 /** Hydration marker: false in SSR HTML, true once React is running. */
@@ -19,13 +18,11 @@ function safeNext(value: string | null) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const emailRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // The form is inert until React has hydrated. Without this, a browser that
   // autofills and submits before the bundle runs performs a native GET submit,
-  // which reloads /login and puts the password in the URL. That was the
-  // "sign-in keeps bouncing back to /login" report.
+  // which reloads /login and puts the password in the URL.
   const ready = useSyncExternalStore(subscribeToHydration, hydrated, serverSnapshot);
 
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
@@ -44,11 +41,15 @@ export default function LoginPage() {
         password,
       });
       if (authError) {
-        setError(authError.message);
+        setError(
+          authError.message === "Invalid login credentials"
+            ? "That email and password do not match an account."
+            : authError.message,
+        );
         return;
       }
       if (!data.session) {
-        setError("This account is not confirmed yet. Ask an administrator to confirm it.");
+        setError("This account has not been confirmed yet. Ask an administrator to confirm it.");
         return;
       }
       router.replace(safeNext(new URLSearchParams(window.location.search).get("next")));
@@ -61,94 +62,74 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-14">
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.05fr]">
-        <section>
-          <span className="chip chip-accent mono">demo access</span>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight">Sign in as a role</h1>
-          <p className="mt-3 max-w-md text-sm leading-7 text-[var(--text-muted)]">
-            Every role sees a different slice of the corpus. Sign in as an employee, ask a question,
-            then sign in as an administrator and ask it again — the answers should diverge, and the
-            documents behind them should too.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {ROLES.map((role) => (
-              <button
-                key={role}
-                className="chip mono"
-                onClick={() => {
-                  if (emailRef.current) emailRef.current.value = `${role}@ekc.local`;
-                }}
-                type="button"
-              >
-                {ROLE_LABEL[role]}
-              </button>
-            ))}
-          </div>
-          <p className="mt-4 text-xs leading-6 text-[var(--text-muted)]">
-            The password for the seven demo accounts is held by the project owner and is not stored
-            in this repository.
-          </p>
-        </section>
+    <div className="mx-auto w-full max-w-md px-4 py-20">
+      <h1 className="text-2xl font-semibold">Sign in</h1>
+      <p className="mt-2 text-sm leading-7 text-[var(--text-muted)]">
+        Use the email address your workspace administrator issued.
+      </p>
 
-        <form
-          className="panel p-6"
-          data-auth-version="3"
-          data-ready={ready ? "true" : "false"}
-          method="post"
-          onSubmit={signIn}
-        >
-          <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <KeyRound size={15} className="text-[var(--accent)]" /> Email and password
-          </h2>
-          <label className="mt-5 block text-xs text-[var(--text-muted)]" htmlFor="email">
-            Email
-          </label>
-          <input
-            autoComplete="username"
-            className="input mt-1"
-            defaultValue="employee@ekc.local"
-            id="email"
-            name="email"
-            ref={emailRef}
-            required
-            type="email"
-          />
-          <label className="mt-4 block text-xs text-[var(--text-muted)]" htmlFor="password">
-            Password
-          </label>
-          <input
-            autoComplete="current-password"
-            className="input mt-1"
-            id="password"
-            name="password"
-            required
-            type="password"
-          />
-          {error ? (
-            <p className="mt-4 rounded-lg border border-[var(--danger)] px-3 py-2 text-xs text-[var(--danger)]">
-              {error}
-            </p>
-          ) : null}
-          <button
-            className="btn btn-primary mt-5 w-full justify-center"
-            disabled={busy || !ready}
-            type="submit"
+      <form
+        className="panel mt-6 p-6"
+        data-auth-version="3"
+        data-ready={ready ? "true" : "false"}
+        method="post"
+        onSubmit={signIn}
+      >
+        <label className="block text-xs text-[var(--text-muted)]" htmlFor="email">
+          Email
+        </label>
+        <input
+          autoComplete="username"
+          className="input mt-1"
+          id="email"
+          name="email"
+          placeholder="you@company.com"
+          required
+          type="email"
+        />
+        <label className="mt-4 block text-xs text-[var(--text-muted)]" htmlFor="password">
+          Password
+        </label>
+        <input
+          autoComplete="current-password"
+          className="input mt-1"
+          id="password"
+          name="password"
+          required
+          type="password"
+        />
+        {error ? (
+          <p
+            className="mt-4 rounded-lg border border-[var(--danger)] px-3 py-2 text-xs text-[var(--danger)]"
+            role="alert"
           >
-            {busy ? <Loader2 className="animate-spin" size={15} /> : <ShieldCheck size={15} />}
-            {busy ? "Signing in" : "Sign in"}
-          </button>
-          <noscript>
-            <p className="mt-4 text-xs leading-5 text-[var(--danger)]">
-              Sign-in needs JavaScript. Enable it and reload this page.
-            </p>
-          </noscript>
-          <p className="mt-4 text-[11px] leading-5 text-[var(--text-muted)]">
-            Sessions are issued by Supabase Auth. The browser only ever holds the anon key; the
-            service-role key stays on the API.
+            {error}
           </p>
-        </form>
-      </div>
+        ) : null}
+        <button
+          className="btn btn-primary mt-5 w-full justify-center"
+          disabled={busy || !ready}
+          type="submit"
+        >
+          {busy ? <Loader2 className="animate-spin" size={15} /> : null}
+          {busy ? "Signing in" : "Sign in"}
+        </button>
+        <noscript>
+          <p className="mt-4 text-xs leading-5 text-[var(--danger)]">
+            Sign-in needs JavaScript. Enable it and reload this page.
+          </p>
+        </noscript>
+      </form>
+
+      <p className="mt-5 text-xs leading-6 text-[var(--text-muted)]">
+        No account yet? Ask an administrator to invite you, or open the sample workspace from the
+        home page.
+      </p>
+      <form action="/api/sample-workspace" className="mt-3" method="post">
+        <button className="text-xs underline decoration-dotted" type="submit">
+          Open the sample workspace without an account
+        </button>
+      </form>
     </div>
   );
 }

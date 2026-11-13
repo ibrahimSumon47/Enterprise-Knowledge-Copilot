@@ -1,9 +1,9 @@
 "use client";
 
-import { Database, Loader2, RefreshCw, ShieldCheck, TriangleAlert } from "lucide-react";
+import { BarChart3, Database, Loader2, RefreshCw, ShieldCheck, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
-import { isStaleCheckpoint } from "@/lib/audit";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 type Job = {
@@ -50,28 +50,6 @@ type DocumentRow = {
   is_synthetic?: boolean;
 };
 
-function isoClock(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-function isoAge(value?: string | null) {
-  if (!value) return null;
-  const elapsed = Date.now() - new Date(value).getTime();
-  if (!Number.isFinite(elapsed)) return null;
-  const minutes = Math.max(0, Math.floor(elapsed / 60_000));
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes} min ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h ago`;
-  return `${Math.floor(hours / 24)} d ago`;
-}
 
 const LEVELS = ["public", "employee", "department", "confidential"];
 const DEPARTMENTS = ["engineering", "security", "people", "finance"];
@@ -87,8 +65,6 @@ export default function AdminPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
-  const [fullPass, setFullPass] = useState(false);
-  const checkpointStale = chain ? isStaleCheckpoint(chain.checkpoint_at) : false;
 
   useEffect(() => {
     const supabase = supabaseBrowser();
@@ -193,8 +169,8 @@ export default function AdminPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-16">
         <h1 className="text-2xl font-semibold">Administrators only</h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
-          This account has the <span className="mono">{role}</span> role. Sign in as{" "}
-          <span className="mono">admin@ekc.local</span> to manage ingestion and read the audit log.
+          This account has the <span className="mono">{role}</span> role. Ask a workspace
+          administrator for access to documents and the activity log.
         </p>
       </div>
     );
@@ -206,10 +182,13 @@ export default function AdminPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Operations</h1>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Corpus ingestion, audit trail and chain verification.
+            Documents, people and the activity log for this workspace.
           </p>
         </div>
         <div className="flex gap-2">
+          <Link className="btn" href="/admin/quality">
+            <BarChart3 size={14} /> Quality
+          </Link>
           <button className="btn" onClick={refresh} type="button">
             {busy ? <Loader2 className="animate-spin" size={14} /> : <RefreshCw size={14} />} Refresh
           </button>
@@ -287,69 +266,26 @@ export default function AdminPage() {
       <section className="panel overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-sm font-semibold">Audit trail</h2>
+            <h2 className="text-sm font-semibold">Activity log</h2>
             {chain ? (
               <span
-                title={
-                  (chain.mode === "incremental"
-                    ? `Resumed from checkpoint #${chain.checkpoint_id ?? "?"}; ${chain.verified_now ?? 0} new rows hashed this run.`
-                    : `Re-hashed the whole log from genesis; ${chain.verified_now ?? chain.entries} rows hashed this run.`) +
-                  (checkpointStale
-                    ? " The checkpoint has not advanced in over six hours; a full pass re-checks the whole log."
-                    : "")
-                }
+                title="The activity log is append-only and hash-chained; this check recomputes it."
                 className={`mono flex items-center gap-1 text-[11px] ${
                   chain.intact ? "text-[var(--ok)]" : "text-[var(--danger)]"
                 }`}
               >
                 <ShieldCheck size={13} />
-                {chain.intact ? (
-                  <>
-                    {`chain ok · ${chain.entries} entries · ${
-                      chain.mode === "incremental"
-                        ? `checkpoint #${chain.checkpoint_id ?? "?"} (+${chain.verified_now ?? 0})`
-                        : "full pass"
-                    }${chain.complete === false ? " · partial log" : ""}${
-                      chain.anchored_at_genesis === false ? " · prefix missing" : ""
-                    }`}
-                    {checkpointStale ? (
-                      <>
-                        <span className="text-[var(--warn)]"> · </span>
-                        <button
-                          className="text-[var(--warn)] underline decoration-dotted underline-offset-2 disabled:opacity-60"
-                          disabled={verifying || !token}
-                          onClick={() => void verifyChain(true)}
-                          title="Re-hash the whole log from genesis now"
-                          type="button"
-                        >
-                          checkpoint stale
-                        </button>
-                      </>
-                    ) : null}
-                  </>
-                ) : (
-                  `chain broken · ${chain.broken_ids.length} entries`
-                )}
+                {chain.intact
+                  ? `activity log intact · ${chain.entries} entries`
+                  : `activity log altered · ${chain.broken_ids.length} entries`}
               </span>
             ) : null}
           </div>
           <div className="flex items-center gap-3">
-            <label
-              className="mono flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]"
-              title="Re-hash the whole log from genesis instead of resuming from the checkpoint"
-            >
-              <input
-                checked={fullPass}
-                className="accent-[var(--accent)]"
-                onChange={(event) => setFullPass(event.target.checked)}
-                type="checkbox"
-              />
-              full pass
-            </label>
             <button
               className="btn"
               disabled={verifying || !token}
-              onClick={() => void verifyChain(fullPass)}
+              onClick={() => void verifyChain(false)}
               type="button"
             >
               {verifying ? (
@@ -357,18 +293,10 @@ export default function AdminPage() {
               ) : (
                 <ShieldCheck size={14} />
               )}
-              {verifying ? "Verifying…" : "Re-verify"}
+              {verifying ? "Checking…" : "Check log"}
             </button>
           </div>
         </div>
-        {chain ? (
-          <p className="mono border-b border-[var(--border)] px-4 py-2 text-[10px] text-[var(--text-muted)]">
-            last verified {isoClock(chain.verified_at) ?? "—"} · checkpoint{" "}
-            {chain.checkpoint_id
-              ? `#${chain.checkpoint_id} advanced ${isoAge(chain.checkpoint_at) ?? "—"}`
-              : "not created yet"}
-          </p>
-        ) : null}
         <table className="w-full text-left text-sm">
           <thead className="bg-[var(--panel-2)] text-[var(--text-muted)]">
             <tr>

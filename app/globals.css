@@ -1,39 +1,40 @@
 @import "tailwindcss";
 
-/* Command-center design tokens. Dark is the default; .light flips the scale. */
+/* Document-first design tokens. Light is the default; .dark flips the scale. */
 :root {
-  --bg: #080c11;
-  --bg-soft: #0b1118;
-  --panel: #0f1620;
-  --panel-2: #131c28;
-  --border: #1d2836;
-  --border-strong: #2a3949;
-  --text: #e7eef5;
-  --text-muted: #8ea1b6;
-  --accent: #14b8a6;
-  --accent-strong: #0f766e;
-  --accent-soft: rgba(20, 184, 166, 0.14);
-  --warn: #f59e0b;
-  --danger: #f87171;
-  --ok: #34d399;
-  --grid: rgba(148, 163, 184, 0.07);
-  color-scheme: dark;
+  --bg: #f7f8f7;
+  --bg-soft: #eef0ee;
+  --panel: #ffffff;
+  --panel-2: #f4f6f4;
+  --border: #e0e4e0;
+  --border-strong: #c8cec8;
+  --text: #17201b;
+  --text-muted: #5b6b61;
+  --accent: #0f766e;
+  --accent-strong: #0b5f58;
+  --accent-soft: rgba(15, 118, 110, 0.1);
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --ok: #15803d;
+  color-scheme: light;
 }
 
-.light {
-  --bg: #f6f8fb;
-  --bg-soft: #eef2f7;
-  --panel: #ffffff;
-  --panel-2: #f8fafc;
-  --border: #dbe3ec;
-  --border-strong: #c3cedb;
-  --text: #0b1220;
-  --text-muted: #55677d;
-  --accent: #0f766e;
-  --accent-strong: #115e59;
-  --accent-soft: rgba(15, 118, 110, 0.1);
-  --grid: rgba(15, 23, 42, 0.05);
-  color-scheme: light;
+.dark {
+  --bg: #0e1412;
+  --bg-soft: #121a17;
+  --panel: #141d19;
+  --panel-2: #19241f;
+  --border: #26332c;
+  --border-strong: #35463c;
+  --text: #e8efe9;
+  --text-muted: #9aab9f;
+  --accent: #2dd4bf;
+  --accent-strong: #14b8a6;
+  --accent-soft: rgba(45, 212, 191, 0.12);
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --ok: #4ade80;
+  color-scheme: dark;
 }
 
 * {
@@ -48,18 +49,21 @@ body {
 
 body {
   background-color: var(--bg);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 32px 32px;
   color: var(--text);
   font-family: var(--font-sans), ui-sans-serif, system-ui, "Noto Sans Bengali", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
 .mono {
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -80,7 +84,7 @@ a {
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .panel-2 {

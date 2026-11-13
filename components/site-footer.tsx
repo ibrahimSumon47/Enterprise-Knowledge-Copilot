@@ -1,37 +1,27 @@
 import Link from "next/link";
-import { site } from "@/lib/site";
+
+const links = [
+  { href: "/product", label: "Product" },
+  { href: "/security", label: "Security" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/contact", label: "Contact" },
+];
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-[var(--border)]">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          Portfolio project built on public documents. Source documents are GitLab&apos;s, licensed{" "}
-          <a
-            className="underline decoration-dotted hover:text-[var(--text)]"
-            href={site.handbook.licenseUrl}
-            rel="noreferrer noopener"
-            target="_blank"
-          >
-            {site.handbook.license}
-          </a>
-          .
-        </p>
-        <nav aria-label="Footer" className="flex items-center gap-4">
-          <Link className="hover:text-[var(--text)]" href="/credits">
-            Credits
+    <footer className="mt-20 border-t border-[var(--border)] bg-[var(--bg-soft)]">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} Enterprise Knowledge Copilot</p>
+        <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          {links.map((link) => (
+            <Link key={link.href} className="hover:text-[var(--text)]" href={link.href}>
+              {link.label}
+            </Link>
+          ))}
+          <Link className="text-xs hover:text-[var(--text)]" href="/licenses">
+            Licenses and sources
           </Link>
-          <Link className="hover:text-[var(--text)]" href="/trust">
-            Security
-          </Link>
-          <a
-            className="hover:text-[var(--text)]"
-            href={site.repo}
-            rel="noreferrer noopener"
-            target="_blank"
-          >
-            Repository
-          </a>
         </nav>
       </div>
     </footer>

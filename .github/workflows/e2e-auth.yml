@@ -14,7 +14,8 @@ concurrency:
 
 jobs:
   sign-in:
-    runs-on: ubuntu-latest
+    # Playwright 1.56 does not ship a Chromium build for ubuntu-26.04 yet.
+    runs-on: ubuntu-24.04
     env:
       EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
     steps:

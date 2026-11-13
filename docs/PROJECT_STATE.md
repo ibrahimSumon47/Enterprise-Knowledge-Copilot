@@ -34,14 +34,14 @@
 
 ## Answer quality
 
-Test split, `--cache-tag product-v4`: retrieval hit@5 1.0,
+Test split, `--cache-tag product-v5`: retrieval hit@5 1.0,
 recall@50 1.0, MRR 0.907; citation
-precision 0.353; refusal accuracy 0.676;
-p50/p95 4259/5646 ms; leakage 0. All 6
-unanswerable questions were refused. 11 of 28 answerable questions were refused,
-all on Gemini, with the gold passage at rank 1 — a citation-verification failure,
-not retrieval. The gate now accepts any marker naming a retrieved passage; the
-numbers above predate that change.
+precision 0.294; wrong refusals 13 of
+21; unanswerable refused 13 of
+13; p50/p95 4278/7353 ms;
+leakage 0. All wrong refusals are Gemini replies that judge present evidence
+insufficient; Groq answers pass. Retrieval is perfect on the split, so the next
+change is provider routing and answerability prompting, not search.
 
 ## Known limits
 

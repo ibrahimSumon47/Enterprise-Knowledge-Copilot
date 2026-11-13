@@ -96,3 +96,26 @@ reports `wrong_refusals`, `unanswerable_refused`, `answerable_questions` and
 `unanswerable_questions`. `check-done` reads both split files and prints their
 counts instead of carrying a number in the script.
 
+## Slice 2: the wrong refusals were provider-side answerability
+
+Reproduced ten of the eleven with the new admin debug fields (the eleventh,
+m12, answered on Gemini). Two causes, both visible in the raw reply:
+
+| id | provider | raw reply | outcome |
+| --- | --- | --- | --- |
+| a23 | gemini (pre-fix) / groq (repro) | `{"answerable": true, "answer": "Alcohol expenses are not reimbursable.", "citations": [4]}` | refused: no inline marker |
+| a24, a27, a29, a30, b08, m08, m09 | gemini (pre-fix) | declared citations, no inline marker | refused: marker mismatch |
+| a28, b11 | gemini | `{"answerable": false, ...}` | model judged present evidence insufficient |
+
+The marker cases are fixed: a declaration is promoted to the citation set when
+every id names a retrieved passage, and the parser accepts fenced or trailing
+text with one retry. The answerability cases remain: Gemini returns false while
+the gold passage is at rank 1, so the refusal is the model's judgement, not
+retrieval, permissions or parsing. `provider_trace` records which providers were
+tried and why they failed; in the reproduction it was empty because Groq answered.
+
+The test run after these fixes (21 answerable, 13 unanswerable) still misses the
+target: 13 wrong refusals, all Gemini answerability refusals, 13/13 unanswerable
+refused, leakage 0, p95 7.4 s. The push budget ended before the prompt/routing
+change could be measured, so it is recorded as the next step rather than claimed.
+

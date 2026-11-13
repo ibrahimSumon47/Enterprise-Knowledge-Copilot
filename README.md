@@ -48,31 +48,30 @@ A post-filter would be a bug.
 
 ## Answer quality, measured on the held-out test split
 
-`eval/run_eval.py --split test --cache-tag product-v4`, 34 questions (28 answerable,
-6 unanswerable); report: `docs/reports/eval_test.json`.
+`eval/run_eval.py --split test --cache-tag product-v5`, 34 questions (21 answerable,
+13 unanswerable); report: `docs/reports/eval_test.json`.
 
 | Metric | Value |
 | --- | --- |
 | retrieval hit@5 | 1.0 |
 | retrieval recall@50 | 1.0 |
 | retrieval MRR | 0.907 |
-| citation precision | 0.353 |
-| refusal accuracy | 0.676 |
-| p50 / p95 latency | 4259 / 5646 ms |
+| citation precision | 0.294 |
+| refusal accuracy | 0.618 |
+| wrong refusals | 13 of 21 |
+| unanswerable refused | 13 of 13 |
+| p50 / p95 latency | 4278 / 7353 ms |
 | Permission leakage | **0** (hard gate) |
 
-Targets: at most 3 wrong refusals of the answerable questions and 90% of
-unanswerable refused. Retrieval met its part (hit@5 1.0, recall@50 1.0,
-MRR 0.907), all 6 unanswerable questions were refused and leakage stayed 0, so the
-retrieval and the refusal gate are sound. The target was still missed: 11 of 28
-answerable questions were refused, every one of them on a Gemini answer (Groq
-answers all passed). The measured cause is citation verification, not retrieval:
-the cited passage was at rank 1 in every one of those questions. The verification
-gate now accepts any marker that names a retrieved passage, with or without the
-JSON declaration, which is the format difference Gemini showed. That change was
-made after this measurement, so the numbers above are the pre-change run.
+Retrieval is not the limit: the gold document is in the top five every time and
+within the top fifty for every question. All 13 unanswerable questions were
+refused, leakage stayed 0, and p95 stayed under ten seconds. The wrong-refusal
+target was missed: Gemini answers "the sources are insufficient" on 13 of 21
+answerable questions where the gold passage is present, while Groq answers pass
+verification. The measured cause is the model's answerability judgement on the
+backup provider, not retrieval, citation parsing or permissions.
 
-## Security controls## Security controls
+## Security controls## Security controls## Security controls
 
 Client-facing summary: `/security`. Engineering evidence lives here and in
 `docs/reports/security.md`.

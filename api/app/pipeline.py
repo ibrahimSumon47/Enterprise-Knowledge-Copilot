@@ -258,11 +258,19 @@ def quote_matches(quote: str, passage: str) -> bool:
     passage_tokens = passage_norm.split()
     window = max(len(quote_tokens) + 2, int(len(quote_tokens) * 1.4))
     for start in range(0, max(1, len(passage_tokens) - window + 1)):
-        matched = 0
-        for token in passage_tokens[start : start + window]:
-            if matched < len(quote_tokens) and token == quote_tokens[matched]:
-                matched += 1
-        if matched >= needed:
+        chunk = passage_tokens[start : start + window]
+        # Longest common subsequence: order matters, a missing or inserted word
+        # does not break the rest of the quote.
+        previous = [0] * (len(chunk) + 1)
+        for token in quote_tokens:
+            current = [0]
+            for index, other in enumerate(chunk, start=1):
+                if token == other:
+                    current.append(previous[index - 1] + 1)
+                else:
+                    current.append(max(previous[index], current[-1]))
+            previous = current
+        if previous[-1] >= needed:
             return True
     return False
 

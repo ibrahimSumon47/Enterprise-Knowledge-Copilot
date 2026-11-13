@@ -18,6 +18,7 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -102,6 +103,28 @@ def ask(args, item: dict, token: str) -> dict:
         return {"answer": "", "citations": [], "refused": True, "latency_ms": 0, "error": str(exc)}
 
 
+def retrieval_rank(args, question: str, role: str, token: str, keywords: list[str]) -> int | None:
+    """Rank of the first gold document in the unscored retrieval list.
+
+    `all_candidates=true` returns the hybrid list before dedup and thresholds, so
+    this is a property of retrieval, not of what the model chose to cite.
+    """
+    query = urllib.parse.quote(question)
+    body = http_json(
+        f"{args.api_url.rstrip('/')}/admin/retrieval?question={query}&role={role}&all_candidates=true",
+        "GET",
+        None,
+        {"Authorization": f"Bearer {token}"},
+    )
+    for index, candidate in enumerate(body.get("candidates") or [], start=1):
+        haystack = " ".join(
+            str(candidate.get(key, "")) for key in ("title", "heading", "snippet")
+        ).lower()
+        if any(keyword.lower() in haystack for keyword in keywords):
+            return index
+    return None
+
+
 def sign_in(supabase_url: str, anon_key: str, email: str, password: str) -> str:
     body = http_json(
         f"{supabase_url.rstrip('/')}/auth/v1/token?grant_type=password",
@@ -163,7 +186,7 @@ def write_report(metrics: dict, mode: str) -> None:
     )
     excluded = metrics["summary"].get("excluded_no_model", 0)
     provider_rows = "\n".join(
-        f"| {name} | {row['questions']} | {row['hit@k']} | {row['citation_precision']} | "
+        f"| {name} | {row['questions']} | {row['citation_hit@k']} | {row['citation_precision']} | "
         f"{row['refusal_accuracy']} | {row['p50_latency_ms']} | {row['p95_latency_ms']} |"
         for name, row in (metrics.get("by_provider") or {}).items()
     )
@@ -268,6 +291,7 @@ def main() -> int:
         cache_path.write_text(json.dumps(cache, indent=2) + "\n", encoding="utf-8")
 
     tokens: dict[str, str] = {}
+    admin_token: str | None = None
     results: list[dict] = []
     leaks = 0
 
@@ -298,6 +322,14 @@ def main() -> int:
             save_cache()
 
         scored = score(item, response)
+        if item.get("expect", {}).get("answerable") and item.get("expect", {}).get("keywords"):
+            if admin_token is None:
+                admin_token = sign_in(
+                    args.supabase_url, args.anon_key, ROLE_EMAILS["admin"], args.password
+                )
+            scored["retrieval_rank"] = retrieval_rank(
+                args, item["question"], role, admin_token, item["expect"]["keywords"]
+            )
         leaks += scored["leaks"]
         results.append(
             {
@@ -325,9 +357,18 @@ def main() -> int:
     latencies = sorted(result["latency_ms"] for result in scored)
     answered = [r for r in scored if r["category"] != "unanswerable"]
     leaked = sum(result["leaks"] for result in scored)
+    retried = [r for r in answered if r.get("retrieval_rank") is not None]
     summary = {
-        "hit@k": round(sum(r["hit"] for r in answered) / max(1, len(answered)), 3),
-        "MRR": round(sum(r["rr"] for r in answered) / max(1, len(answered)), 3),
+        "hit@5_retrieval": round(
+            sum(1 for r in retried if (r.get("retrieval_rank") or 10**9) <= 5) / max(1, len(retried)), 3
+        ),
+        "recall@50_retrieval": round(
+            sum(1 for r in retried if (r.get("retrieval_rank") or 10**9) <= 50) / max(1, len(retried)), 3
+        ),
+        "MRR_retrieval": round(
+            sum(1.0 / r["retrieval_rank"] for r in retried if r.get("retrieval_rank")) / max(1, len(retried)), 3
+        ),
+        "citation_hit@k": round(sum(r["hit"] for r in answered) / max(1, len(answered)), 3),
         "citation_precision": round(sum(r["precision"] for r in scored) / len(scored), 3),
         "faithfulness": round(sum(r["faithful"] for r in scored) / len(scored), 3),
         "refusal_accuracy": round(sum(r["refusal_ok"] for r in scored) / len(scored), 3),
@@ -344,7 +385,7 @@ def main() -> int:
         provider_latencies = sorted(r["latency_ms"] for r in rows)
         by_provider[name] = {
             "questions": len(rows),
-            "hit@k": round(
+            "citation_hit@k": round(
                 sum(r["hit"] for r in answerable_rows) / max(1, len(answerable_rows)), 3
             ),
             "citation_precision": round(sum(r["precision"] for r in rows) / len(rows), 3),

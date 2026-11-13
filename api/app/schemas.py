@@ -37,6 +37,17 @@ class Citation(BaseModel):
     score: float
 
 
+class RetrievalCandidate(BaseModel):
+    id: int
+    document_id: str
+    chunk_id: str
+    title: str
+    heading: str | None = None
+    rerank_score: float
+    rrf_score: float
+    reranked: bool = True
+
+
 class ChatResponse(BaseModel):
     conversation_id: str
     message_id: str | None = None
@@ -53,7 +64,10 @@ class ChatResponse(BaseModel):
     # True when no language model answered at all (outage or quota). Clients can
     # say "try again shortly" instead of implying the handbook has no answer.
     outage: bool = False
+    unavailable: bool = False
     cached: bool = False
+    # Admin-only debug field: retrieval order and scores for this question.
+    retrieval: list[RetrievalCandidate] | None = None
 
 
 class FeedbackRequest(BaseModel):

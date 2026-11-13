@@ -243,7 +243,9 @@ async def chat(
         },
     )
 
-    outage = bool(result.reason and result.reason.startswith("no language model available"))
+    outage = result.unavailable or bool(
+        result.reason and result.reason.startswith("no language model available")
+    )
     if result.refused and not outage:
         try:
             await db.record_unanswered(
@@ -268,6 +270,8 @@ async def chat(
         tokens=result.tokens,
         provider=result.provider,
         outage=outage,
+        unavailable=result.unavailable,
+        retrieval=result.retrieval if user.role == "admin" else None,
     )
 
 

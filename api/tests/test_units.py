@@ -347,3 +347,12 @@ def test_low_scores_still_reach_the_model_when_the_grader_is_off():
     assert route_after_grade(True, "low", grader_enabled=True) == "grade"
     assert route_after_grade(True, "medium", grader_enabled=True) == "answer"
     assert route_after_grade(False, "low", grader_enabled=False) == "refuse"
+
+
+def test_admin_debug_field_defaults_to_hidden():
+    """The retrieval debug list is opt-in per response, and defaults to absent."""
+    from app.schemas import ChatResponse
+
+    fields = ChatResponse.model_fields
+    assert fields["retrieval"].default is None
+    assert fields["unavailable"].default is False

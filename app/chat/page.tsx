@@ -237,6 +237,11 @@ export default function ChatPage() {
                             ) : null}
                           </p>
                           <p className="mt-1 text-[12px] leading-6 text-[var(--text-muted)]">
+                            {citation.quote ? (
+                              <span className="mb-1 block font-medium text-[var(--text)]">
+                                “{citation.quote}”
+                              </span>
+                            ) : null}
                             {citation.snippet}
                           </p>
                           <p className="mt-2 flex flex-wrap gap-3 text-[11px] text-[var(--text-muted)]">

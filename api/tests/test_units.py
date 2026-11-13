@@ -461,3 +461,24 @@ def test_unverified_quote_is_rejected_and_a_relevant_quote_is_needed():
         [_evidence_candidate()],
     )
     assert not unrelated["accepted"]
+
+
+def test_quote_matching_handles_ellipsis_truncation_and_light_paraphrase():
+    from app.pipeline import quote_matches
+
+    passage = (
+        "Upload the receipt to Navan within 30 days of the purchase date. "
+        "Receipts older than 90 days are not reimbursed without manager approval."
+    )
+    assert quote_matches("Upload the receipt to Navan within 30 days", passage)
+    assert quote_matches("Upload ... 90 days are not reimbursed", passage)
+    assert quote_matches("Upload the receipt to the Navan portal within 30 days", passage)
+    assert quote_matches("**Upload** the receipt to Navan within 30 days!", passage)
+
+
+def test_fabricated_quote_does_not_match():
+    from app.pipeline import quote_matches
+
+    passage = "Upload the receipt to Navan within 30 days of the purchase date."
+    assert not quote_matches("Receipts are optional and never required", passage)
+    assert not quote_matches("Submit invoices through the payroll portal instead", passage)

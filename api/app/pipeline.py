@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 import time
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
@@ -227,6 +229,44 @@ def verify_answer(
     return True, "ok"
 
 
+def _normalise_quote(text: str) -> str:
+    """Case, punctuation, markdown and whitespace are not evidence differences."""
+    text = unicodedata.normalize("NFKC", str(text or "")).lower()
+    text = re.sub(r"[`*_#>\[\]()]", " ", text)
+    text = re.sub(r"[^\w\s]", " ", text)
+    return " ".join(text.split())
+
+
+def quote_matches(quote: str, passage: str) -> bool:
+    """A quote verifies when it is the passage, not a paraphrase of somewhere else.
+
+    Ellipses split a quote into fragments; every fragment of four or more words
+    must appear in the passage. A quote without such fragments must have at least
+    80% of its tokens appear in order inside one window of the passage, which
+    tolerates a missing word or a different tense.
+    """
+    raw_fragments = [part for part in re.split(r"\.{2,}|…", str(quote or "")) if part.strip()]
+    passage_norm = _normalise_quote(passage)
+    fragments = [_normalise_quote(fragment) for fragment in raw_fragments]
+    long_fragments = [fragment for fragment in fragments if len(fragment.split()) >= 4]
+    if long_fragments and all(fragment in passage_norm for fragment in long_fragments):
+        return True
+    quote_tokens = _normalise_quote(quote).split()
+    if not quote_tokens:
+        return False
+    needed = max(1, math.ceil(0.8 * len(quote_tokens)))
+    passage_tokens = passage_norm.split()
+    window = max(len(quote_tokens) + 2, int(len(quote_tokens) * 1.4))
+    for start in range(0, max(1, len(passage_tokens) - window + 1)):
+        matched = 0
+        for token in passage_tokens[start : start + window]:
+            if matched < len(quote_tokens) and token == quote_tokens[matched]:
+                matched += 1
+        if matched >= needed:
+            return True
+    return False
+
+
 def verify_evidence(
     question: str, evidence: list[dict[str, Any]], candidates: list[Retrieved]
 ) -> dict[str, Any]:
@@ -256,9 +296,8 @@ def verify_evidence(
         if len(quote) < 12:
             rejected.append(f"quote {passage_id} too short")
             continue
-        content = " ".join((candidate.content or "").lower().split())
-        if quote.lower() not in content:
-            rejected.append(f"quote {passage_id} not found verbatim")
+        if not quote_matches(quote, candidate.content or ""):
+            rejected.append(f"quote {passage_id} does not match the passage")
             continue
         verified.append({"passage_id": passage_id, "quote": quote, "candidate": candidate})
 

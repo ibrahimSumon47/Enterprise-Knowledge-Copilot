@@ -236,6 +236,7 @@ def main() -> int:
     # Changes whenever retrieval or the prompt changes, so stale answers are not
     # silently reused across configurations.
     parser.add_argument("--cache-tag", default="default")
+    parser.add_argument("--throttle", type=float, default=2.0, help="seconds between live questions")
     args = parser.parse_args()
 
     if args.split != "all":
@@ -306,15 +307,17 @@ def main() -> int:
         if response is not None:
             print(f"  {item['id']}: cached answer", file=sys.stderr)
         else:
+            time.sleep(max(0.0, args.throttle))
             response = ask(args, item, tokens[role])
         retries = 0
         while is_outage(response) and retries < args.retry_outage:
             retries += 1
+            wait = min(60, args.retry_wait * (2 ** (retries - 1)))
             print(
-                f"  {item['id']}: no model answer, retry {retries} in {args.retry_wait}s",
+                f"  {item['id']}: provider error, retry {retries} in {wait}s",
                 file=sys.stderr,
             )
-            time.sleep(args.retry_wait)
+            time.sleep(wait)
             response = ask(args, item, tokens[role])
 
         if not is_outage(response):
@@ -342,6 +345,7 @@ def main() -> int:
                 # apart, and let the summary count them.
                 "provider": response.get("provider") or "none",
                 "provider_outage": is_outage(response),
+                "provider_error": is_outage(response),
                 "reason": response.get("reason"),
                 "provider_trace": response.get("provider_trace"),
                 **scored,
@@ -350,6 +354,15 @@ def main() -> int:
 
     outages = [result for result in results if result["provider_outage"]]
     scored = [result for result in results if not result["provider_outage"]]
+    error_rate = len(outages) / max(1, len(results))
+    if error_rate > 0.05:
+        print(
+            f"invalid run: {len(outages)} of {len(results)} questions had a provider error "
+            f"({error_rate:.1%} > 5%); re-run with the cache after the provider recovers. "
+            "The published report was left untouched.",
+            file=sys.stderr,
+        )
+        return 2
     if not scored:
         print(
             f"error: all {len(results)} questions got no model answer (outage or quota). "
@@ -387,6 +400,9 @@ def main() -> int:
         "unanswerable_refused": sum(1 for r in unanswerable if r["refusal_ok"]),
         "scored_questions": len(scored),
         "excluded_no_model": len(outages),
+        "provider_errors": len(outages),
+        "provider_error_rate": round(error_rate, 3),
+        "run_valid": error_rate <= 0.05,
     }
     by_provider: dict[str, dict] = {}
     for name in sorted({result["provider"] for result in scored}):

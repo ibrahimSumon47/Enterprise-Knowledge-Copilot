@@ -11,6 +11,7 @@ export const citationSchema = z.object({
   document_id: z.string(),
   chunk_id: z.string(),
   snippet: z.string(),
+  quote: z.string().nullable().optional(),
   source_url: z.string().nullable().optional(),
   license: z.string(),
   attribution: z.string(),

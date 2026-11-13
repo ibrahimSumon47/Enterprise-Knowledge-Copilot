@@ -363,10 +363,11 @@ def build_graph(router: ProviderRouter, settings: Settings):
             }
         candidates = state.get("candidates") or []
         markers = {int(match) for match in CITATION_RE.findall(state.get("answer", ""))}
-        declared = {int(value) for value in state.get("declared", [])}
-        # The answer may only cite passages it declared, and a declared passage
-        # the text never uses is a mismatch worth refusing over.
-        if not markers or not markers.issubset(declared):
+        retrieved_ids = {candidate.citation_id for candidate in candidates}
+        # A marker is valid when it names a passage retrieval actually returned.
+        # The declared list is a hint, not a gate: Gemini often emits correct
+        # markers without repeating them in JSON, and that is not a false citation.
+        if not markers or not markers.issubset(retrieved_ids):
             return {
                 "refused": True,
                 "answer": REFUSAL,

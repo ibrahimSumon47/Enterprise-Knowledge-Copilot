@@ -2,41 +2,35 @@
   "mode": "dev",
   "questions": 50,
   "summary": {
-    "hit@k": 0.463,
-    "MRR": 0.463,
-    "citation_precision": 0.38,
+    "hit@5_retrieval": 0.885,
+    "recall@50_retrieval": 1.0,
+    "MRR_retrieval": 0.845,
+    "citation_hit@k": 0.195,
+    "citation_precision": 0.16,
     "faithfulness": 1.0,
-    "refusal_accuracy": 0.72,
-    "p50_latency_ms": 4145,
-    "p95_latency_ms": 9063,
+    "refusal_accuracy": 0.48,
+    "p50_latency_ms": 4136,
+    "p95_latency_ms": 5967,
     "permission_leakage": 0,
     "scored_questions": 50,
     "excluded_no_model": 0
   },
   "by_provider": {
     "gemini": {
-      "questions": 10,
-      "hit@k": 0.5,
-      "citation_precision": 0.5,
-      "refusal_accuracy": 0.7,
-      "p50_latency_ms": 5691,
-      "p95_latency_ms": 8390
+      "questions": 22,
+      "citation_hit@k": 0.318,
+      "citation_precision": 0.318,
+      "refusal_accuracy": 0.636,
+      "p50_latency_ms": 4136,
+      "p95_latency_ms": 5967
     },
     "groq": {
-      "questions": 17,
-      "hit@k": 0.875,
-      "citation_precision": 0.824,
-      "refusal_accuracy": 0.882,
-      "p50_latency_ms": 4359,
-      "p95_latency_ms": 5497
-    },
-    "none": {
-      "questions": 23,
-      "hit@k": 0.0,
-      "citation_precision": 0.0,
-      "refusal_accuracy": 0.609,
-      "p50_latency_ms": 4052,
-      "p95_latency_ms": 7816
+      "questions": 28,
+      "citation_hit@k": 0.053,
+      "citation_precision": 0.036,
+      "refusal_accuracy": 0.357,
+      "p50_latency_ms": 4198,
+      "p95_latency_ms": 5097
     }
   },
   "results": [
@@ -46,20 +40,21 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 9063,
-      "answer_len": 505
+      "latency_ms": 10022,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a02",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -67,14 +62,15 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2931,
-      "answer_len": 49
+      "latency_ms": 3153,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a03",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -82,8 +78,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2090,
-      "answer_len": 49
+      "latency_ms": 2384,
+      "answer_len": 49,
+      "retrieval_rank": 2
     },
     {
       "id": "a04",
@@ -91,14 +88,15 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5312,
-      "answer_len": 935
+      "latency_ms": 5097,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a05",
@@ -106,14 +104,15 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4602,
-      "answer_len": 529
+      "latency_ms": 3378,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a06",
@@ -121,14 +120,15 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4237,
-      "answer_len": 415
+      "latency_ms": 4407,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a07",
@@ -136,20 +136,21 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4422,
-      "answer_len": 693
+      "latency_ms": 4253,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a08",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -157,8 +158,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3177,
-      "answer_len": 49
+      "latency_ms": 3479,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a09",
@@ -172,14 +174,15 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3344,
-      "answer_len": 49
+      "latency_ms": 2513,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a10",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -187,8 +190,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3928,
-      "answer_len": 49
+      "latency_ms": 4909,
+      "answer_len": 49,
+      "retrieval_rank": 5
     },
     {
       "id": "a11",
@@ -196,14 +200,15 @@
       "role": "engineering",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3291,
-      "answer_len": 921
+      "latency_ms": 4550,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a12",
@@ -211,20 +216,21 @@
       "role": "engineering",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4119,
-      "answer_len": 300
+      "latency_ms": 4488,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a13",
       "category": "answerable",
       "role": "engineering",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -232,14 +238,15 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2914,
-      "answer_len": 49
+      "latency_ms": 3192,
+      "answer_len": 49,
+      "retrieval_rank": null
     },
     {
       "id": "a14",
       "category": "answerable",
       "role": "engineering",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -247,8 +254,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3795,
-      "answer_len": 49
+      "latency_ms": 5890,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a15",
@@ -262,8 +270,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4359,
-      "answer_len": 49
+      "latency_ms": 4283,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a16",
@@ -271,14 +280,15 @@
       "role": "security",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3490,
-      "answer_len": 352
+      "latency_ms": 3867,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a17",
@@ -286,20 +296,21 @@
       "role": "security",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4091,
-      "answer_len": 895
+      "latency_ms": 4697,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "a18",
       "category": "answerable",
       "role": "security",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -307,14 +318,15 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4261,
-      "answer_len": 49
+      "latency_ms": 3906,
+      "answer_len": 49,
+      "retrieval_rank": 17
     },
     {
       "id": "u01",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -322,14 +334,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2639,
+      "latency_ms": 2858,
       "answer_len": 49
     },
     {
       "id": "u02",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -337,14 +349,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3459,
+      "latency_ms": 3706,
       "answer_len": 49
     },
     {
       "id": "u03",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -352,14 +364,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4100,
+      "latency_ms": 2622,
       "answer_len": 49
     },
     {
       "id": "u04",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -367,14 +379,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3388,
+      "latency_ms": 2945,
       "answer_len": 49
     },
     {
       "id": "u05",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -382,14 +394,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3291,
+      "latency_ms": 4233,
       "answer_len": 49
     },
     {
       "id": "u06",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -397,7 +409,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4980,
+      "latency_ms": 3387,
       "answer_len": 49
     },
     {
@@ -412,14 +424,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3924,
+      "latency_ms": 4849,
       "answer_len": 49
     },
     {
       "id": "u08",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -427,14 +439,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4746,
+      "latency_ms": 4074,
       "answer_len": 49
     },
     {
       "id": "u09",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -442,14 +454,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4052,
+      "latency_ms": 4198,
       "answer_len": 49
     },
     {
       "id": "b01",
       "category": "bangla",
       "role": "employee",
-      "provider": "groq",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 1,
       "rr": 1.0,
@@ -457,8 +469,9 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5052,
-      "answer_len": 591
+      "latency_ms": 5763,
+      "answer_len": 563,
+      "retrieval_rank": null
     },
     {
       "id": "b02",
@@ -472,14 +485,15 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4039,
-      "answer_len": 742
+      "latency_ms": 4448,
+      "answer_len": 359,
+      "retrieval_rank": null
     },
     {
       "id": "b03",
       "category": "bangla",
       "role": "employee",
-      "provider": "groq",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 1,
       "rr": 1.0,
@@ -487,14 +501,15 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5497,
-      "answer_len": 687
+      "latency_ms": 5937,
+      "answer_len": 546,
+      "retrieval_rank": 11
     },
     {
       "id": "b04",
       "category": "bangla",
       "role": "engineering",
-      "provider": "groq",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 1,
       "rr": 1.0,
@@ -502,14 +517,15 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5236,
-      "answer_len": 537
+      "latency_ms": 5967,
+      "answer_len": 466,
+      "retrieval_rank": null
     },
     {
       "id": "b05",
       "category": "bangla",
       "role": "security",
-      "provider": "groq",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 1,
       "rr": 1.0,
@@ -517,8 +533,9 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4391,
-      "answer_len": 512
+      "latency_ms": 5521,
+      "answer_len": 366,
+      "retrieval_rank": null
     },
     {
       "id": "b06",
@@ -532,8 +549,9 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5691,
-      "answer_len": 718
+      "latency_ms": 7308,
+      "answer_len": 256,
+      "retrieval_rank": null
     },
     {
       "id": "b07",
@@ -547,8 +565,9 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5715,
-      "answer_len": 640
+      "latency_ms": 5974,
+      "answer_len": 405,
+      "retrieval_rank": 9
     },
     {
       "id": "m01",
@@ -560,10 +579,11 @@
       "rr": 1.0,
       "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4093,
-      "answer_len": 1088
+      "latency_ms": 3946,
+      "answer_len": 369,
+      "retrieval_rank": 1
     },
     {
       "id": "m02",
@@ -577,14 +597,15 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4145,
-      "answer_len": 49
+      "latency_ms": 4329,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "m03",
       "category": "multi_doc",
       "role": "employee",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -592,14 +613,15 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4198,
-      "answer_len": 49
+      "latency_ms": 2495,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "m04",
       "category": "multi_doc",
       "role": "engineering",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -607,8 +629,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5353,
-      "answer_len": 49
+      "latency_ms": 3468,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "m05",
@@ -622,8 +645,9 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 8390,
-      "answer_len": 49
+      "latency_ms": 4970,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "m06",
@@ -631,14 +655,15 @@
       "role": "security",
       "provider": "gemini",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 9406,
-      "answer_len": 1073
+      "latency_ms": 5056,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "m07",
@@ -646,20 +671,21 @@
       "role": "finance",
       "provider": "gemini",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4009,
-      "answer_len": 547
+      "latency_ms": 4344,
+      "answer_len": 49,
+      "retrieval_rank": 1
     },
     {
       "id": "x01",
       "category": "cross_role",
       "role": "guest",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -667,14 +693,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 9686,
+      "latency_ms": 3709,
       "answer_len": 49
     },
     {
       "id": "x02",
       "category": "cross_role",
       "role": "employee",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -682,7 +708,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4132,
+      "latency_ms": 4136,
       "answer_len": 49
     },
     {
@@ -697,7 +723,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 6844,
+      "latency_ms": 3024,
       "answer_len": 49
     },
     {
@@ -712,14 +738,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3032,
-      "answer_len": 913
+      "latency_ms": 3019,
+      "answer_len": 745
     },
     {
       "id": "x05",
       "category": "cross_role",
       "role": "hr",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -727,14 +753,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 9278,
+      "latency_ms": 3612,
       "answer_len": 49
     },
     {
       "id": "x06",
       "category": "cross_role",
       "role": "finance",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -742,7 +768,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 7816,
+      "latency_ms": 3690,
       "answer_len": 49
     },
     {
@@ -757,14 +783,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3290,
+      "latency_ms": 2461,
       "answer_len": 49
     },
     {
       "id": "x08",
       "category": "cross_role",
       "role": "engineering",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -772,14 +798,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3543,
+      "latency_ms": 3415,
       "answer_len": 49
     },
     {
       "id": "x09",
       "category": "cross_role",
       "role": "employee",
-      "provider": "none",
+      "provider": "gemini",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -787,7 +813,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5365,
+      "latency_ms": 3219,
       "answer_len": 49
     }
   ]

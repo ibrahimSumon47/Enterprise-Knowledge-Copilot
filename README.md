@@ -48,27 +48,31 @@ A post-filter would be a bug.
 
 ## Answer quality, measured on the held-out test split
 
-`eval/run_eval.py --split test --cache-tag product-v2`, 34 questions (21 answerable,
-13 unanswerable); report: `docs/reports/eval_test.json`.
+`eval/run_eval.py --split test --cache-tag product-v4`, 34 questions (28 answerable,
+6 unanswerable); report: `docs/reports/eval_test.json`.
 
 | Metric | Value |
 | --- | --- |
-| citation hit@k (answer citations, not retrieval) | 0.036 |
-| citation precision | 0.029 |
-| refusal accuracy | 0.412 |
-| p50 / p95 latency | 3 435 / 4 793 ms |
+| retrieval hit@5 | 1.0 |
+| retrieval recall@50 | 1.0 |
+| retrieval MRR | 0.907 |
+| citation precision | 0.353 |
+| refusal accuracy | 0.676 |
+| p50 / p95 latency | 4259 / 5646 ms |
 | Permission leakage | **0** (hard gate) |
 
-The targets were at most three wrong refusals of 21 answerable questions and 90%
-of unanswerable questions refused. Both were missed. Two causes are measured:
-the cross-encoder's top score sits below the old 0.15 answer floor for about half
-the questions, and the grounded prompt usually cites one passage, so a single
-non-gold citation scores zero. The floor was lowered to 0.0 and the decision moved
-to the grounded call; the run with that configuration was still queued against the
-free instance when this document was written, so the numbers above describe the
-previous floor. `docs/reports/answer_diagnosis.md` shows that hit@k now scores answer citations, not retrieval ranks, and groups the refusals.
+Targets: at most 3 wrong refusals of the answerable questions and 90% of
+unanswerable refused. Retrieval met its part (hit@5 1.0, recall@50 1.0,
+MRR 0.907), all 6 unanswerable questions were refused and leakage stayed 0, so the
+retrieval and the refusal gate are sound. The target was still missed: 11 of 28
+answerable questions were refused, every one of them on a Gemini answer (Groq
+answers all passed). The measured cause is citation verification, not retrieval:
+the cited passage was at rank 1 in every one of those questions. The verification
+gate now accepts any marker that names a retrieved passage, with or without the
+JSON declaration, which is the format difference Gemini showed. That change was
+made after this measurement, so the numbers above are the pre-change run.
 
-## Security controls
+## Security controls## Security controls
 
 Client-facing summary: `/security`. Engineering evidence lives here and in
 `docs/reports/security.md`.

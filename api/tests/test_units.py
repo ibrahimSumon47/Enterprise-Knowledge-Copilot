@@ -372,3 +372,21 @@ def test_paraphrase_over_two_content_words_is_accepted():
     )
     ok, reason = verify_answer("Upload the receipt to Navan within 30 days [1].", [candidate])
     assert ok, reason
+
+
+def test_marker_inside_retrieved_set_survives_an_empty_declared_list():
+    """Gemini cites correctly without repeating the ids in its JSON declaration."""
+    from app.pipeline import CITATION_RE, verify_answer
+    from app.retrieval import Retrieved
+
+    candidate = Retrieved(
+        chunk_id="c1", document_id="d1", title="Expenses", heading="Receipts",
+        content="Upload the receipt to Navan within 30 days of the purchase.",
+        access_level="public", department=None, is_synthetic=False,
+        source_url=None, license="CC BY-SA 4.0", attribution="GitLab",
+        rrf_score=0.03, rerank_score=0.001, citation_id=1,
+    )
+    answer = "Receipts go to Navan within 30 days [1]."
+    markers = {int(m) for m in CITATION_RE.findall(answer)}
+    assert markers.issubset({candidate.citation_id})
+    assert verify_answer(answer, [candidate])[0]

@@ -2,33 +2,25 @@
   "mode": "test",
   "questions": 34,
   "summary": {
-    "hit@k": 0.036,
-    "MRR": 0.036,
-    "citation_precision": 0.029,
+    "hit@k": 0.071,
+    "MRR": 0.071,
+    "citation_precision": 0.059,
     "faithfulness": 1.0,
-    "refusal_accuracy": 0.412,
-    "p50_latency_ms": 3435,
-    "p95_latency_ms": 4793,
+    "refusal_accuracy": 0.441,
+    "p50_latency_ms": 3695,
+    "p95_latency_ms": 4856,
     "permission_leakage": 0,
     "scored_questions": 34,
     "excluded_no_model": 0
   },
   "by_provider": {
     "groq": {
-      "questions": 18,
-      "hit@k": 0.062,
-      "citation_precision": 0.056,
-      "refusal_accuracy": 0.222,
-      "p50_latency_ms": 4134,
-      "p95_latency_ms": 5436
-    },
-    "none": {
-      "questions": 16,
-      "hit@k": 0.0,
-      "citation_precision": 0.0,
-      "refusal_accuracy": 0.625,
-      "p50_latency_ms": 2486,
-      "p95_latency_ms": 2914
+      "questions": 34,
+      "hit@k": 0.071,
+      "citation_precision": 0.059,
+      "refusal_accuracy": 0.441,
+      "p50_latency_ms": 3695,
+      "p95_latency_ms": 4856
     }
   },
   "results": [
@@ -44,7 +36,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 12168,
+      "latency_ms": 12553,
       "answer_len": 49
     },
     {
@@ -59,7 +51,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4793,
+      "latency_ms": 4476,
       "answer_len": 49
     },
     {
@@ -74,14 +66,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4132,
+      "latency_ms": 3672,
       "answer_len": 49
     },
     {
       "id": "a22",
       "category": "answerable",
       "role": "finance",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -89,7 +81,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2721,
+      "latency_ms": 3695,
       "answer_len": 49
     },
     {
@@ -104,23 +96,23 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4516,
+      "latency_ms": 4856,
       "answer_len": 49
     },
     {
       "id": "a24",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2722,
-      "answer_len": 49
+      "latency_ms": 4431,
+      "answer_len": 615
     },
     {
       "id": "a25",
@@ -134,7 +126,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4134,
+      "latency_ms": 4329,
       "answer_len": 49
     },
     {
@@ -149,14 +141,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3896,
+      "latency_ms": 3920,
       "answer_len": 49
     },
     {
       "id": "a27",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -164,14 +156,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2633,
+      "latency_ms": 4071,
       "answer_len": 49
     },
     {
       "id": "a28",
       "category": "answerable",
       "role": "security",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -179,14 +171,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2629,
+      "latency_ms": 3323,
       "answer_len": 49
     },
     {
       "id": "a29",
       "category": "answerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -194,7 +186,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2076,
+      "latency_ms": 3424,
       "answer_len": 49
     },
     {
@@ -203,20 +195,20 @@
       "role": "engineering",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4226,
-      "answer_len": 493
+      "latency_ms": 4157,
+      "answer_len": 49
     },
     {
       "id": "u10",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -224,14 +216,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2486,
+      "latency_ms": 3597,
       "answer_len": 49
     },
     {
       "id": "u11",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -239,14 +231,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2914,
+      "latency_ms": 3551,
       "answer_len": 49
     },
     {
       "id": "u12",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -254,7 +246,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2202,
+      "latency_ms": 3383,
       "answer_len": 49
     },
     {
@@ -269,7 +261,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3708,
+      "latency_ms": 4018,
       "answer_len": 49
     },
     {
@@ -284,14 +276,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3435,
+      "latency_ms": 3547,
       "answer_len": 49
     },
     {
       "id": "u15",
       "category": "unanswerable",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -299,7 +291,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2279,
+      "latency_ms": 3703,
       "answer_len": 49
     },
     {
@@ -314,7 +306,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4430,
+      "latency_ms": 4744,
       "answer_len": 49
     },
     {
@@ -323,14 +315,14 @@
       "role": "employee",
       "provider": "groq",
       "provider_outage": false,
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5436,
-      "answer_len": 49
+      "latency_ms": 4950,
+      "answer_len": 640
     },
     {
       "id": "b10",
@@ -344,14 +336,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4779,
+      "latency_ms": 3681,
       "answer_len": 49
     },
     {
       "id": "b11",
       "category": "bangla",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -359,14 +351,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 1786,
+      "latency_ms": 2936,
       "answer_len": 49
     },
     {
       "id": "b12",
       "category": "bangla",
       "role": "guest",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -374,7 +366,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3235,
+      "latency_ms": 4661,
       "answer_len": 49
     },
     {
@@ -389,7 +381,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3559,
+      "latency_ms": 3042,
       "answer_len": 49
     },
     {
@@ -404,7 +396,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4095,
+      "latency_ms": 4129,
       "answer_len": 49
     },
     {
@@ -419,7 +411,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4237,
+      "latency_ms": 3580,
       "answer_len": 49
     },
     {
@@ -434,7 +426,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 2999,
+      "latency_ms": 3183,
       "answer_len": 49
     },
     {
@@ -449,14 +441,14 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4087,
+      "latency_ms": 3496,
       "answer_len": 49
     },
     {
       "id": "x10",
       "category": "cross_role",
       "role": "guest",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -464,14 +456,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2609,
+      "latency_ms": 3937,
       "answer_len": 49
     },
     {
       "id": "x11",
       "category": "cross_role",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -479,14 +471,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1199,
+      "latency_ms": 2478,
       "answer_len": 49
     },
     {
       "id": "x12",
       "category": "cross_role",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -494,7 +486,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 2481,
+      "latency_ms": 4276,
       "answer_len": 49
     },
     {
@@ -509,14 +501,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3691,
+      "latency_ms": 2362,
       "answer_len": 49
     },
     {
       "id": "x14",
       "category": "cross_role",
       "role": "hr",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -524,14 +516,14 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1993,
+      "latency_ms": 3179,
       "answer_len": 49
     },
     {
       "id": "x15",
       "category": "cross_role",
       "role": "employee",
-      "provider": "none",
+      "provider": "groq",
       "provider_outage": false,
       "hit": 0,
       "rr": 0.0,
@@ -539,7 +531,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 1461,
+      "latency_ms": 3321,
       "answer_len": 49
     }
   ]

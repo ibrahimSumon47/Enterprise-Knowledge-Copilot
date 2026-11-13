@@ -1,8 +1,8 @@
 {
   "name": "Enterprise Knowledge Copilot",
-  "tagline": "Ask the handbook. Get answers with proof.",
-  "status": "in-progress",
-  "updated": "2026-11-11",
+  "tagline": "Answers your team can check.",
+  "status": "live",
+  "updated": "2026-11-13",
   "repository": "https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot",
   "origins": {
     "web": "https://enterprise-knowledge-copilot-wine.vercel.app",
@@ -28,19 +28,33 @@
     "licence": "CC BY-SA 4.0"
   },
   "access_model": {
-    "roles": ["guest", "employee", "engineering", "security", "hr", "finance", "admin"],
-    "levels": ["public", "employee", "department", "confidential"],
+    "roles": [
+      "guest",
+      "employee",
+      "engineering",
+      "security",
+      "hr",
+      "finance",
+      "admin"
+    ],
+    "levels": [
+      "public",
+      "employee",
+      "department",
+      "confidential"
+    ],
     "enforcement": "SQL predicate inside search_chunks plus RLS policies"
   },
   "evaluation": {
     "golden_questions": 84,
     "harness": "eval/run_eval.py",
-    "report": null
+    "test_split_report": "docs/reports/eval_test.json"
   },
   "known_limits": [
-    "The 512 MB free API instance cannot hold both ONNX models; reranking is disabled there.",
-    "Chat can return 502 while the instance restarts after a memory spike.",
-    "No published evaluation report yet.",
-    "Demo role accounts share one password held outside the repository."
+    "The 512 MB free API instance cannot hold a larger cross-encoder; TinyBERT is the ceiling.",
+    "Free model quotas throttle; an outage is reported as a refusal with no citations.",
+    "The test-split refusal targets were missed; the measured cause is the score floor and single-citation answers.",
+    "Multi-tenant workspaces, browser upload, Google OAuth and password reset are not built.",
+    "Local pytest is blocked on Python 3.14 (no asyncpg wheel); API tests run in CI."
   ]
 }

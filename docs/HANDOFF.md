@@ -63,3 +63,23 @@ variable the button falls back to `/login`.
 > the SQL. Resume from the next step in PROJECT_STATE.md, run
 > `node scripts/check-done.mjs`, and update PROJECT_STATE.md and features.json
 > before you stop.
+
+## Exact next step (2026-11-13, paused mid-phase)
+
+`node scripts/check-done.mjs` reads `docs/PHASES.json`. Answer quality is paused
+with a measured limit: the evidence-quote verifier and the throttled harness are
+shipped, but both free providers returned 429s long enough that no valid dev or
+test run completed. When quota is available, run:
+
+```bash
+python eval/run_eval.py --split dev --cache-tag quality-v2 --password ... --api-url ... --supabase-url ... --anon-key ...
+python eval/run_eval.py --split test --cache-tag quality-v2 --password ... # once
+```
+
+The harness refuses to publish a run with more than 5% provider errors, so an
+invalid attempt never overwrites the report. Replace the quality block in README
+and PROJECT_STATE only with a valid test run, then close P1 as done or a measured
+limit. Phases 2 to 5 are recorded in `docs/PHASES.json` as scope limits; start
+with 2a (organisations and org_id scoping) because the upload, invite and
+isolation tests all depend on it.
+

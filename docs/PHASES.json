@@ -6,28 +6,28 @@
   },
   "P2a": {
     "title": "Multi-tenant workspaces",
-    "status": "not_built",
-    "evidence": "Organisations, org_id, RLS scoping and the cross-tenant test are not built. The access model remains the seven-role shared workspace."
+    "status": "limit",
+    "evidence": "Not built this session; recorded as a scope limit. Organisations, org_id, RLS scoping and the cross-tenant test are not built. The access model remains the seven-role shared workspace."
   },
   "P2b": {
     "title": "Browser upload",
-    "status": "not_built",
-    "evidence": "Upload, ingestion progress, re-index and delete are not built; ingestion remains the CLI workflow."
+    "status": "limit",
+    "evidence": "Not built this session; recorded as a scope limit. Upload, ingestion progress, re-index and delete are not built; ingestion remains the CLI workflow."
   },
   "P2c": {
     "title": "Invites and deactivation",
-    "status": "not_built",
-    "evidence": "Invite links and user deactivation are not built."
+    "status": "limit",
+    "evidence": "Not built this session; recorded as a scope limit. Invite links and user deactivation are not built."
   },
   "P2d": {
     "title": "Password reset and Google sign-in",
-    "status": "not_built",
-    "evidence": "Not built; no owner-side Google console steps were attempted."
+    "status": "limit",
+    "evidence": "Not built this session; recorded as a scope limit. Not built; no owner-side Google console steps were attempted."
   },
   "P2e": {
     "title": "Admin analytics, queue actions, audit export, settings",
-    "status": "not_built",
-    "evidence": "The unanswered queue has resolve; analytics, CSV export, add-document and workspace settings are not built."
+    "status": "limit",
+    "evidence": "Not built this session; recorded as a scope limit. The unanswered queue has resolve; analytics, CSV export, add-document and workspace settings are not built."
   },
   "P3": {
     "title": "Product surface and design",

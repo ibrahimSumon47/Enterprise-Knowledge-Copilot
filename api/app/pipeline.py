@@ -394,7 +394,7 @@ def build_graph(router: ProviderRouter, settings: Settings):
         traces: list[str] = []
         try:
             for attempt in range(2):
-                completion = await router.complete(SYSTEM_PROMPT, prompt, max_tokens=600)
+                completion = await router.complete(SYSTEM_PROMPT, prompt, max_tokens=1400)
                 traces.extend(completion.trace)
                 payload = parse_grounded_reply(completion.text)
                 if payload is not None:

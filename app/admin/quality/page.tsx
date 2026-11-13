@@ -39,6 +39,10 @@ const METRIC_LABEL: Record<string, string> = {
 };
 
 const REASON_LABEL: Record<string, string> = {
+  "best match below the answer threshold": "No close enough document",
+  "no accessible document matched": "Nothing in scope matched",
+  "question too short": "Question too short",
+  "model declined to answer": "No supporting evidence",
   "model judged the sources insufficient": "Documents did not cover it",
   "model answered without declaring citations": "Answer could not be checked",
   "model reply was not the required JSON": "Answer could not be read",
@@ -50,7 +54,7 @@ const REASON_LABEL: Record<string, string> = {
 
 function prettyReason(reason: string | undefined) {
   if (!reason) return "Answered";
-  return REASON_LABEL[reason] ?? "Not answered";
+  return REASON_LABEL[reason] ?? "Not covered by the documents";
 }
 
 export default function QualityPage() {
@@ -109,7 +113,7 @@ export default function QualityPage() {
 
   const refusals = entries.filter((entry) => entry.outcome === "refused");
   const reasons = refusals.reduce<Record<string, number>>((counts, entry) => {
-    const reason = entry.detail?.reason || "not answered";
+    const reason = prettyReason(entry.detail?.reason);
     counts[reason] = (counts[reason] ?? 0) + 1;
     return counts;
   }, {});
@@ -151,7 +155,7 @@ export default function QualityPage() {
           Answer quality
         </h2>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Last measured run{latest ? ` · ${new Date(latest.created_at).toLocaleDateString()}` : ""}
+          Latest quality report{latest ? ` · ${new Date(latest.created_at).toLocaleDateString()}` : ""}
         </p>
         {latest ? (
           <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -166,8 +170,7 @@ export default function QualityPage() {
           </dl>
         ) : (
           <p className="mt-4 text-sm text-[var(--text-muted)]">
-            No measured run is recorded for this workspace yet. The next scheduled run writes its
-            results here.
+            No quality report is recorded for this workspace yet.
           </p>
         )}
       </section>

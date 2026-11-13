@@ -7,7 +7,7 @@ export const site = {
   shortName: "EKC",
   tagline: "Ask the handbook. Get answers with proof.",
   description:
-    "A role-aware copilot over a real company handbook: answers with citations, honest refusals, server-side access control and a tamper-evident audit trail.",
+    "A knowledge copilot over company documents: answers with citations, grounded refusals, server-side access control and a verifiable activity record.",
   url: "https://enterprise-knowledge-copilot-wine.vercel.app",
   repo: "https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot",
   handbook: {

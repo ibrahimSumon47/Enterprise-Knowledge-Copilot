@@ -34,11 +34,7 @@ export async function SiteHeader() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          {user ? (
-            <Link className="btn" href="/chat">
-              Open workspace
-            </Link>
-          ) : (
+          {user ? null : (
             <Link className="btn btn-primary" href="/login">
               Sign in
             </Link>

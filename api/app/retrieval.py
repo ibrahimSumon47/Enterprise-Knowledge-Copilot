@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import logging
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -12,6 +14,15 @@ from .config import Settings
 from .embeddings import embed_query, rerank
 
 logger = logging.getLogger(__name__)
+
+TAG_RE = re.compile(r"<[^>]+>")
+SPACE_RE = re.compile(r"\s+")
+
+
+def plain_text(value: object) -> str:
+    """Corpus pages carry HTML fragments (icons, spans); answers must not."""
+    text = html.unescape(str(value or ""))
+    return SPACE_RE.sub(" ", TAG_RE.sub(" ", text)).strip()
 
 
 @dataclass
@@ -77,9 +88,9 @@ async def retrieve(
         Retrieved(
             chunk_id=str(row["chunk_id"]),
             document_id=str(row["document_id"]),
-            title=str(row["title"]),
-            heading=row["heading"],
-            content=str(row["content"]),
+            title=plain_text(row["title"]),
+            heading=plain_text(row["heading"]) or None,
+            content=plain_text(row["content"]),
             access_level=str(row["access_level"]),
             department=row["department"],
             is_synthetic=bool(row["is_synthetic"]),

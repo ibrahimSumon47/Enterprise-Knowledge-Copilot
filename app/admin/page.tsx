@@ -358,9 +358,6 @@ function DocumentRowEditor({
     <tr>
       <td className="max-w-[22rem] truncate px-4 py-2" title={row.title}>
         {row.title}
-        {row.is_synthetic ? (
-          <span className="mono ml-2 text-[10px] text-[var(--text-muted)]">synthetic</span>
-        ) : null}
       </td>
       <td className="px-4 py-2">
         <select

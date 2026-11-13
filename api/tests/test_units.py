@@ -18,7 +18,7 @@ from app.pipeline import (
     verify_answer,
 )
 from app.redact import redact
-from app.retrieval import Retrieved, retrieve
+from app.retrieval import Retrieved, plain_text, retrieve
 
 
 def make_candidate(citation_id: int = 1, content: str | None = None) -> Retrieved:
@@ -89,6 +89,11 @@ def test_a_refusal_offers_the_closest_sources() -> None:
     offered = closest_sources([make_candidate(index) for index in range(1, 5)])
     assert [item["id"] for item in offered] == [1, 2, 3]
     assert offered[0]["document_id"] == "doc-1"
+
+
+def test_retrieved_text_has_no_markup() -> None:
+    cleaned = plain_text('<i class="fas fa-receipt"></i> Accounts Payable &amp; Payments')
+    assert cleaned == "Accounts Payable & Payments"
 
 
 def test_router_classifies_compensation() -> None:

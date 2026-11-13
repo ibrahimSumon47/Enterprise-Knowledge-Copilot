@@ -6,7 +6,7 @@
  * seconds.
  */
 const url = process.env.EKC_WEB_URL ?? "https://enterprise-knowledge-copilot-wine.vercel.app";
-const marker = process.env.EKC_DEPLOY_MARKER ?? 'data-auth-version="2"';
+const marker = process.env.EKC_DEPLOY_MARKER ?? 'data-auth-version="3"';
 const deadline = Date.now() + 10 * 60_000;
 
 while (Date.now() < deadline) {

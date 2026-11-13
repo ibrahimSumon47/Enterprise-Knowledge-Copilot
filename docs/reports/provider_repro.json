@@ -1,0 +1,112 @@
+[
+  {
+    "id": "a23",
+    "role": "finance",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"Alcohol expenses are not reimbursable.\", \"citations\": [4]}",
+    "citations": 0
+  },
+  {
+    "id": "a24",
+    "role": "employee",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"GitLab is an all‑remote company that encourages team members to work from anywhere, but trade‑control rules limit where you can work with company‑owned devices. Employees may not take company devices to, or otherwise work from, U.S.‑embargoed countries (currently Cuba, Iran, North Korea, Syria) or embargoed regions (Crimea, Donetsk and Luhansk in Ukraine). In addition, work from Russia or Belarus is prohibited due to other restrictions.\", \"citations\": [1]}",
+    "citations": 0
+  },
+  {
+    "id": "a27",
+    "role": "employee",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\n  \"answerable\": true,\n  \"answer\": \"Each team or department that owns a handbook section is responsible for maintaining its content. Diagrams and process pages are kept in the department’s sub‑folders and protected by CODEOWNERS so the right approvers review changes. A dedicated page is created for each (sub‑)department, and the Security Leadership reviews ecosystem diagrams before every off‑site to ensure they remain the single source of truth. Non‑planning handbook pages, runbooks, and system documentation are continuously iterated on to stay current. Additionally, groups link retrospective notes to their group pages in the handbook, making updates public shortly after each monthly releas",
+    "citations": 0
+  },
+  {
+    "id": "a28",
+    "role": "security",
+    "provider": "groq",
+    "refused": true,
+    "reason": "model judged the sources insufficient",
+    "trace": [],
+    "raw": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+    "citations": 0
+  },
+  {
+    "id": "a29",
+    "role": "employee",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\n  \"answerable\": true,\n  \"answer\": \"Book business travel using GitLab’s Navan Travel platform for flights, hotels, train travel, and vehicle rentals. For lodging, book through NexTravel (Travelperk) and, if the rate falls outside GitLab’s guidelines, obtain pre‑approval from the appropriate authorized approver; otherwise reimbursement is limited to the GSA per‑diem rate. Keep all receipts and follow the company Expense policy.\",\n  \"citations\": [5, 1]\n}",
+    "citations": 0
+  },
+  {
+    "id": "a30",
+    "role": "engineering",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"Before a service is launched, its logs must be monitored for security and availability. This monitoring should be performed through automated review and alerting mechanisms, complemented by periodic manual reviews.\", \"citations\": [1]}",
+    "citations": 0
+  },
+  {
+    "id": "b08",
+    "role": "finance",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"ভ্রমণের খরচের সীমা অঞ্চল অনুযায়ী নির্ধারিত: \\n- উত্তর আমেরিকা: ফ্লাইট ক্লাস economy বা ৬ ঘণ্টার বেশি সময়ের জন্য premium, হোটেল প্রতি রাত 260 USD, খাবার প্রতি দিন 75 USD।\\n- ইউরোপ: ফ্লাইট ক্লাস একই, হোটেল প্রতি রাত 220 EUR, খাবার প্রতি দিন 65 EUR।\\n- এশিয়া‑প্যাসিফিক: ফ্লাইট ক্লাস economy, ৮ ঘণ্টার বেশি সময়ের জন্য business, হোটেল প্রতি রাত 200 USD, খাবার প্রতি দিন 55 USD।\\nঅতিরিক্ত শর্ত: ২৫ USD‑এর উপরে রসিদ প্রয়োজন; ৪৫ দিনের পরে জমা দিলে কন্ট্রোলার অনুমোদন দরকার; অ্যালকোহল রিইম্বার্সযোগ্য নয়।\", \"citations\": [1]}",
+    "citations": 0
+  },
+  {
+    "id": "b11",
+    "role": "employee",
+    "provider": "groq",
+    "refused": true,
+    "reason": "model judged the sources insufficient",
+    "trace": [],
+    "raw": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+    "citations": 0
+  },
+  {
+    "id": "m08",
+    "role": "employee",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"Remote work is governed by trade‑compliance rules that prohibit taking company‑owned devices to US‑embargoed countries or regions (e.g., Cuba, Iran, North Korea, Syria, Crimea, Donetsk, Luhansk) or to Russia and Belarus. Travel is governed by the company’s travel‑expense policies, which require employees to treat spending as their own money, use a credit card for company trips, keep original receipts, and file an expense report after the trip.\", \"citations\": [2,5]}",
+    "citations": 0
+  },
+  {
+    "id": "m09",
+    "role": "engineering",
+    "provider": "groq",
+    "refused": true,
+    "reason": "citation markers do not match the declared sources",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"Infrastructure modifications are one of the most common triggers for incidents – changes to deployments, configuration, feature flags or the underlying platform can expose new bottlenecks or failures. Because of this, GitLab’s incident response includes dedicated workflows for the Infrastructure Team, whose actions are aimed at quickly containing and fixing the impact of such change‑related incidents. In short, changes to infrastructure can cause incidents, and the incident response process is designed to detect, triage, and remediate those incidents through coordinated infrastructure‑team actions.\", \"citations\": [1, 2]}",
+    "citations": 0
+  },
+  {
+    "id": "m12",
+    "role": "employee",
+    "provider": "gemini",
+    "refused": false,
+    "reason": "",
+    "trace": [],
+    "raw": "{\"answerable\": true, \"answer\": \"You will receive a virtual card with funds for equipment purchases after your start date [1]. For expenses, you should use Navan to submit receipts for reimbursement [1, 3]. Corporate credit cards are not permitted for equipment purchases; these must go through the standard employee expense reimbursement process [2]. If you purchase home office equipment or software under $5,000 USD, a Zip Purchase Request is not required [5]. Note that items costing $1,000 USD or more are considered company property and must be returned if you leave the company [4].\", \"citations\": [1, 2, 3, 4, 5]}",
+    "citations": 4
+  }
+]

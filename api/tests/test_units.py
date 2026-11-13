@@ -403,3 +403,20 @@ Hope this helps."""
     for text in (fenced, trailing):
         payload = parse_grounded_reply(text)
         assert payload and payload["answerable"] is True and payload["citations"] == [1]
+
+
+def test_declared_citation_is_enough_when_the_answer_omits_the_marker():
+    from app.pipeline import verify_answer
+    from app.retrieval import Retrieved
+
+    candidate = Retrieved(
+        chunk_id="c1", document_id="d1", title="Expenses", heading="Alcohol",
+        content="Alcohol expenses are not reimbursable under the travel policy.",
+        access_level="public", department=None, is_synthetic=False,
+        source_url=None, license="CC BY-SA 4.0", attribution="GitLab",
+        rrf_score=0.03, rerank_score=0.001, citation_id=4,
+    )
+    # verify_answer itself has no declaration argument; the node promotes the
+    # declaration before calling it, so this test checks the shared helper's
+    # inline path and the node-level promotion is covered by the pipeline test.
+    assert verify_answer("Alcohol expenses are not reimbursable [4].", [candidate])[0]

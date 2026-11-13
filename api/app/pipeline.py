@@ -405,10 +405,13 @@ def build_graph(router: ProviderRouter, settings: Settings):
             }
         candidates = state.get("candidates") or []
         markers = {int(match) for match in CITATION_RE.findall(state.get("answer", ""))}
+        declared = {int(value) for value in state.get("declared", [])}
         retrieved_ids = {candidate.citation_id for candidate in candidates}
-        # A marker is valid when it names a passage retrieval actually returned.
-        # The declared list is a hint, not a gate: Gemini often emits correct
-        # markers without repeating them in JSON, and that is not a false citation.
+        # A citation is valid when it names a passage retrieval returned, whether
+        # the model wrote it inline or only in the JSON list. Short answers often
+        # omit the inline marker; the declaration is then the citation.
+        if not markers and declared and declared.issubset(retrieved_ids):
+            markers = set(declared)
         if not markers or not markers.issubset(retrieved_ids):
             return {
                 "refused": True,

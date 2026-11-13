@@ -342,6 +342,8 @@ def main() -> int:
                 # apart, and let the summary count them.
                 "provider": response.get("provider") or "none",
                 "provider_outage": is_outage(response),
+                "reason": response.get("reason"),
+                "provider_trace": response.get("provider_trace"),
                 **scored,
             }
         )

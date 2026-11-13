@@ -7,6 +7,7 @@ chunk is below the answer threshold, the run ends in an honest refusal.
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
 from dataclasses import dataclass, field
@@ -17,6 +18,8 @@ from langgraph.graph import END, StateGraph
 from .config import Settings
 from .providers import ProviderError, ProviderRouter
 from .retrieval import Retrieved, build_context, citation_payload, retrieve
+
+logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You answer questions for a company handbook using only the numbered passages you are given.
 
@@ -75,6 +78,8 @@ class PipelineState(TypedDict, total=False):
     reason: str
     declared: list[int]
     closest: list[dict[str, Any]]
+    trace: list[str]
+    raw: str
     unavailable: bool
 
 
@@ -93,6 +98,8 @@ class AnswerResult:
     retrieval: list[dict[str, Any]] = field(default_factory=list)
     # True when no provider answered: distinct from "the documents do not say".
     unavailable: bool = False
+    provider_trace: list[str] = field(default_factory=list)
+    raw_reply: str = ""
 
 
 def classify(question: str) -> str:
@@ -151,17 +158,31 @@ def _is_refusal(answer: str) -> bool:
 
 
 def parse_grounded_reply(text: str) -> dict[str, Any] | None:
-    """Read the single JSON object the answer prompt asks for."""
-    match = JSON_OBJECT_RE.search(text or "")
-    if not match:
-        return None
-    try:
-        payload = json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(payload, dict) or "answerable" not in payload:
-        return None
-    return payload
+    """Read the JSON object from a reply, tolerating fences and trailing prose.
+
+    Both providers receive the same prompt, but Gemini sometimes wraps the object
+    in a markdown fence or adds a sentence after it. Neither is a wrong answer, so
+    the extractor takes the first balanced object instead of demanding a bare one.
+    """
+    body = (text or "").strip()
+    if body.startswith("```"):
+        body = re.sub(r"^```(?:json)?\s*", "", body)
+        body = re.sub(r"\s*```\s*$", "", body)
+    candidates = [body]
+    start, end = body.find("{"), body.rfind("}")
+    if start != -1 and end > start:
+        candidates.append(body[start : end + 1])
+    match = JSON_OBJECT_RE.search(body)
+    if match:
+        candidates.append(match.group(0))
+    for candidate in candidates:
+        try:
+            payload = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict) and "answerable" in payload:
+            return payload
+    return None
 
 
 def closest_sources(candidates: list[Retrieved], limit: int = 3) -> list[dict[str, Any]]:
@@ -288,8 +309,22 @@ def build_graph(router: ProviderRouter, settings: Settings):
             "Reply with the JSON object only."
         )
         candidates = state.get("candidates") or []
+        completion = None
+        payload = None
+        traces: list[str] = []
         try:
-            completion = await router.complete(SYSTEM_PROMPT, prompt, max_tokens=600)
+            for attempt in range(2):
+                completion = await router.complete(SYSTEM_PROMPT, prompt, max_tokens=600)
+                traces.extend(completion.trace)
+                payload = parse_grounded_reply(completion.text)
+                if payload is not None:
+                    break
+                logger.warning(
+                    "grounded reply was not JSON (attempt %s, provider %s): %r",
+                    attempt + 1,
+                    completion.provider,
+                    (completion.text or "")[:240],
+                )
         except ProviderError as exc:
             # The status code is the difference between an outage and a retired
             # model id, so it goes into the audit detail, not only the logs.
@@ -301,17 +336,19 @@ def build_graph(router: ProviderRouter, settings: Settings):
                 "reason": f"no language model available ({exc})"[:240],
                 "provider": "none",
                 "closest": closest_sources(candidates),
+                "trace": traces,
             }
-        payload = parse_grounded_reply(completion.text)
-        if payload is None:
+        if payload is None or completion is None:
             return {
                 "refused": True,
                 "answer": REFUSAL,
                 "confidence": "low",
-                "reason": "model reply was not the required JSON",
-                "provider": completion.provider,
-                "tokens": completion.tokens,
+                "reason": "model reply was not the required JSON after one retry",
+                "provider": completion.provider if completion else "none",
+                "tokens": completion.tokens if completion else 0,
                 "closest": closest_sources(candidates),
+                "trace": traces,
+                "raw": (completion.text or "")[:2000],
             }
         if not bool(payload.get("answerable")):
             return {
@@ -321,7 +358,9 @@ def build_graph(router: ProviderRouter, settings: Settings):
                 "reason": "model judged the sources insufficient",
                 "provider": completion.provider,
                 "tokens": completion.tokens,
+                "raw": (completion.text or "")[:2000],
                 "closest": closest_sources(candidates),
+                "trace": traces,
             }
         answer = str(payload.get("answer") or "").strip()
         declared_raw = payload.get("citations")
@@ -339,13 +378,16 @@ def build_graph(router: ProviderRouter, settings: Settings):
                 "reason": "model answered without declaring citations",
                 "provider": completion.provider,
                 "tokens": completion.tokens,
+                "raw": (completion.text or "")[:2000],
                 "closest": closest_sources(candidates),
+                "trace": traces,
             }
         return {
             "answer": answer,
             "provider": completion.provider,
             "tokens": completion.tokens,
             "declared": declared,
+            "raw": (completion.text or "")[:2000],
         }
 
     async def verify_node(state: PipelineState) -> PipelineState:
@@ -479,6 +521,8 @@ async def answer_question(
             for candidate in (final.get("candidates") or [])
         ],
         unavailable=bool(final.get("unavailable", False)),
+        provider_trace=final.get("trace", []),
+        raw_reply=str(final.get("raw", ""))[:2000],
         provider=final.get("provider", "none"),
         tokens=int(final.get("tokens", 0)),
         latency_ms=latency_ms,

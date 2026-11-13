@@ -240,6 +240,7 @@ async def chat(
             "provider": result.provider,
             "latency_ms": result.latency_ms,
             "reason": result.reason,
+            "provider_trace": result.provider_trace,
         },
     )
 
@@ -272,6 +273,9 @@ async def chat(
         outage=outage,
         unavailable=result.unavailable,
         retrieval=result.retrieval if user.role == "admin" else None,
+        reason=result.reason if user.role == "admin" else None,
+        provider_trace=result.provider_trace if user.role == "admin" else None,
+        raw_reply=result.raw_reply if user.role == "admin" else None,
     )
 
 

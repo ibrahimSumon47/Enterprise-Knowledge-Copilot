@@ -66,8 +66,11 @@ class ChatResponse(BaseModel):
     outage: bool = False
     unavailable: bool = False
     cached: bool = False
-    # Admin-only debug field: retrieval order and scores for this question.
+    # Admin-only debug fields: why the answer ended as it did.
     retrieval: list[RetrievalCandidate] | None = None
+    reason: str | None = None
+    provider_trace: list[str] | None = None
+    raw_reply: str | None = None
 
 
 class FeedbackRequest(BaseModel):

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import httpx
@@ -28,6 +28,8 @@ class Completion:
     text: str
     provider: str
     tokens: int
+    # Why the providers that were not used did not win: quota, timeout, error.
+    trace: list[str] = field(default_factory=list)
 
 
 class LLMProvider(Protocol):
@@ -227,11 +229,16 @@ class ProviderRouter:
 
     async def complete(self, system: str, prompt: str, max_tokens: int = 700) -> Completion:
         usable = [provider for provider in self._providers if self._available(provider)]
+        skipped = [
+            f"{provider.name}: circuit open after repeated failures"
+            for provider in self._providers
+            if not self._available(provider)
+        ]
         if not usable:
-            raise ProviderError("every provider circuit is open")
+            raise ProviderError("; ".join(skipped) or "every provider circuit is open")
 
         self._stats["calls"] += 1
-        errors: list[str] = []
+        errors: list[str] = list(skipped)
         start_now = asyncio.Event()
         tasks = {
             asyncio.create_task(
@@ -270,6 +277,7 @@ class ProviderRouter:
                     self._failures[provider.name] = 0
                     if provider is not usable[0]:
                         self._stats["backup_won"] += 1
+                    completion.trace = list(errors)
                     return completion
             raise ProviderError("; ".join(errors) or "no provider answered")
         finally:

@@ -390,3 +390,16 @@ def test_marker_inside_retrieved_set_survives_an_empty_declared_list():
     markers = {int(m) for m in CITATION_RE.findall(answer)}
     assert markers.issubset({candidate.citation_id})
     assert verify_answer(answer, [candidate])[0]
+
+
+def test_grounded_reply_tolerates_a_markdown_fence_and_trailing_text():
+    from app.pipeline import parse_grounded_reply
+
+    fenced = """```json
+{"answerable": true, "answer": "Yes [1].", "citations": [1]}
+```"""
+    trailing = """{"answerable": true, "answer": "Yes [1].", "citations": [1]}
+Hope this helps."""
+    for text in (fenced, trailing):
+        payload = parse_grounded_reply(text)
+        assert payload and payload["answerable"] is True and payload["citations"] == [1]

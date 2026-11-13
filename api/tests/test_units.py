@@ -396,13 +396,13 @@ def test_grounded_reply_tolerates_a_markdown_fence_and_trailing_text():
     from app.pipeline import parse_grounded_reply
 
     fenced = """```json
-{"answerable": true, "answer": "Yes [1].", "citations": [1]}
+{"answer": "Yes.", "evidence": [{"passage_id": 1, "quote": "within 45 days"}]}
 ```"""
-    trailing = """{"answerable": true, "answer": "Yes [1].", "citations": [1]}
+    trailing = """{"answer": "Yes.", "evidence": [{"passage_id": 1, "quote": "within 45 days"}]}
 Hope this helps."""
     for text in (fenced, trailing):
         payload = parse_grounded_reply(text)
-        assert payload and payload["answerable"] is True and payload["citations"] == [1]
+        assert payload and payload["evidence"][0]["passage_id"] == 1
 
 
 def test_declared_citation_is_enough_when_the_answer_omits_the_marker():
@@ -438,7 +438,7 @@ def test_quote_verification_normalises_whitespace_and_case():
     from app.pipeline import verify_evidence
 
     result = verify_evidence(
-        "How do I submit a receipt?",
+        "How do I upload a receipt?",
         [{"passage_id": 1, "quote": "UPLOAD  THE RECEIPT to Navan within 30 days"}],
         [_evidence_candidate()],
     )

@@ -194,6 +194,23 @@ def verify_answer(
     return True, "ok"
 
 
+def route_after_grade(
+    candidates_present: bool, confidence: str, grader_enabled: bool
+) -> str:
+    """Decide whether a question reaches the model.
+
+    A low reranker score is not evidence that the documents lack the answer: the
+    cross-encoder scores correct long passages near zero on this corpus. When the
+    grader is off, any retrieved candidate goes to the grounded call, which makes
+    the answerability decision. A low score only asks the optional grader first.
+    """
+    if not candidates_present:
+        return "refuse"
+    if confidence == "low" and grader_enabled:
+        return "grade"
+    return "answer"
+
+
 def build_graph(router: ProviderRouter, settings: Settings):
     """Compile the graph once per process."""
 
@@ -219,7 +236,8 @@ def build_graph(router: ProviderRouter, settings: Settings):
         if not candidates:
             return {"confidence": "low", "reason": "no accessible document matched"}
         if state.get("confidence") == "low":
-            return {"reason": "best match below the answer threshold"}
+            # An annotation, not a refusal: the grounded call decides.
+            return {"reason": "low rerank score; the model will judge the passages"}
         return {}
 
     async def evidence_grade_node(state: PipelineState) -> PipelineState:
@@ -375,11 +393,11 @@ def build_graph(router: ProviderRouter, settings: Settings):
         }
 
     def after_grade(state: PipelineState) -> str:
-        if not state.get("candidates"):
-            return "refuse"
-        if state.get("confidence") == "low":
-            return "grade"
-        return "answer"
+        return route_after_grade(
+            bool(state.get("candidates")),
+            state.get("confidence", "low"),
+            settings.grader_enabled,
+        )
 
     def after_evidence_grade(state: PipelineState) -> str:
         return "answer" if state.get("confidence") != "low" else "refuse"

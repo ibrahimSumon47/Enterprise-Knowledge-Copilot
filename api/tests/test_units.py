@@ -337,3 +337,13 @@ def test_router_reports_when_every_provider_fails() -> None:
     router = ProviderRouter([Broken()], hedge_seconds=0.0)
     with pytest.raises(ProviderError):
         asyncio.run(router.complete("system", "prompt"))
+
+
+def test_low_scores_still_reach_the_model_when_the_grader_is_off():
+    """The regression behind the 16 pre-model refusals on the test split."""
+    from app.pipeline import route_after_grade
+
+    assert route_after_grade(True, "low", grader_enabled=False) == "answer"
+    assert route_after_grade(True, "low", grader_enabled=True) == "grade"
+    assert route_after_grade(True, "medium", grader_enabled=True) == "answer"
+    assert route_after_grade(False, "low", grader_enabled=False) == "refuse"

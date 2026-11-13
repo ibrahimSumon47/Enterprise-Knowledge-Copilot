@@ -36,3 +36,45 @@ and from citation checks.
    measure whether the model stops calling answerable questions unanswerable.
 3. Treat a provider failure as `temporarily_unavailable`, never as a refusal with
    no citations, and retry across Groq and Gemini.
+
+## Slice 1: the pre-model refusals
+
+Measured on the deployed API with `all_candidates=true` for every test question.
+None of the 34 questions returns zero candidates, so the access predicate, the
+translation step and query length are not the cause. The cause is the score floor:
+these 19 questions have a top rerank score below the old 0.01 threshold, the
+pipeline marked them low confidence, and with the grader disabled it refused before
+any model call. The 16 refusals in the report are the subset that was counted that
+run; the same mechanism covers 19.
+
+| id | role | answerable | own candidates | own all_candidates | admin all_candidates | top rerank |
+| --- | --- | --- | --- | --- | --- | --- |
+| a22 | finance | yes | 3 | 10 | 12 | 0.00510 |
+| a24 | employee | yes | 3 | 6 | 9 | 0.00307 |
+| a27 | employee | yes | 3 | 21 | 21 | 0.00748 |
+| a28 | security | yes | 3 | 8 | 12 | 0.00008 |
+| a29 | employee | yes | 3 | 12 | 12 | 0.00211 |
+| u10 | employee | no | 3 | 15 | 13 | 0.00004 |
+| u11 | employee | no | 3 | 21 | 21 | 0.00005 |
+| u12 | employee | no | 3 | 16 | 16 | 0.00307 |
+| u15 | employee | no | 3 | 10 | 13 | 0.00013 |
+| b08 | finance | yes | 3 | 19 | 13 | 0.00003 |
+| b09 | employee | yes | 3 | 19 | 11 | 0.00003 |
+| b10 | employee | yes | 3 | 19 | 13 | 0.00002 |
+| b11 | employee | yes | 3 | 15 | 13 | 0.00002 |
+| b12 | guest | no | 3 | 19 | 11 | 0.00003 |
+| x10 | guest | no | 3 | 13 | 17 | 0.00073 |
+| x11 | employee | no | 3 | 14 | 21 | 0.00030 |
+| x12 | employee | no | 3 | 17 | 19 | 0.00035 |
+| x14 | hr | no | 3 | 12 | 19 | 0.00010 |
+| x15 | employee | no | 3 | 14 | 21 | 0.00055 |
+
+Evidence for the named causes:
+
+- **Access predicate:** not the cause. Every question returns 3 default candidates and 6–21 with `all_candidates=true`; the admin role also returns 6–21.
+- **Empty retrieval:** not the cause. Zero questions have empty candidate lists.
+- **Timeout / translation:** not the cause. These counts come from the retrieval-only endpoint, which does no model and no translation call.
+- **Query too short:** not the cause. `classify()` only marks a question unclear below two words; none of these are.
+- **Score floor:** the cause. All 19 rows are below 0.01, and the refusal path was `grade -> evidence_grade (grader disabled) -> refuse`.
+
+Fix: `route_after_grade` sends every non-empty candidate set to the grounded call; the score floor only guards the no-candidate case. Regression test: `test_low_scores_still_reach_the_model_when_the_grader_is_off`.

@@ -11,6 +11,7 @@ type Answer = {
   answer: string;
   confidence?: string;
   refused?: boolean;
+  unavailable?: boolean;
   citations: Citation[];
   suggestions?: Citation[];
   provider?: string;
@@ -186,8 +187,19 @@ export default function ChatPage() {
                   {turn.result.refused ? (
                     <div className="rounded-xl border border-[var(--border-strong)] px-3 py-3">
                       <p className="flex items-start gap-2 text-sm text-[var(--text-muted)]">
-                        <ShieldAlert className="mt-0.5 shrink-0" size={15} />
-                        {turn.result.answer}
+                        {turn.result.unavailable ? (
+                          <AlertTriangle className="mt-0.5 shrink-0 text-[var(--accent)]" size={15} />
+                        ) : (
+                          <ShieldAlert className="mt-0.5 shrink-0" size={15} />
+                        )}
+                        <span>
+                          {turn.result.unavailable ? (
+                            <span className="mb-1 block text-xs font-medium text-[var(--accent)]">
+                              Temporary service issue
+                            </span>
+                          ) : null}
+                          {turn.result.answer}
+                        </span>
                       </p>
                       {turn.result.suggestions && turn.result.suggestions.length > 0 ? (
                         <div className="mt-3 border-t border-[var(--border)] pt-3">

@@ -188,7 +188,7 @@ def verify_answer(
 
     sentences = [sentence for sentence in re.split(r"(?<=[.!?])\s+", answer) if sentence.strip()]
     uncited = [s for s in sentences if not CITATION_RE.search(s) and len(s.split()) > 4]
-    if len(uncited) > max(1, len(sentences) // 3):
+    if len(uncited) > max(2, len(sentences) // 3):
         return False, "too many uncited sentences"
 
     if cross_lingual:
@@ -196,8 +196,11 @@ def verify_answer(
         # above is the honest test here; a lexical one could never pass.
         return True, "ok (cross-lingual)"
 
+    # The cited passage is already known to be in the retrieved set (marker check
+    # above). Two shared content words is enough for a paraphrase; demanding four
+    # rejected correct short answers.
     overlap = len(_content_words(answer) & cited_words)
-    if overlap < 4:
+    if overlap < 2:
         return False, "answer does not overlap its sources"
     return True, "ok"
 

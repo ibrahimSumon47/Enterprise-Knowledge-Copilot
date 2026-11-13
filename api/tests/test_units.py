@@ -356,3 +356,19 @@ def test_admin_debug_field_defaults_to_hidden():
     fields = ChatResponse.model_fields
     assert fields["retrieval"].default is None
     assert fields["unavailable"].default is False
+
+
+def test_paraphrase_over_two_content_words_is_accepted():
+    """A cited passage in the retrieved set needs key-term overlap, not four words."""
+    from app.pipeline import verify_answer
+    from app.retrieval import Retrieved
+
+    candidate = Retrieved(
+        chunk_id="c1", document_id="d1", title="Expenses", heading="Receipts",
+        content="Upload the receipt to Navan within 30 days of the purchase.",
+        access_level="public", department=None, is_synthetic=False,
+        source_url=None, license="CC BY-SA 4.0", attribution="GitLab",
+        rrf_score=0.03, rerank_score=0.001, citation_id=1,
+    )
+    ok, reason = verify_answer("Upload the receipt to Navan within 30 days [1].", [candidate])
+    assert ok, reason

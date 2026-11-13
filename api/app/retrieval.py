@@ -179,7 +179,7 @@ async def retrieve(
     return RetrievalResult(candidates=retrieved, top_score=top, confidence=confidence)
 
 
-def build_context(candidates: list[Retrieved], max_chars: int = 5200) -> str:
+def build_context(candidates: list[Retrieved], max_chars: int = 9000) -> str:
     """Number the passages so the model can cite them as [n]."""
     lines: list[str] = []
     used = 0

@@ -53,7 +53,7 @@ A post-filter would be a bug.
 
 | Metric | Value |
 | --- | --- |
-| hit@k | 0.036 |
+| citation hit@k (answer citations, not retrieval) | 0.036 |
 | citation precision | 0.029 |
 | refusal accuracy | 0.412 |
 | p50 / p95 latency | 3 435 / 4 793 ms |
@@ -66,7 +66,7 @@ the questions, and the grounded prompt usually cites one passage, so a single
 non-gold citation scores zero. The floor was lowered to 0.0 and the decision moved
 to the grounded call; the run with that configuration was still queued against the
 free instance when this document was written, so the numbers above describe the
-previous floor. `docs/reports/retrieval_refusals.md` has the retrieval analysis.
+previous floor. `docs/reports/answer_diagnosis.md` shows that hit@k now scores answer citations, not retrieval ranks, and groups the refusals.
 
 ## Security controls
 

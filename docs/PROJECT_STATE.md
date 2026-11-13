@@ -38,7 +38,7 @@ Test split, `--cache-tag product-v2`: hit@k 0.036, citation precision 0.029,
 refusal accuracy 0.412, p50/p95 3 435/4 793 ms, leakage 0. The targets (at most 3
 wrong refusals of 21; 90% of unanswerable refused) were missed. The measured cause
 is the score floor refusing before a model call, plus single-citation answers.
-The floor is now 0.0; a re-measurement was queued but had not reported at handoff.
+The floor is now 0.0; that re-run scored 0.441 refusal accuracy and 0.071 hit@k, so the floor was not the whole cause. `docs/reports/answer_diagnosis.md` records that hit@k now measures answer citations rather than retrieval ranks.
 
 ## Known limits
 

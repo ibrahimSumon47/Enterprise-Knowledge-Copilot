@@ -10,7 +10,13 @@ import pytest
 from app import audit, db
 from app.config import Settings
 from app.ingest import chunk_markdown
-from app.pipeline import REFUSAL, classify, verify_answer
+from app.pipeline import (
+    REFUSAL,
+    classify,
+    closest_sources,
+    parse_grounded_reply,
+    verify_answer,
+)
 from app.redact import redact
 from app.retrieval import Retrieved, retrieve
 
@@ -67,6 +73,22 @@ def test_answer_with_real_citation_passes() -> None:
         [make_candidate(1)],
     )
     assert ok is True, reason
+
+
+def test_grounded_reply_needs_the_json_contract() -> None:
+    payload = parse_grounded_reply(
+        'Sure: {"answerable": true, "answer": "Receipts within 45 days [1].", "citations": [1]}'
+    )
+    assert payload is not None
+    assert payload["answerable"] is True
+    assert payload["citations"] == [1]
+    assert parse_grounded_reply("Employees must submit receipts within 45 days.") is None
+
+
+def test_a_refusal_offers_the_closest_sources() -> None:
+    offered = closest_sources([make_candidate(index) for index in range(1, 5)])
+    assert [item["id"] for item in offered] == [1, 2, 3]
+    assert offered[0]["document_id"] == "doc-1"
 
 
 def test_router_classifies_compensation() -> None:

@@ -482,6 +482,51 @@ async def cache_put(cache_key: str, access_scope: str, answer: dict[str, Any]) -
     )
 
 
+async def record_unanswered(
+    *, user_id: str, role: str, question: str, reason: str, closest: list[dict[str, Any]]
+) -> None:
+    """Queue a refused question so an admin can close the knowledge gap."""
+    await pool().execute(
+        """
+        insert into public.unanswered_questions (user_id, role, question, reason, closest)
+        values ($1::uuid, $2, $3, $4, $5::jsonb)
+        """,
+        user_id,
+        role,
+        question[:2000],
+        reason[:240],
+        json.dumps(closest),
+    )
+
+
+async def list_unanswered(limit: int = 50) -> list[dict[str, Any]]:
+    rows = await pool().fetch(
+        """
+        select id, role, question, reason, closest, created_at
+        from public.unanswered_questions
+        where resolved_at is null
+        order by created_at desc
+        limit $1
+        """,
+        limit,
+    )
+    return [dict(row) for row in rows]
+
+
+async def resolve_unanswered(question_id: str, actor_id: str) -> bool:
+    row = await pool().fetchrow(
+        """
+        update public.unanswered_questions
+        set resolved_at = now(), resolved_by = $2::uuid
+        where id = $1::uuid and resolved_at is null
+        returning id
+        """,
+        question_id,
+        actor_id,
+    )
+    return bool(row)
+
+
 async def ready_checks() -> dict[str, Any]:
     """Readiness probe used by the Space and the check-done script."""
     row = await pool().fetchrow(

@@ -1,0 +1,33 @@
+name: Keep the API warm
+
+on:
+  schedule:
+    # Render's free instance sleeps after 15 idle minutes. A request every ten
+    # keeps it resident; one always-on service stays inside the monthly free
+    # instance hours (see docs/DEPLOY.md).
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-warm
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake the API and record its version
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            if curl -fsS --max-time 90 https://enterprise-knowledge-copilot-2u57.onrender.com/health; then
+              exit 0
+            fi
+            echo "attempt ${attempt} failed; retrying"
+            sleep 15
+          done
+          echo "the API did not answer /health" >&2
+          exit 1

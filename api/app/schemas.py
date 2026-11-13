@@ -44,6 +44,9 @@ class ChatResponse(BaseModel):
     confidence: Literal["high", "medium", "low"]
     refused: bool
     citations: list[Citation]
+    # Offered on a refusal: the closest passages, so the reader has somewhere
+    # to go instead of a dead end.
+    suggestions: list[Citation] = []
     latency_ms: int
     tokens: int
     provider: str

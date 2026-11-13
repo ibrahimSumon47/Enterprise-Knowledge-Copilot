@@ -239,6 +239,19 @@ async def chat(
         },
     )
 
+    outage = bool(result.reason and result.reason.startswith("no language model available"))
+    if result.refused and not outage:
+        try:
+            await db.record_unanswered(
+                user_id=user.id,
+                role=user.role,
+                question=payload.question,
+                reason=result.reason,
+                closest=result.suggestions,
+            )
+        except Exception:  # noqa: BLE001 - the queue must not fail the answer
+            logger.warning("could not record the unanswered question", exc_info=True)
+
     return ChatResponse(
         conversation_id=conversation_id,
         message_id=message_id,
@@ -246,10 +259,11 @@ async def chat(
         confidence=result.confidence if not result.refused else "low",
         refused=result.refused,
         citations=[citation_payload_from_dict(item) for item in result.citations],
+        suggestions=[citation_payload_from_dict(item) for item in result.suggestions],
         latency_ms=result.latency_ms,
         tokens=result.tokens,
         provider=result.provider,
-        outage=bool(result.reason and result.reason.startswith("no language model available")),
+        outage=outage,
     )
 
 
@@ -289,7 +303,26 @@ async def chat_stream(
             yield frame("error", {"detail": "answer failed"})
             return
 
-        yield frame("citations", {"citations": result.citations, "confidence": result.confidence})
+        if result.refused and not result.reason.startswith("no language model available"):
+            try:
+                await db.record_unanswered(
+                    user_id=user.id,
+                    role=user.role,
+                    question=payload.question,
+                    reason=result.reason,
+                    closest=result.suggestions,
+                )
+            except Exception:  # noqa: BLE001 - the queue must not fail the stream
+                logger.warning("could not record the unanswered question", exc_info=True)
+
+        yield frame(
+            "citations",
+            {
+                "citations": result.citations,
+                "suggestions": result.suggestions,
+                "confidence": result.confidence,
+            },
+        )
         async for chunk in stream_tokens(result.answer):
             yield frame("token", {"text": chunk})
 
@@ -420,6 +453,32 @@ async def remove_document(document_id: str, user: AuthUser = Depends(require_adm
         actor_role=user.role,
     )
     raise HTTPException(status_code=403, detail="document deletion is disabled on this deployment")
+
+
+@app.get("/admin/unanswered", tags=["admin"])
+async def unanswered_queue(
+    limit: int = 50, user: AuthUser = Depends(require_admin)
+) -> dict[str, Any]:
+    """Questions the copilot could not answer, newest first."""
+    del user  # the dependency enforces the admin role
+    return {"questions": await db.list_unanswered(max(1, min(limit, 200)))}
+
+
+@app.post("/admin/unanswered/{question_id}/resolve", tags=["admin"])
+async def resolve_unanswered(
+    question_id: str, user: AuthUser = Depends(require_admin)
+) -> dict[str, str]:
+    resolved = await db.resolve_unanswered(question_id, user.id)
+    if not resolved:
+        raise HTTPException(status_code=404, detail="question not found or already resolved")
+    await audit.record(
+        action="knowledge.gap_resolved",
+        resource_type="unanswered_question",
+        resource_id=question_id,
+        actor_id=user.id,
+        actor_role=user.role,
+    )
+    return {"status": "resolved"}
 
 
 @app.post("/admin/ingest", response_model=IngestResponse, tags=["admin"])

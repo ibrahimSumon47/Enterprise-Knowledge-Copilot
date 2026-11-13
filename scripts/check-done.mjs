@@ -76,13 +76,18 @@ const phasesCheck = {
   run: () => {
     const rows = JSON.parse(read("docs/PHASES.json") || "{}");
     const entries = Object.entries(rows);
-    const open = entries.filter(([, row]) => !["done", "limit"].includes(row.status) || !row.evidence);
+    const open = entries.filter(([, row]) => {
+      if (!row.evidence) return true;
+      if (row.status === "done") return false;
+      // Only answer quality may pause on the free LLM quota.
+      return !(row.status === "limit" && row.quota_blocked === true);
+    });
     const done = entries.filter(([, row]) => row.status === "done").length;
     const limits = entries.filter(([, row]) => row.status === "limit").length;
     const notBuilt = entries.filter(([, row]) => row.status === "not_built").length;
     return {
       ok: entries.length > 0 && open.length === 0,
-      evidence: `${entries.length} phases: ${done} done, ${limits} measured limits, ${notBuilt} recorded not built`,
+      evidence: `${entries.length} phases: ${done} done, ${limits} quota limits, ${notBuilt} not built` + (open.length ? `; open: ${open.map(([key]) => key).join(", ")}` : ""),
     };
   },
 };

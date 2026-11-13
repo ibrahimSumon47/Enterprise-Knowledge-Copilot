@@ -2,46 +2,47 @@
   "P1": {
     "title": "Answer quality",
     "status": "limit",
-    "evidence": "Evidence-quote verifier shipped at 6adc1ef with token-overlap matching and unit tests; eval harness throttles, backs off, caches and rejects runs over 5% provider errors. The dev run could not finish because both free providers returned 429/timeouts, so no valid dev or test numbers exist. Test split not measured."
+    "evidence": "Evidence-quote verifier shipped at 6adc1ef with token-overlap matching and unit tests; eval harness throttles, backs off, caches and rejects runs over 5% provider errors. The dev run could not finish because both free providers returned 429/timeouts, so no valid dev or test numbers exist. Test split not measured.",
+    "quota_blocked": true
   },
   "P2a": {
     "title": "Multi-tenant workspaces",
-    "status": "limit",
-    "evidence": "Not built this session; recorded as a scope limit. Organisations, org_id, RLS scoping and the cross-tenant test are not built. The access model remains the seven-role shared workspace."
+    "status": "not_built",
+    "evidence": "Not built. Organisations, org_id, RLS scoping and the cross-tenant test are not built. The access model remains the seven-role shared workspace."
   },
   "P2b": {
     "title": "Browser upload",
-    "status": "limit",
-    "evidence": "Not built this session; recorded as a scope limit. Upload, ingestion progress, re-index and delete are not built; ingestion remains the CLI workflow."
+    "status": "not_built",
+    "evidence": "Not built. Upload, ingestion progress, re-index and delete are not built; ingestion remains the CLI workflow."
   },
   "P2c": {
     "title": "Invites and deactivation",
-    "status": "limit",
-    "evidence": "Not built this session; recorded as a scope limit. Invite links and user deactivation are not built."
+    "status": "not_built",
+    "evidence": "Not built. Invite links and user deactivation are not built."
   },
   "P2d": {
     "title": "Password reset and Google sign-in",
-    "status": "limit",
-    "evidence": "Not built this session; recorded as a scope limit. Not built; no owner-side Google console steps were attempted."
+    "status": "not_built",
+    "evidence": "Not built. Not built; no owner-side Google console steps were attempted."
   },
   "P2e": {
     "title": "Admin analytics, queue actions, audit export, settings",
-    "status": "limit",
-    "evidence": "Not built this session; recorded as a scope limit. The unanswered queue has resolve; analytics, CSV export, add-document and workspace settings are not built."
+    "status": "not_built",
+    "evidence": "Not built. The unanswered queue has resolve; analytics, CSV export, add-document and workspace settings are not built."
   },
   "P3": {
     "title": "Product surface and design",
-    "status": "limit",
-    "evidence": "Public product pages and the sample workspace exist; the full design pass, real screenshots on the landing page and the banned-pattern sweep for this phase were not completed."
+    "status": "not_built",
+    "evidence": "Not built. Public product pages and the sample workspace exist; the full design pass, real screenshots on the landing page and the banned-pattern sweep for this phase were not completed."
   },
   "P4": {
     "title": "Verify like a buyer",
-    "status": "limit",
-    "evidence": "Production sign-in e2e is green; registration, workspace creation, upload, invite, two-workspace isolation, axe and Lighthouse were not run because those features do not exist."
+    "status": "not_built",
+    "evidence": "Not built. Production sign-in e2e is green; registration, workspace creation, upload, invite, two-workspace isolation, axe and Lighthouse were not run because those features do not exist."
   },
   "P5": {
     "title": "Docs",
-    "status": "limit",
-    "evidence": "README, PROJECT_STATE, HANDOFF, llms.txt and DEMO_SCRIPT exist; measured quality numbers are the last valid run and the new phases are documented as not built."
+    "status": "not_built",
+    "evidence": "Not built. README, PROJECT_STATE, HANDOFF, llms.txt and DEMO_SCRIPT exist; measured quality numbers are the last valid run and the new phases are documented as not built."
   }
 }

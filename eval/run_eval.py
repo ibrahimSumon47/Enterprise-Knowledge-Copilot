@@ -335,6 +335,7 @@ def main() -> int:
             {
                 "id": item["id"],
                 "category": item["category"],
+                "answerable": bool(item.get("expect", {}).get("answerable")),
                 "role": role,
                 # A throttled provider refuses without citations, which scores
                 # exactly like a retrieval miss. Keep the evidence to tell them
@@ -355,7 +356,10 @@ def main() -> int:
         )
         return 2
     latencies = sorted(result["latency_ms"] for result in scored)
-    answered = [r for r in scored if r["category"] != "unanswerable"]
+    # The label lives in expect.answerable. The category is a topic, not a
+    # verdict: cross_role and bangla questions can be deliberately unanswerable.
+    answered = [r for r in scored if r["answerable"]]
+    unanswerable = [r for r in scored if not r["answerable"]]
     leaked = sum(result["leaks"] for result in scored)
     retried = [r for r in answered if r.get("retrieval_rank") is not None]
     summary = {
@@ -375,13 +379,17 @@ def main() -> int:
         "p50_latency_ms": latencies[len(latencies) // 2] if latencies else 0,
         "p95_latency_ms": latencies[int(len(latencies) * 0.95) - 1] if latencies else 0,
         "permission_leakage": leaked,
+        "answerable_questions": len(answered),
+        "unanswerable_questions": len(unanswerable),
+        "wrong_refusals": sum(1 for r in answered if not r["refusal_ok"]),
+        "unanswerable_refused": sum(1 for r in unanswerable if r["refusal_ok"]),
         "scored_questions": len(scored),
         "excluded_no_model": len(outages),
     }
     by_provider: dict[str, dict] = {}
     for name in sorted({result["provider"] for result in scored}):
         rows = [result for result in scored if result["provider"] == name]
-        answerable_rows = [r for r in rows if r["category"] != "unanswerable"]
+        answerable_rows = [r for r in rows if r["answerable"]]
         provider_latencies = sorted(r["latency_ms"] for r in rows)
         by_provider[name] = {
             "questions": len(rows),

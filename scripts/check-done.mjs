@@ -46,6 +46,31 @@ const minLinesCheck = (label, path, minimum) => ({
   },
 });
 
+const splitCheck = (label, path) => ({
+  label,
+  run: () => {
+    const rows = read(path).split(String.fromCharCode(10)).filter((line) => line.trim());
+    let answerable = 0;
+    let labelled = 0;
+    for (const row of rows) {
+      try {
+        const item = JSON.parse(row);
+        if (typeof item.expect?.answerable === "boolean") {
+          labelled += 1;
+          if (item.expect.answerable) answerable += 1;
+        }
+      } catch {
+        // an unparseable row fails the count below
+      }
+    }
+    const ok = rows.length > 0 && labelled === rows.length && answerable > 0;
+    return {
+      ok,
+      evidence: `${path}: ${rows.length} questions, ${answerable} answerable, ${rows.length - answerable} unanswerable`,
+    };
+  },
+});
+
 const bannedWordsCheck = (label, files, words) => ({
   label,
   run: () => {
@@ -114,6 +139,8 @@ const phases = {
   P5: [
     fileCheck("golden set", "eval/golden_set.jsonl"),
     minLinesCheck("golden set size", "eval/golden_set.jsonl", 80),
+    splitCheck("test split labels", "eval/golden_test.jsonl"),
+    splitCheck("dev split labels", "eval/golden_dev.jsonl"),
     containsCheck("leakage gate", "eval/run_eval.py", ["leak"]),
   ],
   P6: [

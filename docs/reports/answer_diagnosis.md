@@ -78,3 +78,21 @@ Evidence for the named causes:
 - **Score floor:** the cause. All 19 rows are below 0.01, and the refusal path was `grade -> evidence_grade (grader disabled) -> refuse`.
 
 Fix: `route_after_grade` sends every non-empty candidate set to the grounded call; the score floor only guards the no-candidate case. Regression test: `test_low_scores_still_reach_the_model_when_the_grader_is_off`.
+
+## Slice 1: the test split was never relabelled
+
+`git log --follow -- eval/golden_test.jsonl` returns one commit, `0b432f7`, which
+added the file with 34 questions. There is no later edit, so no label changed
+after results were seen and the test numbers are not contaminated.
+
+The 28/6 count came from the evaluator, not the labels. `run_eval.py` grouped with
+`category != "unanswerable"`, but the label lives in `expect.answerable`; the test
+split's six `cross_role` questions and one `bangla` question are labelled
+unanswerable while their category names a topic. Grouping by the label gives the
+original 21 answerable and 13 unanswerable.
+
+Fix: the evaluator now uses `expect.answerable` for every grouped metric and
+reports `wrong_refusals`, `unanswerable_refused`, `answerable_questions` and
+`unanswerable_questions`. `check-done` reads both split files and prints their
+counts instead of carrying a number in the script.
+

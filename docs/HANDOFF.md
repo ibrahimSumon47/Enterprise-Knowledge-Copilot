@@ -83,3 +83,35 @@ limit. Phases 2 to 5 are recorded in `docs/PHASES.json` as scope limits; start
 with 2a (organisations and org_id scoping) because the upload, invite and
 isolation tests all depend on it.
 
+## Slice status, 2026-11-13
+
+Done and applied: 2a-1 schema. `20261113150000_organisations.sql` adds
+organizations, org_members, groups, org_id on documents/chunks/conversations/
+messages/feedback/audit_log/unanswered_questions, membership RLS, and
+`search_chunks_org`. `db-migrate.yml` applied it and ran
+`supabase/tests/cross_tenant.sql`, which passed: a sample-workspace admin sees
+zero documents and zero chunks of a second organisation while its own documents
+remain readable.
+
+Next slice, 2a-2 retrieval, in this order:
+
+1. `api/app/auth.py`: after verifying the JWT, read `org_members` for the user
+   (active row, one org per user for now), put `org_id`, `role` and `department`
+   into `AuthUser`, and reject a user with no active membership except the
+   onboarding route.
+2. `api/app/db.py`: `search_chunks(org_id, ...)` must call
+   `public.search_chunks_org`; update every caller in `retrieval.py` and
+   `main.py` (`/admin/retrieval`, `/admin/recall`).
+3. Scope every read: documents/library, conversations/messages, feedback,
+   audit_log, unanswered_questions, answer_cache and ingest_jobs by the member's
+   org. Never read an org from the request body or an unverified header.
+4. Add `api/tests/test_org_scope.py` with two orgs and a swapped-org case for
+   chat, library, search, feedback, audit and unanswered; the expected result is
+   exactly zero rows for the foreign org.
+5. Mark `P2a` done in `docs/PHASES.json` only after that test runs in CI.
+
+Remaining after 2a: 2a-3 onboarding and sign-up organisation creation, 2a-4
+red-team gate, then 2b upload, 2c invites, 2d auth, 2e analytics, 3 design,
+4 buyer flow, 5 docs. `node scripts/check-done.mjs` stays red until then and
+names the open phases.
+

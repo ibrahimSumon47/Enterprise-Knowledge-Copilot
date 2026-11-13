@@ -71,6 +71,22 @@ const splitCheck = (label, path) => ({
   },
 });
 
+const phasesCheck = {
+  label: "phase status",
+  run: () => {
+    const rows = JSON.parse(read("docs/PHASES.json") || "{}");
+    const entries = Object.entries(rows);
+    const open = entries.filter(([, row]) => !["done", "limit"].includes(row.status) || !row.evidence);
+    const done = entries.filter(([, row]) => row.status === "done").length;
+    const limits = entries.filter(([, row]) => row.status === "limit").length;
+    const notBuilt = entries.filter(([, row]) => row.status === "not_built").length;
+    return {
+      ok: entries.length > 0 && open.length === 0,
+      evidence: `${entries.length} phases: ${done} done, ${limits} measured limits, ${notBuilt} recorded not built`,
+    };
+  },
+};
+
 const bannedWordsCheck = (label, files, words) => ({
   label,
   run: () => {
@@ -141,6 +157,7 @@ const phases = {
     minLinesCheck("golden set size", "eval/golden_set.jsonl", 80),
     splitCheck("test split labels", "eval/golden_test.jsonl"),
     splitCheck("dev split labels", "eval/golden_dev.jsonl"),
+    phasesCheck,
     containsCheck("leakage gate", "eval/run_eval.py", ["leak"]),
   ],
   P6: [

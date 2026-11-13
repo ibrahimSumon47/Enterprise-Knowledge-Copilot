@@ -1,0 +1,47 @@
+{
+  "P1": {
+    "title": "Answer quality",
+    "status": "limit",
+    "evidence": "Evidence-quote verifier shipped at 6adc1ef with token-overlap matching and unit tests; eval harness throttles, backs off, caches and rejects runs over 5% provider errors. The dev run could not finish because both free providers returned 429/timeouts, so no valid dev or test numbers exist. Test split not measured."
+  },
+  "P2a": {
+    "title": "Multi-tenant workspaces",
+    "status": "not_built",
+    "evidence": "Organisations, org_id, RLS scoping and the cross-tenant test are not built. The access model remains the seven-role shared workspace."
+  },
+  "P2b": {
+    "title": "Browser upload",
+    "status": "not_built",
+    "evidence": "Upload, ingestion progress, re-index and delete are not built; ingestion remains the CLI workflow."
+  },
+  "P2c": {
+    "title": "Invites and deactivation",
+    "status": "not_built",
+    "evidence": "Invite links and user deactivation are not built."
+  },
+  "P2d": {
+    "title": "Password reset and Google sign-in",
+    "status": "not_built",
+    "evidence": "Not built; no owner-side Google console steps were attempted."
+  },
+  "P2e": {
+    "title": "Admin analytics, queue actions, audit export, settings",
+    "status": "not_built",
+    "evidence": "The unanswered queue has resolve; analytics, CSV export, add-document and workspace settings are not built."
+  },
+  "P3": {
+    "title": "Product surface and design",
+    "status": "limit",
+    "evidence": "Public product pages and the sample workspace exist; the full design pass, real screenshots on the landing page and the banned-pattern sweep for this phase were not completed."
+  },
+  "P4": {
+    "title": "Verify like a buyer",
+    "status": "limit",
+    "evidence": "Production sign-in e2e is green; registration, workspace creation, upload, invite, two-workspace isolation, axe and Lighthouse were not run because those features do not exist."
+  },
+  "P5": {
+    "title": "Docs",
+    "status": "limit",
+    "evidence": "README, PROJECT_STATE, HANDOFF, llms.txt and DEMO_SCRIPT exist; measured quality numbers are the last valid run and the new phases are documented as not built."
+  }
+}

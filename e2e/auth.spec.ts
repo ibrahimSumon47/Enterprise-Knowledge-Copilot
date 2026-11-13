@@ -36,7 +36,7 @@ test.beforeAll(async () => {
 
 async function signIn(page: Page, email: string) {
   await page.goto("/login", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("form[data-auth-version='2']")).toBeVisible();
+  await expect(page.locator("form[data-auth-version='3'][data-ready='true']")).toBeVisible();
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
@@ -49,7 +49,7 @@ test("the sign-in form cannot fall back to a native GET submit", async ({ page }
     if (request.url().includes("password=")) leaked.push(request.url());
   });
   await page.goto("/login");
-  const form = page.locator("form[data-auth-version='2']");
+  const form = page.locator("form[data-auth-version='3'][data-ready='true']");
   await expect(form).toHaveAttribute("method", "post");
   await page.getByLabel("Email").fill("admin@ekc.local");
   await page.getByLabel("Password").fill(password);

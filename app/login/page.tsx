@@ -2,7 +2,7 @@
 
 import { KeyRound, Loader2, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { ROLES, ROLE_LABEL } from "@/lib/site";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
@@ -19,8 +19,7 @@ function safeNext(value: string | null) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("employee@ekc.local");
-  const [password, setPassword] = useState("");
+  const emailRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // The form is inert until React has hydrated. Without this, a browser that
@@ -32,6 +31,11 @@ export default function LoginPage() {
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!ready) return;
+    // Uncontrolled inputs: a browser that autofills before React hydrates keeps
+    // its values instead of having them replaced by empty state.
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
     setBusy(true);
     setError(null);
     try {
@@ -72,7 +76,9 @@ export default function LoginPage() {
               <button
                 key={role}
                 className="chip mono"
-                onClick={() => setEmail(`${role}@ekc.local`)}
+                onClick={() => {
+                  if (emailRef.current) emailRef.current.value = `${role}@ekc.local`;
+                }}
                 type="button"
               >
                 {ROLE_LABEL[role]}
@@ -87,7 +93,8 @@ export default function LoginPage() {
 
         <form
           className="panel p-6"
-          data-auth-version="2"
+          data-auth-version="3"
+          data-ready={ready ? "true" : "false"}
           method="post"
           onSubmit={signIn}
         >
@@ -100,11 +107,12 @@ export default function LoginPage() {
           <input
             autoComplete="username"
             className="input mt-1"
+            defaultValue="employee@ekc.local"
             id="email"
-            onChange={(event) => setEmail(event.target.value)}
+            name="email"
+            ref={emailRef}
             required
             type="email"
-            value={email}
           />
           <label className="mt-4 block text-xs text-[var(--text-muted)]" htmlFor="password">
             Password
@@ -113,10 +121,9 @@ export default function LoginPage() {
             autoComplete="current-password"
             className="input mt-1"
             id="password"
-            onChange={(event) => setPassword(event.target.value)}
+            name="password"
             required
             type="password"
-            value={password}
           />
           {error ? (
             <p className="mt-4 rounded-lg border border-[var(--danger)] px-3 py-2 text-xs text-[var(--danger)]">

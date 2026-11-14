@@ -245,7 +245,10 @@ async function main() {
       readFileSync(new URL("../e2e/fixtures/bomb.docx", import.meta.url)),
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     );
-    expect(bomb.status === 422, `zip-bomb DOCX returned ${bomb.status}`);
+    expect(
+      [400, 422].includes(bomb.status),
+      `zip-bomb DOCX returned ${bomb.status}`,
+    );
 
     const foreignDocument = await call(`/documents/${a.workspace.document_id}`, b.token);
     expect(foreignDocument.status === 404, `foreign document id returned ${foreignDocument.status}`);

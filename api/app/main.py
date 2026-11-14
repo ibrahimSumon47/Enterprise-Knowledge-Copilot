@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from . import audit, db, ingest
-from .auth import AuthUser, current_user, decode_token, require_admin
+from .auth import AuthUser, current_user, decode_token, require_admin, require_owner
 from .config import Settings, get_settings
 from .embeddings import embed_documents, embed_query, rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
@@ -275,6 +275,18 @@ async def first_document(
     return {"status": "added", "document_id": document_id}
 
 
+@app.delete("/workspace", tags=["auth"])
+async def delete_workspace(user: AuthUser = Depends(require_owner)) -> dict[str, str]:
+    """Delete the workspace and everything in it. Owners only.
+
+    An admin can run the workspace but cannot destroy it; ownership is never
+    transferred by this route.
+    """
+    if not await db.delete_workspace(user.org_id):
+        raise HTTPException(status_code=404, detail="workspace not found")
+    return {"status": "deleted"}
+
+
 @app.get("/me", response_model=MeResponse, tags=["auth"])
 async def me(user: AuthUser = Depends(current_user)) -> MeResponse:
     return MeResponse(
@@ -282,6 +294,7 @@ async def me(user: AuthUser = Depends(current_user)) -> MeResponse:
         email=user.email,
         role=user.role,
         department=user.department,
+        org_id=user.org_id,
         visible_levels=VISIBLE.get(user.role, ["public"]),
     )
 

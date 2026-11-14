@@ -611,6 +611,48 @@ async def record_feedback(
     return row is not None
 
 
+async def delete_workspace(org_id: str) -> bool:
+    """Owner-only destructive delete. Audit rows are detached, never deleted.
+
+    The audit chain is global and must stay verifiable, so removing a workspace
+    keeps its historical entries with a null org instead of breaking the hashes.
+    """
+    async with pool().acquire() as connection:
+        async with connection.transaction():
+            exists = await connection.fetchval(
+                "select id from public.organizations where id = $1 for update", org_id
+            )
+            if exists is None:
+                return False
+            await connection.execute(
+                "delete from public.feedback where org_id = $1", org_id
+            )
+            await connection.execute(
+                "delete from public.messages where org_id = $1", org_id
+            )
+            await connection.execute(
+                "delete from public.conversations where org_id = $1", org_id
+            )
+            await connection.execute("delete from public.chunks where org_id = $1", org_id)
+            await connection.execute(
+                "delete from public.documents where org_id = $1", org_id
+            )
+            await connection.execute(
+                "delete from public.unanswered_questions where org_id = $1", org_id
+            )
+            await connection.execute(
+                "update public.audit_log set org_id = null where org_id = $1", org_id
+            )
+            await connection.execute("delete from public.groups where org_id = $1", org_id)
+            await connection.execute(
+                "delete from public.org_members where org_id = $1", org_id
+            )
+            await connection.execute(
+                "delete from public.organizations where id = $1", org_id
+            )
+            return True
+
+
 async def org_name(org_id: str) -> str | None:
     row = await pool().fetchrow(
         "select name from public.organizations where id = $1", org_id

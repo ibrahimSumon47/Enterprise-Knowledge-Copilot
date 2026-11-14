@@ -164,6 +164,10 @@ const phases = {
     splitCheck("dev split labels", "eval/golden_dev.jsonl"),
     phasesCheck,
     containsCheck("leakage gate", "eval/run_eval.py", ["leak"]),
+    containsCheck("cross-tenant isolation gate", ".github/workflows/isolation.yml", [
+      "isolation_suite.mjs",
+      "SUPABASE_SERVICE_ROLE_KEY",
+    ]),
   ],
   P6: [
     fileCheck("threat model", "docs/THREAT_MODEL.md"),

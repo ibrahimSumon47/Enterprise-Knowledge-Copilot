@@ -125,6 +125,7 @@ class MeResponse(BaseModel):
     email: str
     role: str
     department: str | None
+    org_id: str
     visible_levels: list[str]
 
 

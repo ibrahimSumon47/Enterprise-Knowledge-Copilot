@@ -134,6 +134,24 @@ export default function LoginPage() {
         </noscript>
       </form>
 
+      <div className="mt-4 flex items-center justify-between text-xs">
+        <a className="underline decoration-dotted" href="/forgot-password">
+          Forgot password?
+        </a>
+        <button
+          className="btn"
+          onClick={() =>
+            supabaseBrowser().auth.signInWithOAuth({
+              provider: "google",
+              options: { redirectTo: `${window.location.origin}/chat` },
+            })
+          }
+          type="button"
+        >
+          Continue with Google
+        </button>
+      </div>
+
       <p className="mt-5 text-xs leading-6 text-[var(--text-muted)]">
         No account yet?{" "}
         <a className="underline decoration-dotted" href="/register">

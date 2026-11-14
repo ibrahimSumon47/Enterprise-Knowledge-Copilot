@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/chat", "/admin", "/audit", "/traces"];
+const PROTECTED = ["/chat", "/admin", "/audit", "/traces", "/onboarding"];
 
 /** Refreshes the Supabase session and guards authenticated routes. */
 export async function updateSession(request: NextRequest) {

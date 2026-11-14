@@ -74,6 +74,36 @@ class ChatResponse(BaseModel):
     raw_reply: str | None = None
 
 
+class SignupRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=200)
+    password: str = Field(min_length=10, max_length=200)
+
+    @field_validator("email")
+    @classmethod
+    def valid_email(cls, value: str) -> str:
+        cleaned = value.strip().lower()
+        if "@" not in cleaned or cleaned.startswith("@") or cleaned.endswith("@"):
+            raise ValueError("a valid email is required")
+        return cleaned
+
+
+class WorkspaceNameRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+
+    @field_validator("name")
+    @classmethod
+    def strip_name(cls, value: str) -> str:
+        cleaned = " ".join(value.split())
+        if len(cleaned) < 2:
+            raise ValueError("workspace name is too short")
+        return cleaned
+
+
+class FirstDocumentRequest(BaseModel):
+    title: str = Field(min_length=2, max_length=160)
+    text: str = Field(min_length=40, max_length=50_000)
+
+
 class FeedbackRequest(BaseModel):
     message_id: str
     rating: Literal[-1, 1]

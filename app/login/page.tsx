@@ -122,8 +122,11 @@ export default function LoginPage() {
       </form>
 
       <p className="mt-5 text-xs leading-6 text-[var(--text-muted)]">
-        No account yet? Ask an administrator to invite you, or open the sample workspace from the
-        home page.
+        No account yet?{" "}
+        <a className="underline decoration-dotted" href="/register">
+          Create a workspace
+        </a>
+        , ask an administrator to invite you, or open the sample workspace from the home page.
       </p>
       <form action="/api/sample-workspace" className="mt-3" method="post">
         <button className="text-xs underline decoration-dotted" type="submit">

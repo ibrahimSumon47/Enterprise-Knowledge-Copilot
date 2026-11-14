@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import re
+import uuid
 from datetime import datetime
 from typing import Any
 
@@ -76,6 +78,10 @@ async def search_chunks(
         limit,
     )
     return [dict(row) for row in rows]
+
+
+def _slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:80]
 
 
 async def insert_document(document: dict[str, Any]) -> str:
@@ -231,6 +237,50 @@ async def rate_limit_hit(user_id: str, limit: int, window_seconds: int) -> tuple
                 "insert into public.rate_events (user_id) values ($1)", user_id
             )
             return True, max(0, limit - int(count) - 1)
+
+
+async def create_workspace(user_id: str, email: str, name: str) -> str:
+    """Create an empty workspace and make the signer-up its owner."""
+    async with pool().acquire() as connection:
+        async with connection.transaction():
+            await connection.execute(
+                """
+                insert into public.profiles (id, email, role)
+                values ($1::uuid, $2, 'employee')
+                on conflict (id) do nothing
+                """,
+                user_id,
+                email,
+            )
+            row = await connection.fetchrow(
+                """
+                insert into public.organizations (name, slug, created_by)
+                values ($1, $2, $3::uuid)
+                returning id
+                """,
+                name[:80],
+                f"{_slug(name)[:40] or 'workspace'}-{uuid.uuid4().hex[:8]}",
+                user_id,
+            )
+            await connection.execute(
+                """
+                insert into public.org_members (org_id, user_id, role)
+                values ($1, $2::uuid, 'owner')
+                on conflict (org_id, user_id) do update set role = 'owner'
+                """,
+                row["id"],
+                user_id,
+            )
+            return str(row["id"])
+
+
+async def rename_workspace(org_id: str, name: str) -> bool:
+    row = await pool().fetchrow(
+        "update public.organizations set name = $2 where id = $1 returning id",
+        org_id,
+        name[:80],
+    )
+    return row is not None
 
 
 async def profile_for(user_id: str) -> dict[str, Any] | None:
@@ -559,6 +609,13 @@ async def record_feedback(
         org_id,
     )
     return row is not None
+
+
+async def org_name(org_id: str) -> str | None:
+    row = await pool().fetchrow(
+        "select name from public.organizations where id = $1", org_id
+    )
+    return str(row["name"]) if row else None
 
 
 async def list_unanswered(org_id: str, limit: int = 50) -> list[dict[str, Any]]:

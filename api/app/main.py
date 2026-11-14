@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator
 
+import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -18,7 +19,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from . import audit, db, ingest
 from .auth import AuthUser, current_user, decode_token, require_admin
 from .config import Settings, get_settings
-from .embeddings import embed_query, rerank_state
+from .embeddings import embed_documents, embed_query, rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
 from .providers import GeminiProvider, build_router, list_gemini_models, probe_gemini
 from .redact import hash_identifier
@@ -30,9 +31,12 @@ from .schemas import (
     DocumentUpdate,
     EvalRun,
     FeedbackRequest,
+    FirstDocumentRequest,
     IngestResponse,
     MeResponse,
     ReadyResponse,
+    SignupRequest,
+    WorkspaceNameRequest,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -52,6 +56,7 @@ VISIBLE = {
     "hr": ["public", "employee", "department:people"],
     "finance": ["public", "employee", "department:finance"],
     "admin": ["public", "employee", "department", "confidential"],
+    "owner": ["public", "employee", "department", "confidential"],
 }
 
 
@@ -149,6 +154,125 @@ async def ready(settings: Settings = Depends(get_settings)) -> ReadyResponse:
         profiles=int(counts["profiles"]),
         providers=app.state.router.health(),
     )
+
+
+@app.post("/signup", status_code=201, tags=["auth"])
+async def signup(
+    payload: SignupRequest, settings: Settings = Depends(get_settings)
+) -> dict[str, str]:
+    """Create a confirmed account and an empty workspace owned by it.
+
+    Supabase's admin endpoint is used so a new account can start working without
+    an email round trip on the free tier. The workspace name is a placeholder;
+    onboarding renames it before anything is asked.
+    """
+    if not settings.supabase_url or not settings.supabase_service_role_key:
+        raise HTTPException(status_code=503, detail="sign-up is not configured")
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            response = await client.post(
+                f"{settings.supabase_url.rstrip('/')}/auth/v1/admin/users",
+                headers={
+                    "apikey": settings.supabase_service_role_key,
+                    "Authorization": f"Bearer {settings.supabase_service_role_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "email": payload.email,
+                    "password": payload.password,
+                    "email_confirm": True,
+                },
+            )
+    except httpx.HTTPError as exc:
+        logger.warning("signup request failed: %s", type(exc).__name__)
+        raise HTTPException(status_code=502, detail="sign-up provider unavailable") from exc
+    if response.status_code >= 400:
+        logger.info("signup rejected: %s", response.status_code)
+        raise HTTPException(
+            status_code=409, detail="an account with that email already exists"
+        )
+    user_id = str(response.json().get("id", ""))
+    if not user_id:
+        raise HTTPException(status_code=502, detail="sign-up returned no user")
+    await db.create_workspace(user_id, payload.email, "My workspace")
+    return {"status": "created", "email": payload.email}
+
+
+@app.get("/onboarding", tags=["auth"])
+async def onboarding_state(user: AuthUser = Depends(current_user)) -> dict[str, Any]:
+    return {
+        "workspace": await db.org_name(user.org_id) or "My workspace",
+        "role": user.role,
+        "email": user.email,
+        "first_question": "What can this workspace answer?",
+    }
+
+
+@app.patch("/onboarding/workspace", tags=["auth"])
+async def rename_workspace(
+    payload: WorkspaceNameRequest, user: AuthUser = Depends(require_admin)
+) -> dict[str, str]:
+    if user.role != "owner":
+        raise HTTPException(status_code=403, detail="owner role required")
+    if not await db.rename_workspace(user.org_id, payload.name):
+        raise HTTPException(status_code=404, detail="workspace not found")
+    await audit.record(
+        org_id=user.org_id,
+        action="workspace.renamed",
+        resource_type="organization",
+        resource_id=user.org_id,
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"name": payload.name},
+    )
+    return {"status": "updated", "name": payload.name}
+
+
+@app.post("/onboarding/document", tags=["auth"])
+async def first_document(
+    payload: FirstDocumentRequest,
+    user: AuthUser = Depends(require_admin),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, str]:
+    """Add the workspace's first document from pasted text.
+
+    This is the onboarding path; the full browser upload with files, progress and
+    re-index arrives in the upload slice and reuses the same document/chunk shape.
+    """
+    text = payload.text.strip()
+    embedding = await asyncio.to_thread(embed_documents, [text], settings)
+    document_id = await db.insert_document(
+        {
+            "org_id": user.org_id,
+            "slug": f"onboarding-{uuid.uuid4().hex[:10]}",
+            "title": payload.title,
+            "access_level": "employee",
+            "content_hash": uuid.uuid4().hex,
+            "metadata": {"onboarding": True},
+        }
+    )
+    await db.replace_chunks(
+        document_id,
+        [
+            {
+                "ordinal": 1,
+                "heading": "Overview",
+                "content": text,
+                "token_count": len(text.split()),
+                "embedding": embedding[0],
+            }
+        ],
+    )
+    await audit.record(
+        org_id=user.org_id,
+        action="document.added",
+        resource_type="document",
+        resource_id=document_id,
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"title": payload.title, "onboarding": True},
+    )
+    return {"status": "added", "document_id": document_id}
 
 
 @app.get("/me", response_model=MeResponse, tags=["auth"])

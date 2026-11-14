@@ -89,6 +89,13 @@ async def current_user(request: Request, settings: Settings = Depends(get_settin
 
 
 def require_admin(user: AuthUser = Depends(current_user)) -> AuthUser:
-    if user.role != "admin":
+    if user.role not in {"admin", "owner"}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="admin role required")
+    return user
+
+
+def require_owner(user: AuthUser = Depends(current_user)) -> AuthUser:
+    """Owner-only actions: delete workspace, transfer ownership, remove admins."""
+    if user.role != "owner":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="owner role required")
     return user

@@ -4,6 +4,29 @@
 \set ON_ERROR_STOP on
 begin;
 
+select count(*) as owner_constraint
+from pg_constraint
+where conrelid = 'public.org_members'::regclass
+  and conname = 'org_members_role_check'
+  and pg_get_constraintdef(oid) like '%owner%'
+\gset
+\if :owner_constraint
+\else
+  \echo 'owner role constraint is missing'
+  \quit 1
+\endif
+
+select count(*) as owner_index
+from pg_indexes
+where schemaname = 'public'
+  and indexname = 'organizations_one_owner_idx'
+\gset
+\if :owner_index
+\else
+  \echo 'single-owner index is missing'
+  \quit 1
+\endif
+
 select count(*) as policy_count
 from pg_policies
 where schemaname = 'public'

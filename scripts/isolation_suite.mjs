@@ -135,7 +135,13 @@ async function waitForDeploy() {
       const response = await fetch(`${apiBase}/openapi.json`, { signal: AbortSignal.timeout(45_000) });
       if (response.ok) {
         const spec = await response.json();
-        if (spec.paths?.["/signup"] && spec.paths?.["/workspace"]?.delete) return;
+        if (
+          spec.paths?.["/signup"] &&
+          spec.paths?.["/workspace"]?.delete &&
+          spec.paths?.["/documents/upload"]
+        ) {
+          return;
+        }
       }
     } catch {
       /* keep waiting for Render */

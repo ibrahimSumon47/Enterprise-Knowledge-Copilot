@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import os
+import secrets
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, AsyncIterator
 
 import httpx
@@ -17,7 +19,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from . import audit, db, ingest, storage, uploads
-from .auth import AuthUser, current_user, decode_token, require_admin, require_owner
+from .auth import (
+    AuthUser,
+    current_identity,
+    current_user,
+    decode_token,
+    require_admin,
+    require_owner,
+)
 from .config import Settings, get_settings
 from .embeddings import embed_documents, embed_query, rerank_state
 from .pipeline import answer_question, build_graph, stream_tokens
@@ -32,7 +41,10 @@ from .schemas import (
     EvalRun,
     FeedbackRequest,
     FirstDocumentRequest,
+    GroupRequest,
     IngestResponse,
+    InviteRequest,
+    MemberUpdate,
     MeResponse,
     ReadyResponse,
     SignupRequest,
@@ -196,6 +208,14 @@ async def signup(
     user_id = str(response.json().get("id", ""))
     if not user_id:
         raise HTTPException(status_code=502, detail="sign-up returned no user")
+    if payload.invite_token:
+        token_hash = hashlib.sha256(payload.invite_token.encode("utf-8")).hexdigest()
+        joined = await db.redeem_invite_for(token_hash, user_id)
+        if not joined:
+            raise HTTPException(
+                status_code=422, detail="invite is invalid, expired or already used"
+            )
+        return {"status": "joined", "email": payload.email}
     await db.create_workspace(user_id, payload.email, "My workspace")
     return {"status": "created", "email": payload.email}
 
@@ -289,6 +309,162 @@ async def delete_workspace(user: AuthUser = Depends(require_owner)) -> dict[str,
     return {"status": "deleted"}
 
 
+@app.get("/admin/groups", tags=["admin"])
+async def groups(user: AuthUser = Depends(require_admin)) -> dict[str, Any]:
+    return {"groups": await db.list_groups(user.org_id)}
+
+
+@app.post("/admin/groups", status_code=201, tags=["admin"])
+async def create_group(
+    payload: GroupRequest, user: AuthUser = Depends(require_admin)
+) -> dict[str, Any]:
+    group = await db.create_group(user.org_id, payload.name)
+    return {"id": str(group["id"]), "name": group["name"]}
+
+
+@app.post("/admin/invites", status_code=201, tags=["admin"])
+async def create_invite(
+    payload: InviteRequest, request: Request, user: AuthUser = Depends(require_admin)
+) -> dict[str, Any]:
+    """Return a copyable, single-use invitation link. Only its hash is stored."""
+    if payload.role == "admin" and user.role != "owner":
+        raise HTTPException(status_code=403, detail="only an owner can invite an admin")
+    if payload.group_id and not await db.group_in_org(payload.group_id, user.org_id):
+        raise HTTPException(status_code=422, detail="group does not belong to this workspace")
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=payload.expires_hours)
+    invite = await db.create_invite(
+        org_id=user.org_id,
+        token_hash=token_hash,
+        role=payload.role,
+        group_id=payload.group_id,
+        created_by=user.id,
+        expires_at=expires_at,
+        max_uses=payload.max_uses,
+    )
+    await audit.record(
+        org_id=user.org_id,
+        action="invite.created",
+        resource_type="invite",
+        resource_id=str(invite["id"]),
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"role": payload.role, "max_uses": payload.max_uses},
+    )
+    return {
+        "id": str(invite["id"]),
+        "token": token,
+        "path": f"/invite/{token}",
+        "role": payload.role,
+        "group_id": payload.group_id,
+        "expires_at": invite["expires_at"].isoformat(),
+        "max_uses": payload.max_uses,
+    }
+
+
+@app.get("/admin/invites", tags=["admin"])
+async def invites(user: AuthUser = Depends(require_admin)) -> dict[str, Any]:
+    rows = await db.list_invites(user.org_id)
+    return {
+        "invites": [
+            {
+                **row,
+                "id": str(row["id"]),
+                "group_id": str(row["group_id"]) if row["group_id"] else None,
+                "expires_at": row["expires_at"].isoformat(),
+                "created_at": row["created_at"].isoformat(),
+            }
+            for row in rows
+        ]
+    }
+
+
+@app.delete("/admin/invites/{invite_id}", tags=["admin"])
+async def revoke_invite(
+    invite_id: str, user: AuthUser = Depends(require_admin)
+) -> dict[str, str]:
+    if not await db.revoke_invite(invite_id, user.org_id):
+        raise HTTPException(status_code=404, detail="invite not found")
+    await audit.record(
+        org_id=user.org_id,
+        action="invite.revoked",
+        resource_type="invite",
+        resource_id=invite_id,
+        actor_id=user.id,
+        actor_role=user.role,
+    )
+    return {"status": "revoked"}
+
+
+@app.post("/invites/{token}/accept", tags=["auth"])
+async def accept_invite(
+    token: str, identity: Any = Depends(current_identity)
+) -> dict[str, str]:
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    org_id = await db.accept_invite(token_hash)
+    if not org_id:
+        raise HTTPException(status_code=404, detail="invite is invalid, expired or used")
+    await audit.record(
+        org_id=org_id,
+        action="invite.accepted",
+        resource_type="invite",
+        actor_id=identity.id,
+        actor_role="member",
+    )
+    return {"status": "joined"}
+
+
+@app.get("/admin/members", tags=["admin"])
+async def members(user: AuthUser = Depends(require_admin)) -> dict[str, Any]:
+    rows = await db.list_members(user.org_id)
+    return {
+        "members": [
+            {
+                **row,
+                "user_id": str(row["user_id"]),
+                "group_id": str(row["group_id"]) if row["group_id"] else None,
+                "created_at": row["created_at"].isoformat(),
+            }
+            for row in rows
+        ]
+    }
+
+
+@app.patch("/admin/members/{user_id}", tags=["admin"])
+async def update_member(
+    user_id: str, payload: MemberUpdate, user: AuthUser = Depends(require_admin)
+) -> dict[str, str]:
+    target = await db.member_role(user.org_id, user_id)
+    if target is None:
+        raise HTTPException(status_code=404, detail="member not found")
+    if target == "owner":
+        raise HTTPException(status_code=403, detail="ownership cannot be changed here")
+    if target == "admin" and user.role != "owner":
+        raise HTTPException(status_code=403, detail="only an owner can change an admin")
+    if payload.role == "admin" and user.role != "owner":
+        raise HTTPException(status_code=403, detail="only an owner can grant admin")
+    if payload.group_id and not await db.group_in_org(payload.group_id, user.org_id):
+        raise HTTPException(status_code=422, detail="group does not belong to this workspace")
+    if payload.status == "deactivated" and user_id == user.id:
+        raise HTTPException(status_code=400, detail="you cannot deactivate yourself")
+    updated = await db.update_member(
+        user.org_id, user_id, payload.role, payload.status, payload.group_id
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="member not found")
+    await audit.record(
+        org_id=user.org_id,
+        action="member.updated",
+        resource_type="member",
+        resource_id=user_id,
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"role": payload.role, "status": payload.status},
+    )
+    return {"status": "updated"}
+
+
 @app.get("/me", response_model=MeResponse, tags=["auth"])
 async def me(user: AuthUser = Depends(current_user)) -> MeResponse:
     return MeResponse(
@@ -348,6 +524,7 @@ async def chat(
         user.org_id,
         user.role,
         user.department,
+        user.group_id,
         settings,
         app.state.router,
         app.state.graph,
@@ -451,6 +628,7 @@ async def chat_stream(
                 user.org_id,
                 user.role,
                 user.department,
+                user.group_id,
                 settings,
                 app.state.router,
                 app.state.graph,
@@ -602,6 +780,7 @@ async def _index_upload(
 async def upload_document(
     file: UploadFile = File(...),
     title: str | None = Form(default=None),
+    group_id: str | None = Form(default=None),
     user: AuthUser = Depends(current_user),
     settings: Settings = Depends(get_settings),
 ) -> dict[str, Any]:
@@ -636,6 +815,8 @@ async def upload_document(
     except uploads.UploadError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
 
+    if group_id and not await db.group_in_org(group_id, user.org_id):
+        raise HTTPException(status_code=422, detail="group does not belong to this workspace")
     used = await db.org_storage_used(user.org_id)
     if used + len(buffer) > uploads.MAX_ORG_BYTES:
         raise HTTPException(
@@ -667,6 +848,7 @@ async def upload_document(
         storage_path=path,
         mime_type=mime,
         content_hash=hash_identifier(path),
+        group_id=group_id,
     )
     await audit.record(
         org_id=user.org_id,
@@ -754,7 +936,9 @@ async def reindex_document(
 
 @app.get("/documents", tags=["documents"])
 async def documents(user: AuthUser = Depends(current_user)) -> dict[str, Any]:
-    rows = await db.list_documents(user.org_id, user.role, user.department)
+    rows = await db.list_documents(
+        user.org_id, user.role, user.department, user.group_id
+    )
     return {"documents": rows, "role": user.role}
 
 
@@ -925,8 +1109,9 @@ async def retrieval_debug(
     result = await retrieve(
         question,
         _.org_id,
-        role if _.role == "admin" else _.role,
+        role if _.role in ("admin", "owner") else _.role,
         department,
+        _.group_id,
         settings,
         all_candidates,
     )
@@ -970,8 +1155,9 @@ async def recall_debug(
         embedding=embedding,
         query_text=question,
         org_id=_.org_id,
-        role=role if _.role == "admin" else _.role,
+        role=role if _.role in ("admin", "owner") else _.role,
         department=department,
+        group_id=_.group_id,
         limit=max(1, min(k, 100)),
     )
     return {

@@ -24,6 +24,7 @@ class AuthUser:
     role: str
     department: str | None
     org_id: str
+    group_id: str | None
     raw_token: str
 
 
@@ -84,8 +85,30 @@ async def current_user(request: Request, settings: Settings = Depends(get_settin
         role=str(profile.get("org_role") or profile["role"]),
         department=profile["department"],
         org_id=str(profile["org_id"]),
+        group_id=str(profile["group_id"]) if profile.get("group_id") else None,
         raw_token=token,
     )
+
+
+@dataclass(frozen=True)
+class Identity:
+    """A verified sign-in without a workspace membership, for invite acceptance."""
+
+    id: str
+    email: str
+
+
+async def current_identity(
+    request: Request, settings: Settings = Depends(get_settings)
+) -> Identity:
+    header = request.headers.get("authorization", "")
+    if not header.lower().startswith("bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="missing token")
+    claims = decode_token(header.split(" ", 1)[1].strip(), settings)
+    user_id = str(claims.get("sub", ""))
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="token has no subject")
+    return Identity(id=user_id, email=str(claims.get("email", "")))
 
 
 def require_admin(user: AuthUser = Depends(current_user)) -> AuthUser:

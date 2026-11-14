@@ -71,6 +71,7 @@ async def retrieve(
     org_id: str,
     role: str,
     department: str | None,
+    group_id: str | None,
     settings: Settings,
     all_candidates: bool = False,
 ) -> RetrievalResult:
@@ -83,6 +84,7 @@ async def retrieve(
         org_id=org_id,
         role=role,
         department=department,
+        group_id=group_id,
         limit=settings.candidate_limit,
     )
 

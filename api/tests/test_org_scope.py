@@ -30,6 +30,7 @@ def member(org: str = ORG_A, role: str = "admin") -> AuthUser:
         role=role,
         department=None,
         org_id=org,
+        group_id=None,
         raw_token="token",
     )
 
@@ -109,8 +110,12 @@ def test_documents_use_membership_org_and_ignore_a_header(
 ) -> None:
     captured: dict[str, Any] = {}
 
-    async def fake_documents(org_id: str, role: str, department: str | None) -> list[Any]:
-        captured.update(org_id=org_id, role=role, department=department)
+    async def fake_documents(
+        org_id: str, role: str, department: str | None, group_id: str | None = None
+    ) -> list[Any]:
+        captured.update(
+            org_id=org_id, role=role, department=department, group_id=group_id
+        )
         return []
 
     monkeypatch.setattr(db, "list_documents", fake_documents)
@@ -194,6 +199,6 @@ def test_search_passes_the_member_org_to_the_sql_function(
     from app.retrieval import retrieve
 
     asyncio.run(
-        retrieve("policy?", ORG_A, "employee", None, api.get_settings())
+        retrieve("policy?", ORG_A, "employee", None, None, api.get_settings())
     )
     assert captured["org_id"] == ORG_A

@@ -253,6 +253,74 @@ async function main() {
     const foreignDocument = await call(`/documents/${a.workspace.document_id}`, b.token);
     expect(foreignDocument.status === 404, `foreign document id returned ${foreignDocument.status}`);
 
+    // Group-scoped visibility: a member of the same workspace in no group must
+    // not retrieve a group-only document, and an invite must be single-use.
+    const groupResponse = await call("/admin/groups", a.token, {
+      method: "POST",
+      body: JSON.stringify({ name: `Finance ${stamp}` }),
+    });
+    const group = await json(groupResponse);
+    expect(groupResponse.status === 201, `group create returned ${groupResponse.status}`);
+
+    const inviteResponse = await call("/admin/invites", a.token, {
+      method: "POST",
+      body: JSON.stringify({ role: "admin", group_id: null, max_uses: 1, expires_hours: 72 }),
+    });
+    const invite = await json(inviteResponse);
+    expect(inviteResponse.status === 201, `invite create returned ${inviteResponse.status}`);
+
+    const cEmail = `isolation-c-${stamp}@ekc-e2e.test`;
+    const cPassword = `Ekc-c-${randomUUID()}`;
+    const joined = await call("/signup", null, {
+      method: "POST",
+      body: JSON.stringify({ email: cEmail, password: cPassword, invite_token: invite.token }),
+    });
+    expect(joined.status === 201, `invited signup returned ${joined.status}`);
+    const cSession = await signin(cEmail, cPassword);
+    state.push({ email: cEmail, password: cPassword, ...cSession });
+
+    const reused = await call("/signup", null, {
+      method: "POST",
+      body: JSON.stringify({ email: `isolation-reuse-${stamp}@ekc-e2e.test`, password: cPassword, invite_token: invite.token }),
+    });
+    expect(reused.status === 422, `reused invite returned ${reused.status}`);
+
+    const groupTitle = `group-${stamp}.md`;
+    const groupBody = new FormData();
+    groupBody.set("file", new Blob([
+      `# Group finance ${stamp}\n\nOnly the finance group may read this receipt policy. Approval above 25 USD is required.`,
+    ], { type: "text/markdown" }), groupTitle);
+    groupBody.set("group_id", group.id);
+    const groupUpload = await fetch(`${apiBase}/documents/upload`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${a.token}` },
+      body: groupBody,
+    });
+    const groupDoc = await json(groupUpload);
+    expect(groupUpload.status === 202, `group upload returned ${groupUpload.status}`);
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      const status = await json(await call(`/documents/${groupDoc.document_id}`, a.token));
+      if (status.status === "active") break;
+      if (status.status === "failed") throw new Error(`group document failed: ${status.error}`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+
+    const cRecall = await json(
+      await call(`/admin/recall?question=${encodeURIComponent("group finance receipt policy")}&k=50`, cSession.token),
+    );
+    const cTitles = (cRecall.candidates ?? []).map((row) => row.title);
+    expect(
+      !cTitles.includes(groupTitle),
+      "a non-member of the group retrieved its document",
+    );
+    const aRecall = await json(
+      await call(`/admin/recall?question=${encodeURIComponent("group finance receipt policy")}&k=50`, a.token),
+    );
+    expect(
+      JSON.stringify(aRecall).includes(groupTitle),
+      "the owner could not retrieve the group document",
+    );
+
     // A shared answer link guessed by B is not found.
     const [conversation] = await service("/conversations", {
       method: "POST",

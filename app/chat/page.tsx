@@ -127,9 +127,14 @@ export default function ChatPage() {
               {email ? `Signed in as ${email}` : "Checking your session…"}
             </p>
           </div>
-          <button className="btn" onClick={signOut} type="button">
-            <LogOut size={14} /> Sign out
-          </button>
+          <div className="flex items-center gap-2">
+            <a className="btn" href="/settings">
+              Settings
+            </a>
+            <button className="btn" onClick={signOut} type="button">
+              <LogOut size={14} /> Sign out
+            </button>
+          </div>
         </header>
 
         <WarmupBanner />

@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { site } from "@/lib/site";
 
 /** Hydration marker: false in SSR HTML, true once React is running. */
 const subscribeToHydration = () => () => {};
@@ -50,6 +51,18 @@ export default function LoginPage() {
       }
       if (!data.session) {
         setError("This account has not been confirmed yet. Ask an administrator to confirm it.");
+        return;
+      }
+      const check = await fetch(
+        `${site.apiBaseUrl.replace(/\/$/, "")}/me`,
+        {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+          signal: AbortSignal.timeout(20_000),
+        },
+      );
+      if (check.status === 403) {
+        await supabaseBrowser().auth.signOut();
+        setError("This account has no active workspace membership. Ask your owner to reactivate you.");
         return;
       }
       router.replace(safeNext(new URLSearchParams(window.location.search).get("next")));

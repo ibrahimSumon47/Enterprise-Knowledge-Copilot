@@ -15,6 +15,7 @@ def user(role: str) -> AuthUser:
         role=role,
         department=None,
         org_id="11111111-1111-1111-1111-111111111111",
+        group_id=None,
         raw_token="token",
     )
 

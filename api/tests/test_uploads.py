@@ -26,6 +26,7 @@ def member(org: str = ORG_A, role: str = "owner") -> AuthUser:
         role=role,
         department=None,
         org_id=org,
+        group_id=None,
         raw_token="token",
     )
 

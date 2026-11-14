@@ -77,6 +77,7 @@ class ChatResponse(BaseModel):
 class SignupRequest(BaseModel):
     email: str = Field(min_length=5, max_length=200)
     password: str = Field(min_length=10, max_length=200)
+    invite_token: str | None = Field(default=None, max_length=200)
 
     @field_validator("email")
     @classmethod
@@ -97,6 +98,38 @@ class WorkspaceNameRequest(BaseModel):
         if len(cleaned) < 2:
             raise ValueError("workspace name is too short")
         return cleaned
+
+
+INVITE_ROLES = (
+    "admin",
+    "guest",
+    "employee",
+    "engineering",
+    "security",
+    "hr",
+    "finance",
+)
+
+
+class InviteRequest(BaseModel):
+    role: Literal[
+        "admin", "guest", "employee", "engineering", "security", "hr", "finance"
+    ] = "employee"
+    group_id: str | None = None
+    max_uses: int = Field(default=1, ge=1, le=100)
+    expires_hours: int = Field(default=72, ge=1, le=720)
+
+
+class GroupRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+
+
+class MemberUpdate(BaseModel):
+    role: Literal[
+        "admin", "guest", "employee", "engineering", "security", "hr", "finance"
+    ] | None = None
+    status: Literal["active", "deactivated"] | None = None
+    group_id: str | None = None
 
 
 class FirstDocumentRequest(BaseModel):

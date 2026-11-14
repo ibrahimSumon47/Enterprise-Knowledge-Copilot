@@ -67,6 +67,7 @@ STOPWORDS = {
 class PipelineState(TypedDict, total=False):
     question: str
     org_id: str
+    group_id: str | None
     role: str
     department: str | None
     route: str
@@ -383,7 +384,12 @@ def build_graph(router: ProviderRouter, settings: Settings):
         # Retrieve with the English form; answer in the language that was asked.
         query = await _retrieval_question(state["question"], router)
         result = await retrieve(
-            query, state["org_id"], state["role"], state.get("department"), settings
+            query,
+            state["org_id"],
+            state["role"],
+            state.get("department"),
+            state.get("group_id"),
+            settings,
         )
         return {
             "candidates": result.candidates,
@@ -576,6 +582,7 @@ async def answer_question(
     org_id: str,
     role: str,
     department: str | None,
+    group_id: str | None,
     settings: Settings,
     router: ProviderRouter,
     graph: Any,
@@ -586,6 +593,7 @@ async def answer_question(
         {
             "question": question,
             "org_id": org_id,
+            "group_id": group_id,
             "role": role,
             "department": department,
         }

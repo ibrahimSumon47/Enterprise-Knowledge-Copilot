@@ -17,13 +17,14 @@ export default function RegisterPage() {
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
+    const inviteToken = new URLSearchParams(window.location.search).get("invite");
     setBusy(true);
     setError(null);
     try {
       const response = await fetch(`${site.apiBaseUrl.replace(/\/$/, "")}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, invite_token: inviteToken }),
       });
       if (!response.ok) {
         const detail = await response.text().catch(() => "");
@@ -42,7 +43,7 @@ export default function RegisterPage() {
         setError(authError.message);
         return;
       }
-      router.replace("/onboarding");
+      router.replace(inviteToken ? "/chat" : "/onboarding");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Registration failed");

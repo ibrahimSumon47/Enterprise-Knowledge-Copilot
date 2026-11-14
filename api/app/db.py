@@ -21,7 +21,7 @@ _pool: asyncpg.Pool | None = None
 SEARCH_SQL = """
 select chunk_id, document_id, title, heading, content, access_level, department,
        is_synthetic, source_url, license, attribution, rrf_score
-from public.search_chunks_org($1::vector, $2::text, $3::uuid, $4::text, $5::text, $6::int)
+from public.search_chunks_grouped($1::vector, $2::text, $3::uuid, $4::text, $5::text, $6::uuid, $7::int)
 """
 
 
@@ -65,9 +65,10 @@ async def search_chunks(
     org_id: str,
     role: str,
     department: str | None,
+    group_id: str | None,
     limit: int,
 ) -> list[dict[str, Any]]:
-    """Hybrid search with the organisation and access predicates in SQL."""
+    """Hybrid search with organisation, group and access predicates in SQL."""
     rows = await pool().fetch(
         SEARCH_SQL,
         _vector_literal(embedding),
@@ -75,6 +76,7 @@ async def search_chunks(
         org_id,
         role,
         department or "",
+        group_id,
         limit,
     )
     return [dict(row) for row in rows]
@@ -287,7 +289,7 @@ async def profile_for(user_id: str) -> dict[str, Any] | None:
     row = await pool().fetchrow(
         """
         select p.id, p.email, p.role, p.department,
-               m.org_id, m.role as org_role
+               m.org_id, m.role as org_role, m.group_id
         from public.profiles p
         left join public.org_members m
           on m.user_id = p.id and m.status = 'active'
@@ -452,7 +454,7 @@ async def audit_page(org_id: str, limit: int = 100) -> list[dict[str, Any]]:
 
 
 async def list_documents(
-    org_id: str, role: str, department: str | None
+    org_id: str, role: str, department: str | None, group_id: str | None = None
 ) -> list[dict[str, Any]]:
     """Admin/inventory listing that still applies the access predicate."""
     rows = await pool().fetch(
@@ -463,6 +465,7 @@ async def list_documents(
         from public.documents d
         where status in ('active', 'processing', 'failed')
           and org_id = $3
+          and (group_id is null or group_id = $4)
           and (
             $1 = 'admin'
             or ($1 = 'guest' and access_level = 'public')
@@ -476,6 +479,7 @@ async def list_documents(
         role,
         department or "",
         org_id,
+        group_id,
     )
     return [dict(row) for row in rows]
 
@@ -520,13 +524,14 @@ async def create_upload_document(
     storage_path: str,
     mime_type: str,
     content_hash: str,
+    group_id: str | None = None,
 ) -> str:
     row = await pool().fetchrow(
         """
         insert into public.documents
           (org_id, slug, title, access_level, content_hash, status, metadata,
-           uploaded_by, file_size, storage_path, mime_type)
-        values ($1,$2,$3,'employee',$4,'processing',$5::jsonb,$6::uuid,$7,$8,$9)
+           uploaded_by, file_size, storage_path, mime_type, group_id)
+        values ($1,$2,$3,'employee',$4,'processing',$5::jsonb,$6::uuid,$7,$8,$9,$10)
         returning id
         """,
         org_id,
@@ -538,6 +543,7 @@ async def create_upload_document(
         file_size,
         storage_path,
         mime_type,
+        group_id,
     )
     return str(row["id"])
 
@@ -809,6 +815,179 @@ async def resolve_unanswered(question_id: str, org_id: str, actor_id: str) -> bo
         actor_id,
     )
     return bool(row)
+
+
+async def group_in_org(group_id: str, org_id: str) -> bool:
+    row = await pool().fetchval(
+        "select id from public.groups where id = $1 and org_id = $2", group_id, org_id
+    )
+    return row is not None
+
+
+async def list_groups(org_id: str) -> list[dict[str, Any]]:
+    rows = await pool().fetch(
+        "select id, name, created_at from public.groups where org_id = $1 order by name",
+        org_id,
+    )
+    return [dict(row) for row in rows]
+
+
+async def create_group(org_id: str, name: str) -> dict[str, Any]:
+    row = await pool().fetchrow(
+        """
+        insert into public.groups (org_id, name) values ($1, $2)
+        on conflict (org_id, name) do update set name = excluded.name
+        returning id, name, created_at
+        """,
+        org_id,
+        name[:80],
+    )
+    return dict(row)
+
+
+async def create_invite(
+    *,
+    org_id: str,
+    token_hash: str,
+    role: str,
+    group_id: str | None,
+    created_by: str,
+    expires_at: datetime,
+    max_uses: int,
+) -> dict[str, Any]:
+    row = await pool().fetchrow(
+        """
+        insert into public.invites
+          (org_id, token_hash, role, group_id, created_by, expires_at, max_uses)
+        values ($1,$2,$3,$4,$5::uuid,$6,$7)
+        returning id, role, group_id, expires_at, max_uses, use_count, created_at
+        """,
+        org_id,
+        token_hash,
+        role,
+        group_id,
+        created_by,
+        expires_at,
+        max_uses,
+    )
+    return dict(row)
+
+
+async def list_invites(org_id: str) -> list[dict[str, Any]]:
+    rows = await pool().fetch(
+        """
+        select id, role, group_id, expires_at, max_uses, use_count, revoked_at,
+               created_at
+        from public.invites where org_id = $1 order by created_at desc limit 100
+        """,
+        org_id,
+    )
+    return [dict(row) for row in rows]
+
+
+async def revoke_invite(invite_id: str, org_id: str) -> bool:
+    row = await pool().fetchrow(
+        """
+        update public.invites set revoked_at = now()
+        where id = $1 and org_id = $2 and revoked_at is null
+        returning id
+        """,
+        invite_id,
+        org_id,
+    )
+    return row is not None
+
+
+async def redeem_invite_for(token_hash: str, user_id: str) -> str | None:
+    """Redeem an invite for a just-created account (no JWT context yet)."""
+    async with pool().acquire() as connection:
+        async with connection.transaction():
+            invite = await connection.fetchrow(
+                """
+                select id, org_id, role, group_id from public.invites
+                where token_hash = $1 and revoked_at is null
+                  and expires_at > now() and use_count < max_uses
+                for update
+                """,
+                token_hash,
+            )
+            if invite is None:
+                return None
+            await connection.execute(
+                """
+                insert into public.org_members (org_id, user_id, role, group_id)
+                values ($1, $2::uuid, $3, $4)
+                on conflict (org_id, user_id) do nothing
+                """,
+                invite["org_id"],
+                user_id,
+                invite["role"],
+                invite["group_id"],
+            )
+            await connection.execute(
+                """
+                update public.invites set use_count = use_count + 1,
+                  last_used_at = now()
+                where id = $1
+                """,
+                invite["id"],
+            )
+            return str(invite["org_id"])
+
+
+async def accept_invite(token_hash: str) -> str | None:
+    try:
+        row = await pool().fetchrow(
+            "select public.accept_invite($1) as org_id", token_hash
+        )
+    except asyncpg.PostgresError:
+        return None
+    return str(row["org_id"]) if row else None
+
+
+async def list_members(org_id: str) -> list[dict[str, Any]]:
+    rows = await pool().fetch(
+        """
+        select m.user_id, p.email, m.role, m.department, m.group_id, g.name as group_name,
+               m.status, m.created_at
+        from public.org_members m
+        left join public.profiles p on p.id = m.user_id
+        left join public.groups g on g.id = m.group_id
+        where m.org_id = $1 order by m.created_at
+        """,
+        org_id,
+    )
+    return [dict(row) for row in rows]
+
+
+async def member_role(org_id: str, user_id: str) -> str | None:
+    row = await pool().fetchrow(
+        "select role from public.org_members where org_id = $1 and user_id = $2::uuid",
+        org_id,
+        user_id,
+    )
+    return str(row["role"]) if row else None
+
+
+async def update_member(
+    org_id: str, user_id: str, role: str | None, status: str | None, group_id: str | None
+) -> bool:
+    row = await pool().fetchrow(
+        """
+        update public.org_members m
+        set role = coalesce($3, m.role),
+            status = coalesce($4, m.status),
+            group_id = coalesce($5, m.group_id)
+        where m.org_id = $1 and m.user_id = $2::uuid and m.role <> 'owner'
+        returning m.user_id
+        """,
+        org_id,
+        user_id,
+        role,
+        status,
+        group_id,
+    )
+    return row is not None
 
 
 async def ready_checks() -> dict[str, Any]:

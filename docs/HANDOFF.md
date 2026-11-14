@@ -106,7 +106,37 @@ ids return 404. `api/tests/test_org_scope.py` covers a forged token org claim, a
 swapped `X-Org-Id` header, guessed ids and two org identifiers at the API layer;
 `supabase/tests/cross_tenant.sql` covers the database layer.
 
-### Next: 2a-3 onboarding
+### P2a finished (2026-11-14)
+
+Owner role, signup-created workspace, onboarding, and the real two-workspace
+isolation suite are done and green. P2a is `done` in `docs/PHASES.json`; evidence
+is in `docs/ISOLATION.md` (run 43565180117, checks=8, violations=0).
+
+### Next: 2b browser upload
+
+1. `api/app/main.py`: add `POST /documents/upload` (multipart, 5 MB cap) that
+   parses `.pdf` with `pypdf`, `.docx` with `python-docx`, `.html` by stripping
+   tags and `.txt/.md` as UTF-8. Reuse `ingest.chunk_markdown`, `embed_documents`
+   and `db.insert_document` with `org_id` from the caller. Add both parser
+   packages to `api/requirements.txt`.
+2. `DELETE /documents/{id}` currently refuses every caller. Make it owner/admin
+   scoped and allow it only outside the sample workspace; add
+   `POST /documents/{id}/reindex` that re-embeds the document's chunks.
+3. `api/tests`: upload rejects another tenant's document id, parsing works for
+   text and HTML, and the tenant is taken from membership.
+4. Web: add an upload form to `/library` with file picker, progress state and
+   per-document re-index/delete actions; refresh the list when done.
+5. Verify on production, then mark P2b done with the run/report evidence.
+
+### After 2b
+
+2c invites by copyable link with role and group plus deactivation; 2d password
+reset and Google sign-in with owner console steps in `docs/OWNER_TODO.md`; 2e
+analytics, unanswered actions, audit CSV export and workspace settings; then P3
+design, P4 buyer verification, P5 docs. `node scripts/check-done.mjs` is red only
+on those phases.
+
+## Earlier note: 2a-3 onboarding
 
 1. `POST /onboarding` (authenticated): create `organizations` (slug from name +
    random suffix), insert `org_members` with role `owner`, and link the caller.

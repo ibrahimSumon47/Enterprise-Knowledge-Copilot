@@ -4,6 +4,28 @@ on:
   schedule:
     - cron: "41 3 * * *"
   workflow_dispatch:
+    inputs:
+      split:
+        description: Golden split to run
+        type: choice
+        options: [dev, test, all]
+        default: dev
+      subset:
+        description: Run the deterministic 12-question sample
+        type: boolean
+        default: true
+      cache_tag:
+        description: Answer-cache tag; change it when code changes
+        type: string
+        default: nightly
+      throttle:
+        description: Seconds between live questions
+        type: number
+        default: 2
+      retry_outage:
+        description: Retries per provider outage
+        type: number
+        default: 3
 
 permissions:
   contents: read
@@ -12,6 +34,7 @@ jobs:
   llm-eval:
     name: sampled LLM eval
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: read
     steps:
@@ -33,9 +56,14 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
+          SPLIT: ${{ inputs.split || 'dev' }}
+          SUBSET: ${{ inputs.subset == false && '' || '--subset' }}
+          CACHE_TAG: ${{ inputs.cache_tag || 'nightly' }}
+          THROTTLE: ${{ inputs.throttle || 2 }}
+          RETRY_OUTAGE: ${{ inputs.retry_outage || 3 }}
         run: |
-          python eval/run_eval.py --split dev --subset --retry-outage 3 --retry-wait 60 \
-            --cache-tag nightly
+          python eval/run_eval.py --split "$SPLIT" $SUBSET --retry-outage "$RETRY_OUTAGE" \
+            --retry-wait 60 --throttle "$THROTTLE" --cache-tag "$CACHE_TAG"
       - name: Save the answer cache
         if: always()
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4

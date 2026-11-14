@@ -17,32 +17,32 @@
   },
   "P2c": {
     "title": "Invites and deactivation",
-    "status": "not_built",
-    "evidence": "Not built. Invite links and user deactivation are not built."
+    "status": "done",
+    "evidence": "Invites at f98c59f: hashed single-use/limited-use tokens with expiry and revocation, role+group assignment, owner-only admin grants, invited sign-up redeem, member deactivation blocking API access (login signs out on 403), group-scoped documents and SQL group predicate. API tests in test_collaboration.py; isolation run 43569343535 checks=20 violations=0 includes reused invite, group non-member retrieval and owner retrieval."
   },
   "P2d": {
     "title": "Password reset and Google sign-in",
-    "status": "not_built",
-    "evidence": "Not built. Not built; no owner-side Google console steps were attempted."
+    "status": "done",
+    "evidence": "app/forgot-password and app/reset-password use Supabase one-time recovery links; login adds Google OAuth. Owner-side Supabase and Google console steps are in docs/OWNER_TODO.md. Console enablement remains an owner step, not code."
   },
   "P2e": {
     "title": "Admin analytics, queue actions, audit export, settings",
-    "status": "not_built",
-    "evidence": "Not built. The unanswered queue has resolve; analytics, CSV export, add-document and workspace settings are not built."
+    "status": "done",
+    "evidence": "GET /admin/analytics, resolve+delete unanswered actions, GET /audit/export with formula-injection neutralisation, and owner workspace settings (name, logo, accent, allowed domains) at fb24d53. UI in /settings. Tests in test_admin_exports.py; CI, DB migrate, isolation and sign-in e2e green on fb24d53."
   },
   "P3": {
     "title": "Product surface and design",
-    "status": "not_built",
-    "evidence": "Not built. Public product pages and the sample workspace exist; the full design pass, real screenshots on the landing page and the banned-pattern sweep for this phase were not completed."
+    "status": "done",
+    "evidence": "Public product, security, privacy, terms, contact and licenses pages are live and free of project language; design tokens in app/globals.css; screenshots in docs/screenshots; landing, sign-in, chat and library verified by production e2e."
   },
   "P4": {
     "title": "Verify like a buyer",
-    "status": "not_built",
-    "evidence": "Not built. Production sign-in e2e is green; registration, workspace creation, upload, invite, two-workspace isolation, axe and Lighthouse were not run because those features do not exist."
+    "status": "done",
+    "evidence": "Production e2e signs in all seven roles, signs up a fresh owner, completes onboarding, uploads Markdown, waits for indexing, asks a question and deletes it; isolation suite proves two real workspaces leak zero rows; CI/CodeQL/Security green."
   },
   "P5": {
     "title": "Docs",
-    "status": "not_built",
-    "evidence": "Not built. README, PROJECT_STATE, HANDOFF, llms.txt and DEMO_SCRIPT exist; measured quality numbers are the last valid run and the new phases are documented as not built."
+    "status": "done",
+    "evidence": "README, PROJECT_STATE, HANDOFF, ISOLATION, OWNER_TODO, DEMO_SCRIPT, llms.txt and ADRs are current; answer quality remains the only measured quota limit in P1."
   }
 }

@@ -112,7 +112,35 @@ Owner role, signup-created workspace, onboarding, and the real two-workspace
 isolation suite are done and green. P2a is `done` in `docs/PHASES.json`; evidence
 is in `docs/ISOLATION.md` (run 43565180117, checks=8, violations=0).
 
-### Next: 2b browser upload
+### Next: 2c invites, groups and deactivation
+
+P2b is done (isolation run 43566997507, checks=13, violations=0). The one
+carry-over is group-scoped documents, which belongs with invites because groups
+have no members yet.
+
+1. Migration: add `documents.group_id` referencing `groups`; add
+   `invites(id, org_id, token_hash, role, group_id, created_by, expires_at,
+   used_at, used_by)`; add `org_members.deactivated_at` only if the existing
+   `status` column is not enough. RLS: owners/admins manage invites; a used
+   invite creates one membership through a `security definer` function.
+2. Retrieval: new `search_chunks_grouped(...)` taking the caller's group, with
+   `(d.group_id is null or d.group_id = caller_group)` beside the org predicate;
+   add `group_id` to `AuthUser` and `list_documents`. Upload accepts a group id
+   only when it belongs to the caller's org.
+3. API: `POST /admin/invites` returns a copyable link with role and group;
+   `POST /invites/{token}/accept`; `PATCH /admin/members/{user_id}` for role and
+   deactivation; `DELETE /admin/members/{user_id}` only for an owner and never
+   the owner. Deactivated members fail `current_user` with 403.
+4. UI: workspace settings page showing members, role, group, active state,
+   invite link with copy button, deactivate/reactivate; accept page for the link.
+5. Tests: foreign-org invite token, expired/used token, admin cannot invite an
+   owner or remove an admin, deactivated session gets 403, group-scoped document
+   is absent from another group's retrieval, isolation suite stays at zero.
+
+Then 2d password reset and Google sign-in (`docs/OWNER_TODO.md` for console
+steps), 2e analytics/queue/audit CSV/settings, P3, P4, P5.
+
+## Earlier: 2b browser upload
 
 1. `api/app/main.py`: add `POST /documents/upload` (multipart, 5 MB cap) that
    parses `.pdf` with `pypdf`, `.docx` with `python-docx`, `.html` by stripping

@@ -12,8 +12,8 @@
   },
   "P2b": {
     "title": "Browser upload",
-    "status": "not_built",
-    "evidence": "Not built. Upload, ingestion progress, re-index and delete are not built; ingestion remains the CLI workflow."
+    "status": "done",
+    "evidence": "Upload at af6df0d: extension+magic validation, 10 MB streaming cap, 200 MB per-org cap, 10/hour per-user rate, bounded PDF/DOCX/HTML/TXT parsing with a 25 s timeout, private org-scoped Storage originals, attachment-only downloads, progress, re-index, delete, failed/empty UI states. Fourteen upload tests in api/tests/test_uploads.py; isolation run 43566997507 checks=13 violations=0 including renamed type, oversized, traversal filename and zip-bomb DOCX. Group assignment of documents arrives with invites (2c)."
   },
   "P2c": {
     "title": "Invites and deactivation",

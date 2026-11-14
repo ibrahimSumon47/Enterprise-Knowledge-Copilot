@@ -74,10 +74,10 @@
     },
     {
       "id": "F-011",
-      "description": "Admin panel for upload, classification and re-index",
+      "description": "Admin and owner document upload, classification, re-index and delete",
       "acceptance": "admin changes a document access level and the audit log records it",
       "status": "pass",
-      "evidence": "app/admin/page.tsx edits access level and department via PATCH /documents/{id}; the API writes document.access_changed to the audit chain and the nightly reset workflow reverses drift; deletion answers 403 (api/tests/test_units.py)"
+      "evidence": "app/library/page.tsx uploads with progress and failed states, re-indexes and deletes; PATCH /documents/{id} changes access; DELETE protects sample corpus and removes chunks plus the stored original; api/tests/test_uploads.py; isolation run 43566997507"
     },
     {
       "id": "F-012",

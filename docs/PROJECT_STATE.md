@@ -61,6 +61,7 @@ change is provider routing and answerability prompting, not search.
    empty workspace, onboarding adds the first document, and the real two-workspace
    red-team suite reports zero leakage (`docs/ISOLATION.md`). Invites, deactivation,
    analytics and workspace settings remain.
-3. Document upload from the browser (PDF/DOCX/HTML) is still the CLI ingestion
-   workflow; onboarding accepts pasted text.
+3. Browser upload is built with type/magic checks, size and rate caps, private
+   Storage originals, progress, re-index and delete; the remaining gap is
+   group-scoped documents, which arrives with invites in 2c.
 4. Google OAuth and password reset are not wired.

@@ -41,4 +41,11 @@ organisation so the global hash chain stays verifiable.
   `checks=8 violations=0` on commit `078eab1`.
 - Production sign-up and onboarding: Sign-in e2e run on `53d7308`.
 - Database policies and owner constraint: DB migrate run on `3721dc6`.
+## Upload attacks (2b)
+
+Run [43566997507](https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot/actions/runs/43566997507)
+adds a renamed PDF, an oversized upload, a traversal filename, a zip-bomb DOCX
+and another tenant's document id to the same suite: `checks=13 violations=0`.
+`api/tests/test_uploads.py` covers each guard directly, including HTML scripts
+and styles never reaching the corpus.
 

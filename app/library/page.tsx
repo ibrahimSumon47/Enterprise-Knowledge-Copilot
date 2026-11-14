@@ -14,9 +14,14 @@ type DocumentRow = {
   license: string;
   attribution: string;
   is_synthetic?: boolean;
+  status?: string;
+  error?: string | null;
+  progress?: number;
 };
 
 type Me = { email: string; role: string };
+
+const API = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://enterprise-knowledge-copilot-2u57.onrender.com").replace(/\/$/, "");
 
 const LEVEL_LABEL: Record<string, string> = {
   public: "Public",
@@ -32,6 +37,9 @@ export default function LibraryPage() {
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string>("employee");
+  const [uploading, setUploading] = useState(false);
+  const [uploadNote, setUploadNote] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = supabaseBrowser();
@@ -46,9 +54,10 @@ export default function LibraryPage() {
     if (!token) return;
     let active = true;
     Promise.all([apiFetch<{ documents: DocumentRow[] }>("/documents", token), apiFetch<Me>("/me", token)])
-      .then(([docs]) => {
+      .then(([docs, me]) => {
         if (!active) return;
         setDocuments(docs.documents ?? []);
+        setRole(me.role);
       })
       .catch((caught) => {
         if (!active) return;
@@ -73,6 +82,76 @@ export default function LibraryPage() {
   }, [documents, query]);
 
   const sample = email === "guest@ekc.local";
+  const canManage = !sample && ["owner", "admin"].includes(role);
+
+  async function refresh() {
+    if (!token) return;
+    const data = await apiFetch<{ documents: DocumentRow[] }>("/documents", token);
+    setDocuments(data.documents ?? []);
+  }
+
+  async function upload(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token) return;
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const file = form.get("file");
+    if (!(file instanceof File) || file.size === 0) {
+      setUploadNote("Choose a file first.");
+      return;
+    }
+    setUploading(true);
+    setUploadNote("Uploading…");
+    try {
+      const response = await fetch(`${API}/documents/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.detail ?? `Upload failed (${response.status})`);
+      for (let attempt = 0; attempt < 60; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const status = await apiFetch<DocumentRow>(`/documents/${data.document_id}`, token);
+        if (status.status === "failed") {
+          setUploadNote(status.error ?? "Indexing failed");
+          break;
+        }
+        if (status.status === "active") {
+          setUploadNote("Indexed and ready to answer from.");
+          break;
+        }
+        setUploadNote(`Indexing… ${status.progress ?? 0}%`);
+      }
+      formElement.reset();
+      await refresh();
+    } catch (caught) {
+      setUploadNote(caught instanceof Error ? caught.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function remove(document: DocumentRow) {
+    if (!token || !window.confirm(`Delete ${document.title} and its stored original?`)) return;
+    try {
+      await apiFetch(`/documents/${document.id}`, token, { method: "DELETE" });
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Delete failed");
+    }
+  }
+
+  async function reindex(document: DocumentRow) {
+    if (!token) return;
+    try {
+      await apiFetch(`/documents/${document.id}/reindex`, token, { method: "POST" });
+      setUploadNote("Re-index queued.");
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Re-index failed");
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -121,6 +200,33 @@ export default function LibraryPage() {
         </p>
       ) : null}
 
+      {canManage ? (
+        <form className="panel mt-4 flex flex-wrap items-end gap-3 p-4" onSubmit={upload}>
+          <div className="min-w-56 flex-1">
+            <label className="block text-xs text-[var(--text-muted)]" htmlFor="upload-file">
+              Upload a document (PDF, DOCX, MD, HTML, TXT · 10 MB)
+            </label>
+            <input
+              accept=".pdf,.docx,.md,.markdown,.html,.htm,.txt"
+              className="input mt-1"
+              id="upload-file"
+              name="file"
+              required
+              type="file"
+            />
+          </div>
+          <button className="btn btn-primary" disabled={uploading} type="submit">
+            {uploading ? <Loader2 className="animate-spin" size={15} /> : null}
+            Upload
+          </button>
+          {uploadNote ? (
+            <p className="w-full text-xs text-[var(--text-muted)]" role="status">
+              {uploadNote}
+            </p>
+          ) : null}
+        </form>
+      ) : null}
+
       <div className="panel mt-5 overflow-hidden">
         {loading ? (
           <div className="divide-y divide-[var(--border)]">
@@ -159,10 +265,38 @@ export default function LibraryPage() {
                     {document.attribution}
                     {document.department ? ` · ${document.department}` : ""}
                   </p>
+                  {document.status === "failed" ? (
+                    <p className="mt-1 text-xs text-[var(--danger)]">
+                      Indexing failed: {document.error ?? "unknown reason"}
+                    </p>
+                  ) : null}
+                  {document.status === "processing" ? (
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
+                      Indexing… {document.progress ?? 0}%
+                    </p>
+                  ) : null}
                 </div>
                 <span className="chip text-[10px]">
                   {LEVEL_LABEL[document.access_level] ?? document.access_level}
                 </span>
+                {canManage && !document.is_synthetic ? (
+                  <div className="flex gap-2">
+                    <button
+                      className="text-xs underline decoration-dotted"
+                      onClick={() => reindex(document)}
+                      type="button"
+                    >
+                      Re-index
+                    </button>
+                    <button
+                      className="text-xs text-[var(--danger)] underline decoration-dotted"
+                      onClick={() => remove(document)}
+                      type="button"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

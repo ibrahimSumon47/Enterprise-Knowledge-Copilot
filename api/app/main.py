@@ -12,11 +12,11 @@ from datetime import datetime, timezone
 from typing import Any, AsyncIterator
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 
-from . import audit, db, ingest
+from . import audit, db, ingest, storage, uploads
 from .auth import AuthUser, current_user, decode_token, require_admin, require_owner
 from .config import Settings, get_settings
 from .embeddings import embed_documents, embed_query, rerank_state
@@ -47,6 +47,8 @@ logger = logging.getLogger("ekc")
 # complete=false rather than pretending the log was verified.
 AUDIT_VERIFY_PAGE = 1000
 AUDIT_VERIFY_MAX_ROWS = 50_000
+UPLOAD_RATE_LIMIT = 10
+UPLOAD_RATE_WINDOW = 3600
 
 VISIBLE = {
     "guest": ["public"],
@@ -563,6 +565,193 @@ async def feedback(payload: FeedbackRequest, user: AuthUser = Depends(current_us
     return {"status": "recorded"}
 
 
+async def _index_upload(
+    document_id: str, org_id: str, text: str, settings: Settings
+) -> None:
+    try:
+        chunks = ingest.chunk_markdown(text)
+        if not chunks:
+            raise uploads.UploadError("no usable sections were found")
+        await db.set_document_progress(document_id, org_id, 10)
+        batch_size = 8
+        for start in range(0, len(chunks), batch_size):
+            batch = chunks[start : start + batch_size]
+            embeddings = await asyncio.to_thread(
+                embed_documents, [chunk["content"] for chunk in batch], settings
+            )
+            for chunk, embedding in zip(batch, embeddings, strict=False):
+                chunk["embedding"] = embedding
+            await db.set_document_progress(
+                document_id, org_id, 10 + int(80 * min(1, (start + batch_size) / len(chunks)))
+            )
+        await db.replace_chunks(document_id, chunks)
+        await db.set_document_status(document_id, org_id, "active")
+        await db.set_document_progress(document_id, org_id, 100)
+    except asyncio.CancelledError:
+        raise
+    except uploads.UploadError as exc:
+        await db.set_document_status(document_id, org_id, "failed", exc.reason)
+    except Exception:  # noqa: BLE001 - a bad file must never crash the worker
+        logger.exception("upload indexing failed")
+        await db.set_document_status(
+            document_id, org_id, "failed", "the document could not be indexed"
+        )
+
+
+@app.post("/documents/upload", status_code=202, tags=["documents"])
+async def upload_document(
+    file: UploadFile = File(...),
+    title: str | None = Form(default=None),
+    user: AuthUser = Depends(current_user),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    """Upload one document. Type, size, rate and storage caps are server-side."""
+    if not storage.configured(settings):
+        raise HTTPException(status_code=503, detail="document storage is not configured")
+    if not await db.upload_rate_allowed(
+        user.id, user.org_id, UPLOAD_RATE_LIMIT, UPLOAD_RATE_WINDOW
+    ):
+        raise HTTPException(
+            status_code=429,
+            detail="upload limit reached: 10 documents per hour",
+            headers={"Retry-After": str(UPLOAD_RATE_WINDOW)},
+        )
+
+    buffer = bytearray()
+    while True:
+        piece = await file.read(1024 * 1024)
+        if not piece:
+            break
+        buffer.extend(piece)
+        if len(buffer) > uploads.MAX_BYTES:
+            raise HTTPException(status_code=413, detail="the file is larger than 10 MB")
+
+    try:
+        parsed = await asyncio.wait_for(
+            asyncio.to_thread(uploads.extract, file.filename, bytes(buffer)),
+            timeout=uploads.PARSE_TIMEOUT_SECONDS,
+        )
+    except TimeoutError as exc:
+        raise HTTPException(status_code=422, detail="the file took too long to read") from exc
+    except uploads.UploadError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
+
+    used = await db.org_storage_used(user.org_id)
+    if used + len(buffer) > uploads.MAX_ORG_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail="this workspace has reached its 200 MB storage limit",
+        )
+
+    document_id = str(uuid.uuid4())
+    path = f"{user.org_id}/{document_id}/{parsed.safe_name}"
+    mime = {
+        "pdf": "application/pdf",
+        "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "html": "text/html",
+        "text": "text/plain",
+    }[parsed.kind]
+    display_title = (title or parsed.safe_name).strip()[:160] or parsed.safe_name
+    try:
+        await storage.put(settings, path, bytes(buffer), mime)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("storage upload failed: %s", type(exc).__name__)
+        raise HTTPException(status_code=502, detail="the file could not be stored") from exc
+
+    document_id = await db.create_upload_document(
+        org_id=user.org_id,
+        user_id=user.id,
+        title=display_title,
+        slug=f"upload-{uuid.uuid4().hex[:12]}",
+        file_size=len(buffer),
+        storage_path=path,
+        mime_type=mime,
+        content_hash=hash_identifier(path),
+    )
+    await audit.record(
+        org_id=user.org_id,
+        action="document.uploaded",
+        resource_type="document",
+        resource_id=document_id,
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"title": display_title, "bytes": len(buffer), "kind": parsed.kind},
+    )
+    asyncio.create_task(_index_upload(document_id, user.org_id, parsed.text, settings))
+    return {"document_id": document_id, "status": "processing", "progress": 0}
+
+
+@app.get("/documents/{document_id}", tags=["documents"])
+async def document_status(
+    document_id: str, user: AuthUser = Depends(current_user)
+) -> dict[str, Any]:
+    detail = await db.document_detail(document_id, user.org_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="document not found")
+    return {
+        **detail,
+        "id": str(detail["id"]),
+        "updated_at": detail["updated_at"].isoformat()
+        if hasattr(detail["updated_at"], "isoformat")
+        else str(detail["updated_at"]),
+    }
+
+
+@app.get("/documents/{document_id}/download", tags=["documents"])
+async def download_document(
+    document_id: str,
+    user: AuthUser = Depends(current_user),
+    settings: Settings = Depends(get_settings),
+) -> Response:
+    """Download an original as an attachment: HTML is never served inline."""
+    detail = await db.document_detail(document_id, user.org_id)
+    if detail is None or not detail["storage_path"]:
+        raise HTTPException(status_code=404, detail="document not found")
+    try:
+        body = await storage.get(settings, str(detail["storage_path"]))
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="stored file not found") from exc
+    name = uploads.safe_filename(str(detail["storage_path"]).rsplit("/", 1)[-1])
+    media = "application/pdf" if detail["mime_type"] == "application/pdf" else "text/plain"
+    return Response(
+        content=body,
+        media_type=media,
+        headers={
+            "Content-Disposition": f'attachment; filename="{name}"',
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
+
+
+@app.post("/documents/{document_id}/reindex", status_code=202, tags=["documents"])
+async def reindex_document(
+    document_id: str,
+    user: AuthUser = Depends(require_admin),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, str]:
+    detail = await db.document_detail(document_id, user.org_id)
+    if detail is None or not detail["storage_path"]:
+        raise HTTPException(status_code=404, detail="document not found")
+    try:
+        body = await storage.get(settings, str(detail["storage_path"]))
+        parsed = await asyncio.wait_for(
+            asyncio.to_thread(
+                uploads.extract, str(detail["storage_path"]).rsplit("/", 1)[-1], body
+            ),
+            timeout=uploads.PARSE_TIMEOUT_SECONDS,
+        )
+    except TimeoutError as exc:
+        await db.set_document_status(document_id, user.org_id, "failed", "re-index timed out")
+        raise HTTPException(status_code=422, detail="re-index timed out") from exc
+    except uploads.UploadError as exc:
+        await db.set_document_status(document_id, user.org_id, "failed", exc.reason)
+        raise HTTPException(status_code=422, detail=exc.reason) from exc
+    await db.set_document_status(document_id, user.org_id, "processing")
+    await db.set_document_progress(document_id, user.org_id, 0)
+    asyncio.create_task(_index_upload(document_id, user.org_id, parsed.text, settings))
+    return {"status": "processing", "document_id": document_id}
+
+
 @app.get("/documents", tags=["documents"])
 async def documents(user: AuthUser = Depends(current_user)) -> dict[str, Any]:
     rows = await db.list_documents(user.org_id, user.role, user.department)
@@ -595,22 +784,40 @@ async def update_document(
 
 
 @app.delete("/documents/{document_id}", tags=["documents"])
-async def remove_document(document_id: str, user: AuthUser = Depends(require_admin)) -> dict[str, str]:
-    """Deletion is disabled on the shared deployment.
+async def remove_document(
+    document_id: str,
+    user: AuthUser = Depends(require_admin),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, str]:
+    """Delete an uploaded document, its chunks and its stored original.
 
-    The admin account is shared with reviewers, so a delete would remove corpus
-    documents no reviewer could restore. Ingestion can still refresh documents, and
-    the nightly reset workflow reverses access-level edits.
+    Sample-workspace corpus documents stay immutable so a shared reviewer cannot
+    destroy evidence; only uploaded documents in a real workspace can be removed.
     """
+    detail = await db.document_detail(document_id, user.org_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail="document not found")
+    path = await db.delete_upload_document(document_id, user.org_id)
+    if path is None and detail["storage_path"] is None:
+        raise HTTPException(
+            status_code=403,
+            detail="sample workspace documents cannot be deleted",
+        )
+    if path:
+        try:
+            await storage.delete(settings, path)
+        except Exception:  # noqa: BLE001 - the row is the source of truth
+            logger.warning("stored original could not be removed", exc_info=True)
     await audit.record(
         org_id=user.org_id,
-        action="document.delete_denied",
+        action="document.deleted",
         resource_type="document",
         resource_id=document_id,
         actor_id=user.id,
         actor_role=user.role,
+        detail={"title": detail["title"]},
     )
-    raise HTTPException(status_code=403, detail="document deletion is disabled on this deployment")
+    return {"status": "deleted"}
 
 
 @app.get("/admin/unanswered", tags=["admin"])

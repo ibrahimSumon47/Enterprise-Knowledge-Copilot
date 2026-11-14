@@ -14,3 +14,5 @@ python-multipart==0.0.33
 # the torch build, without pulling 900 MB of framework into a 512 MB instance.
 fastembed==0.9.1
 flashrank==0.2.10
+pypdf==5.1.0
+python-docx==1.1.2

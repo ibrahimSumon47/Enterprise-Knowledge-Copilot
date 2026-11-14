@@ -238,8 +238,8 @@ def test_grader_verdict_parsing() -> None:
     assert _parse_verdict('I cannot tell') is None
 
 
-def test_shared_admin_cannot_delete_documents() -> None:
-    """The delete route is admin-gated and refuses by design."""
+def test_document_delete_is_admin_gated_and_protects_samples() -> None:
+    """Uploaded documents can be deleted; sample corpus documents cannot."""
     from app import main as api
 
     route = next(
@@ -248,7 +248,9 @@ def test_shared_admin_cannot_delete_documents() -> None:
     )
     assert route.endpoint.__name__ == "remove_document"
     source = route.endpoint.__doc__ or ""
-    assert "disabled" in source.lower()
+    assert "sample" in source.lower()
+    names = {dependency.call.__name__ for dependency in route.dependant.dependencies if dependency.call}
+    assert "require_admin" in names
 
 
 def test_document_update_is_admin_only() -> None:

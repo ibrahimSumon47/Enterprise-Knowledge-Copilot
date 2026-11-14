@@ -458,10 +458,10 @@ async def list_documents(
     rows = await pool().fetch(
         """
         select id, slug, title, access_level, department, is_synthetic, status,
-               source_url, version, updated_at,
+               error, file_size, mime_type, progress, source_url, version, updated_at,
                (select count(*) from public.chunks c where c.document_id = d.id) as chunk_count
         from public.documents d
-        where status = 'active'
+        where status in ('active', 'processing', 'failed')
           and org_id = $3
           and (
             $1 = 'admin'
@@ -478,6 +478,127 @@ async def list_documents(
         org_id,
     )
     return [dict(row) for row in rows]
+
+
+async def org_storage_used(org_id: str) -> int:
+    value = await pool().fetchval(
+        "select coalesce(sum(file_size), 0) from public.documents where org_id = $1",
+        org_id,
+    )
+    return int(value or 0)
+
+
+async def upload_rate_allowed(user_id: str, org_id: str, limit: int, window_seconds: int) -> bool:
+    async with pool().acquire() as connection:
+        async with connection.transaction():
+            await connection.execute(
+                "delete from public.upload_events where created_at < now() - ($1 || ' seconds')::interval",
+                str(window_seconds),
+            )
+            count = await connection.fetchval(
+                "select count(*) from public.upload_events where user_id = $1 and created_at > now() - ($2 || ' seconds')::interval",
+                user_id,
+                str(window_seconds),
+            )
+            if int(count or 0) >= limit:
+                return False
+            await connection.execute(
+                "insert into public.upload_events (user_id, org_id) values ($1::uuid, $2)",
+                user_id,
+                org_id,
+            )
+            return True
+
+
+async def create_upload_document(
+    *,
+    org_id: str,
+    user_id: str,
+    title: str,
+    slug: str,
+    file_size: int,
+    storage_path: str,
+    mime_type: str,
+    content_hash: str,
+) -> str:
+    row = await pool().fetchrow(
+        """
+        insert into public.documents
+          (org_id, slug, title, access_level, content_hash, status, metadata,
+           uploaded_by, file_size, storage_path, mime_type)
+        values ($1,$2,$3,'employee',$4,'processing',$5::jsonb,$6::uuid,$7,$8,$9)
+        returning id
+        """,
+        org_id,
+        slug,
+        title[:160],
+        content_hash,
+        json.dumps({"uploaded": True}),
+        user_id,
+        file_size,
+        storage_path,
+        mime_type,
+    )
+    return str(row["id"])
+
+
+async def set_document_status(
+    document_id: str, org_id: str, status: str, error: str | None = None
+) -> None:
+    await pool().execute(
+        """
+        update public.documents
+        set status = $3, error = $4, updated_at = now()
+        where id = $1 and org_id = $2
+        """,
+        document_id,
+        org_id,
+        status,
+        (error or "")[:240] or None,
+    )
+
+
+async def set_document_progress(document_id: str, org_id: str, progress: int) -> None:
+    await pool().execute(
+        "update public.documents set progress = $3 where id = $1 and org_id = $2",
+        document_id,
+        org_id,
+        max(0, min(100, int(progress))),
+    )
+
+
+async def document_detail(document_id: str, org_id: str) -> dict[str, Any] | None:
+    row = await pool().fetchrow(
+        """
+        select d.id, d.title, d.status, d.error, d.file_size, d.mime_type,
+               d.storage_path, d.progress, d.updated_at,
+               (select count(*) from public.chunks c where c.document_id = d.id) as chunk_count
+        from public.documents d
+        where d.id = $1 and d.org_id = $2
+        """,
+        document_id,
+        org_id,
+    )
+    return dict(row) if row else None
+
+
+async def delete_upload_document(document_id: str, org_id: str) -> str | None:
+    """Delete an uploaded document, never a sample-workspace row.
+
+    Chunks cascade with the document. The stored original path is returned so
+    the caller can remove the object after the row is gone.
+    """
+    row = await pool().fetchrow(
+        """
+        delete from public.documents d
+        where d.id = $1 and d.org_id = $2
+          and d.org_id not in (select id from public.organizations where is_sample)
+        returning d.storage_path
+        """,
+        document_id,
+        org_id,
+    )
+    return str(row["storage_path"]) if row and row["storage_path"] else None
 
 
 async def set_document_access(

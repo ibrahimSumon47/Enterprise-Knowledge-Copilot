@@ -9,6 +9,7 @@
  * Both workspaces and both auth users are deleted afterwards.
  */
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 
 const apiBase = (process.env.API_URL ?? "https://enterprise-knowledge-copilot-2u57.onrender.com").replace(/\/$/, "");
 const supabaseUrl = (process.env.SUPABASE_URL ?? "").replace(/\/$/, "");
@@ -181,6 +182,49 @@ async function main() {
     );
     const recallTitles = (recall.candidates ?? []).map((row) => row.title);
     expect(!recallTitles.includes(b.workspace.title), "retrieval returned tenant B passage");
+
+    // Upload attacks: wrong type renamed, oversized, path traversal, zip bomb
+    // and another tenant's document id.
+    async function upload(token, filename, bytes, type) {
+      const body = new FormData();
+      body.set("file", new Blob([bytes], { type }), filename);
+      return call("/documents/upload", token, { method: "POST", body });
+    }
+
+    const renamed = await upload(
+      a.token,
+      "policy.pdf",
+      "this is plain text, not a pdf",
+      "application/pdf",
+    );
+    expect(renamed.status === 400, `renamed PDF returned ${renamed.status}`);
+
+    const oversized = await upload(
+      a.token,
+      "larger.txt",
+      new Uint8Array(10 * 1024 * 1024 + 1).fill(97),
+      "text/plain",
+    );
+    expect(oversized.status === 413, `oversized upload returned ${oversized.status}`);
+
+    const traversal = await upload(
+      a.token,
+      "../../etc/passwd.txt",
+      "Path traversal fixture. Receipts are due within 45 days and approval is required.",
+      "text/plain",
+    );
+    expect(traversal.status === 202, `path-traversal upload returned ${traversal.status}`);
+
+    const bomb = await upload(
+      a.token,
+      "bomb.docx",
+      readFileSync(new URL("../e2e/fixtures/bomb.docx", import.meta.url)),
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(bomb.status === 422, `zip-bomb DOCX returned ${bomb.status}`);
+
+    const foreignDocument = await call(`/documents/${a.workspace.document_id}`, b.token);
+    expect(foreignDocument.status === 404, `foreign document id returned ${foreignDocument.status}`);
 
     // A shared answer link guessed by B is not found.
     const [conversation] = await service("/conversations", {

@@ -66,6 +66,7 @@ STOPWORDS = {
 
 class PipelineState(TypedDict, total=False):
     question: str
+    org_id: str
     role: str
     department: str | None
     route: str
@@ -382,7 +383,7 @@ def build_graph(router: ProviderRouter, settings: Settings):
         # Retrieve with the English form; answer in the language that was asked.
         query = await _retrieval_question(state["question"], router)
         result = await retrieve(
-            query, state["role"], state.get("department"), settings
+            query, state["org_id"], state["role"], state.get("department"), settings
         )
         return {
             "candidates": result.candidates,
@@ -572,6 +573,7 @@ def build_graph(router: ProviderRouter, settings: Settings):
 
 async def answer_question(
     question: str,
+    org_id: str,
     role: str,
     department: str | None,
     settings: Settings,
@@ -581,7 +583,12 @@ async def answer_question(
     """Run the graph and time it. Audit is the caller's responsibility."""
     started = time.perf_counter()
     final: PipelineState = await graph.ainvoke(
-        {"question": question, "role": role, "department": department}
+        {
+            "question": question,
+            "org_id": org_id,
+            "role": role,
+            "department": department,
+        }
     )
     latency_ms = int((time.perf_counter() - started) * 1000)
     return AnswerResult(

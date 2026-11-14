@@ -218,7 +218,10 @@ def test_retrieval_uses_sql_permission_filter(monkeypatch: pytest.MonkeyPatch) -
     )
 
     settings = Settings(supabase_url="https://example.supabase.co")
-    result = asyncio.run(retrieve("receipts?", "employee", None, settings))
+    result = asyncio.run(
+        retrieve("receipts?", "org-a", "employee", None, settings)
+    )
+    assert captured["org_id"] == "org-a"
     assert captured["role"] == "employee"
     assert captured["department"] is None
     assert captured["limit"] == settings.candidate_limit

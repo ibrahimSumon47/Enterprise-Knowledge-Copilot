@@ -68,17 +68,19 @@ class RetrievalResult:
 
 async def retrieve(
     question: str,
+    org_id: str,
     role: str,
     department: str | None,
     settings: Settings,
     all_candidates: bool = False,
 ) -> RetrievalResult:
-    """Run the full retrieval path. The access predicate is applied by SQL."""
+    """Run the full retrieval path. Both predicates are applied by SQL."""
     # ONNX inference is CPU-bound; keep the event loop free for health checks.
     embedding = await asyncio.to_thread(embed_query, question, settings)
     rows = await db.search_chunks(
         embedding=embedding,
         query_text=question,
+        org_id=org_id,
         role=role,
         department=department,
         limit=settings.candidate_limit,

@@ -22,6 +22,7 @@ def compute_hash(prev_hash: str, payload: dict[str, Any]) -> str:
 
 async def record(
     *,
+    org_id: str,
     action: str,
     resource_type: str,
     actor_id: str | None,
@@ -45,7 +46,9 @@ async def record(
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
     entry_hash = compute_hash(prev_hash, payload)
-    await db.insert_audit({"prev_hash": prev_hash, "entry_hash": entry_hash, **payload})
+    await db.insert_audit(
+        {"org_id": org_id, "prev_hash": prev_hash, "entry_hash": entry_hash, **payload}
+    )
     return entry_hash
 
 

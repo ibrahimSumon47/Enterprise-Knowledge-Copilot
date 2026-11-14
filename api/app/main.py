@@ -177,8 +177,8 @@ async def _rate_limit(user: AuthUser, settings: Settings) -> None:
 
 async def _ensure_conversation(user: AuthUser, conversation_id: str | None, question: str) -> str:
     if not conversation_id:
-        return await db.create_conversation(user.id, question[:80])
-    owner = await db.conversation_owner(conversation_id)
+        return await db.create_conversation(user.org_id, user.id, question[:80])
+    owner = await db.conversation_owner(conversation_id, user.org_id)
     if owner is None or owner != user.id:
         # Do not reveal whether the id exists.
         raise HTTPException(status_code=404, detail="conversation not found")
@@ -197,6 +197,7 @@ async def chat(
 
     await db.insert_message(
         {
+            "org_id": user.org_id,
             "conversation_id": conversation_id,
             "role": "user",
             "content": payload.question,
@@ -205,6 +206,7 @@ async def chat(
 
     result = await answer_question(
         payload.question,
+        user.org_id,
         user.role,
         user.department,
         settings,
@@ -214,6 +216,7 @@ async def chat(
 
     message_id = await db.insert_message(
         {
+            "org_id": user.org_id,
             "conversation_id": conversation_id,
             "role": "assistant",
             "content": result.answer,
@@ -227,6 +230,7 @@ async def chat(
     )
 
     await audit.record(
+        org_id=user.org_id,
         action="chat.question",
         resource_type="conversation",
         resource_id=conversation_id,
@@ -250,6 +254,7 @@ async def chat(
     if result.refused and not outage:
         try:
             await db.record_unanswered(
+                org_id=user.org_id,
                 user_id=user.id,
                 role=user.role,
                 question=payload.question,
@@ -304,6 +309,7 @@ async def chat_stream(
         try:
             result = await answer_question(
                 payload.question,
+                user.org_id,
                 user.role,
                 user.department,
                 settings,
@@ -318,6 +324,7 @@ async def chat_stream(
         if result.refused and not result.reason.startswith("no language model available"):
             try:
                 await db.record_unanswered(
+                    org_id=user.org_id,
                     user_id=user.id,
                     role=user.role,
                     question=payload.question,
@@ -340,6 +347,7 @@ async def chat_stream(
 
         message_id = await db.insert_message(
             {
+                "org_id": user.org_id,
                 "conversation_id": conversation_id,
                 "role": "assistant",
                 "content": result.answer,
@@ -352,6 +360,7 @@ async def chat_stream(
             }
         )
         await audit.record(
+            org_id=user.org_id,
             action="chat.question",
             resource_type="conversation",
             resource_id=conversation_id,
@@ -390,7 +399,7 @@ async def chat_stream(
 async def conversation_messages(
     conversation_id: str, user: AuthUser = Depends(current_user)
 ) -> dict[str, Any]:
-    messages = await db.list_messages(conversation_id, user.id)
+    messages = await db.list_messages(conversation_id, user.org_id, user.id)
     if not messages:
         raise HTTPException(status_code=404, detail="conversation not found")
     return {"conversation_id": conversation_id, "messages": messages}
@@ -398,19 +407,15 @@ async def conversation_messages(
 
 @app.post("/feedback", tags=["chat"])
 async def feedback(payload: FeedbackRequest, user: AuthUser = Depends(current_user)) -> dict[str, str]:
-    await db.pool().execute(
-        """
-        insert into public.feedback (message_id, user_id, rating, reason)
-        values ($1,$2,$3,$4)
-        on conflict (message_id, user_id) do update set
-          rating = excluded.rating, reason = excluded.reason
-        """,
-        payload.message_id,
-        user.id,
-        payload.rating,
-        payload.reason,
+    recorded = await db.record_feedback(
+        payload.message_id, user.org_id, user.id, payload.rating, payload.reason
     )
+    if not recorded:
+        # The message is not in this workspace (or not this user's): do not say
+        # whether the id exists elsewhere.
+        raise HTTPException(status_code=404, detail="message not found")
     await audit.record(
+        org_id=user.org_id,
         action="feedback.recorded",
         resource_type="message",
         resource_id=payload.message_id,
@@ -423,7 +428,7 @@ async def feedback(payload: FeedbackRequest, user: AuthUser = Depends(current_us
 
 @app.get("/documents", tags=["documents"])
 async def documents(user: AuthUser = Depends(current_user)) -> dict[str, Any]:
-    rows = await db.list_documents(user.role, user.department)
+    rows = await db.list_documents(user.org_id, user.role, user.department)
     return {"documents": rows, "role": user.role}
 
 
@@ -435,10 +440,13 @@ async def update_document(
 ) -> dict[str, str]:
     if payload.access_level == "department" and not payload.department:
         raise HTTPException(status_code=422, detail="department is required for that level")
-    updated = await db.set_document_access(document_id, payload.access_level, payload.department)
+    updated = await db.set_document_access(
+        document_id, user.org_id, payload.access_level, payload.department
+    )
     if not updated:
         raise HTTPException(status_code=404, detail="document not found")
     await audit.record(
+        org_id=user.org_id,
         action="document.access_changed",
         resource_type="document",
         resource_id=document_id,
@@ -458,6 +466,7 @@ async def remove_document(document_id: str, user: AuthUser = Depends(require_adm
     the nightly reset workflow reverses access-level edits.
     """
     await audit.record(
+        org_id=user.org_id,
         action="document.delete_denied",
         resource_type="document",
         resource_id=document_id,
@@ -472,18 +481,18 @@ async def unanswered_queue(
     limit: int = 50, user: AuthUser = Depends(require_admin)
 ) -> dict[str, Any]:
     """Questions the copilot could not answer, newest first."""
-    del user  # the dependency enforces the admin role
-    return {"questions": await db.list_unanswered(max(1, min(limit, 200)))}
+    return {"questions": await db.list_unanswered(user.org_id, max(1, min(limit, 200)))}
 
 
 @app.post("/admin/unanswered/{question_id}/resolve", tags=["admin"])
 async def resolve_unanswered(
     question_id: str, user: AuthUser = Depends(require_admin)
 ) -> dict[str, str]:
-    resolved = await db.resolve_unanswered(question_id, user.id)
+    resolved = await db.resolve_unanswered(question_id, user.org_id, user.id)
     if not resolved:
         raise HTTPException(status_code=404, detail="question not found or already resolved")
     await audit.record(
+        org_id=user.org_id,
         action="knowledge.gap_resolved",
         resource_type="unanswered_question",
         resource_id=question_id,
@@ -503,6 +512,7 @@ async def start_ingest(user: AuthUser = Depends(require_admin)) -> IngestRespons
     )
     asyncio.create_task(ingest.run_ingest(job_id, get_settings()))
     await audit.record(
+        org_id=user.org_id,
         action="ingest.started",
         resource_type="ingest_job",
         resource_id=job_id,
@@ -568,7 +578,14 @@ async def retrieval_debug(
     `all_candidates=true` every scored passage is returned, which is what the
     model-free evaluation needs to compare fused order, rerank order and blends.
     """
-    result = await retrieve(question, role, department, settings, all_candidates)
+    result = await retrieve(
+        question,
+        _.org_id,
+        role if _.role == "admin" else _.role,
+        department,
+        settings,
+        all_candidates,
+    )
     return {
         "confidence": result.confidence,
         "top_score": result.top_score,
@@ -608,7 +625,8 @@ async def recall_debug(
     rows = await db.search_chunks(
         embedding=embedding,
         query_text=question,
-        role=role,
+        org_id=_.org_id,
+        role=role if _.role == "admin" else _.role,
         department=department,
         limit=max(1, min(k, 100)),
     )
@@ -640,7 +658,7 @@ async def ingest_status(job_id: str, _: AuthUser = Depends(require_admin)) -> di
 
 @app.get("/audit", tags=["admin"])
 async def audit_log(limit: int = 100, _: AuthUser = Depends(require_admin)) -> dict[str, Any]:
-    rows = await db.audit_page(min(limit, 200))
+    rows = await db.audit_page(_.org_id, min(limit, 200))
     return {
         "entries": [
             {

@@ -19,7 +19,7 @@ _pool: asyncpg.Pool | None = None
 SEARCH_SQL = """
 select chunk_id, document_id, title, heading, content, access_level, department,
        is_synthetic, source_url, license, attribution, rrf_score
-from public.search_chunks($1::vector, $2::text, $3::text, $4::text, $5::int)
+from public.search_chunks_org($1::vector, $2::text, $3::uuid, $4::text, $5::text, $6::int)
 """
 
 
@@ -60,15 +60,17 @@ def _vector_literal(embedding: list[float]) -> str:
 async def search_chunks(
     embedding: list[float],
     query_text: str,
+    org_id: str,
     role: str,
     department: str | None,
     limit: int,
 ) -> list[dict[str, Any]]:
-    """Hybrid search with the caller's access predicate inside the SQL function."""
+    """Hybrid search with the organisation and access predicates in SQL."""
     rows = await pool().fetch(
         SEARCH_SQL,
         _vector_literal(embedding),
         query_text,
+        org_id,
         role,
         department or "",
         limit,
@@ -81,9 +83,10 @@ async def insert_document(document: dict[str, Any]) -> str:
     row = await pool().fetchrow(
         """
         insert into public.documents
-          (slug, title, source_url, license, attribution, access_level, department,
-           is_synthetic, content_hash, metadata)
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)
+          (org_id, slug, title, source_url, license, attribution, access_level,
+           department, is_synthetic, content_hash, metadata)
+        values (coalesce($1::uuid, (select id from public.organizations where is_sample limit 1)),
+                $2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb)
         on conflict (slug) do update set
           title = excluded.title,
           source_url = excluded.source_url,
@@ -98,6 +101,7 @@ async def insert_document(document: dict[str, Any]) -> str:
           updated_at = now()
         returning id
         """,
+        document.get("org_id"),
         document["slug"],
         document["title"],
         document.get("source_url"),
@@ -122,8 +126,9 @@ async def replace_chunks(document_id: str, chunks: list[dict[str, Any]]) -> None
             await connection.executemany(
                 """
                 insert into public.chunks
-                  (document_id, ordinal, heading, content, token_count, embedding)
-                values ($1,$2,$3,$4,$5,$6::vector)
+                  (org_id, document_id, ordinal, heading, content, token_count, embedding)
+                select d.org_id, $1, $2, $3, $4, $5, $6::vector
+                from public.documents d where d.id = $1
                 """,
                 [
                     (
@@ -139,21 +144,24 @@ async def replace_chunks(document_id: str, chunks: list[dict[str, Any]]) -> None
             )
 
 
-async def create_conversation(user_id: str, title: str) -> str:
+async def create_conversation(org_id: str, user_id: str, title: str) -> str:
     row = await pool().fetchrow(
         """
-        insert into public.conversations (user_id, title)
-        values ($1, $2) returning id
+        insert into public.conversations (org_id, user_id, title)
+        values ($1, $2, $3) returning id
         """,
+        org_id,
         user_id,
         title[:120],
     )
     return str(row["id"])
 
 
-async def conversation_owner(conversation_id: str) -> str | None:
+async def conversation_owner(conversation_id: str, org_id: str) -> str | None:
     row = await pool().fetchrow(
-        "select user_id from public.conversations where id = $1", conversation_id
+        "select user_id from public.conversations where id = $1 and org_id = $2",
+        conversation_id,
+        org_id,
     )
     return str(row["user_id"]) if row else None
 
@@ -162,11 +170,12 @@ async def insert_message(message: dict[str, Any]) -> str:
     row = await pool().fetchrow(
         """
         insert into public.messages
-          (conversation_id, role, content, citations, confidence, refused,
+          (org_id, conversation_id, role, content, citations, confidence, refused,
            latency_ms, token_count, provider)
-        values ($1,$2,$3,$4::jsonb,$5,$6,$7,$8,$9)
+        values ($1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9,$10)
         returning id
         """,
+        message["org_id"],
         message["conversation_id"],
         message["role"],
         message["content"],
@@ -180,9 +189,11 @@ async def insert_message(message: dict[str, Any]) -> str:
     return str(row["id"])
 
 
-async def list_messages(conversation_id: str, user_id: str) -> list[dict[str, Any]]:
-    """Messages of a conversation, but only for its owner (IDOR guard)."""
-    owner = await conversation_owner(conversation_id)
+async def list_messages(
+    conversation_id: str, org_id: str, user_id: str
+) -> list[dict[str, Any]]:
+    """Messages of a conversation, scoped to the tenant and its owner."""
+    owner = await conversation_owner(conversation_id, org_id)
     if owner != user_id:
         return []
     rows = await pool().fetch(
@@ -190,10 +201,11 @@ async def list_messages(conversation_id: str, user_id: str) -> list[dict[str, An
         select id, role, content, citations, confidence, refused, latency_ms,
                token_count, provider, created_at
         from public.messages
-        where conversation_id = $1
+        where conversation_id = $1 and org_id = $2
         order by created_at asc
         """,
         conversation_id,
+        org_id,
     )
     return [dict(row) for row in rows]
 
@@ -223,7 +235,15 @@ async def rate_limit_hit(user_id: str, limit: int, window_seconds: int) -> tuple
 
 async def profile_for(user_id: str) -> dict[str, Any] | None:
     row = await pool().fetchrow(
-        "select id, email, role, department from public.profiles where id = $1", user_id
+        """
+        select p.id, p.email, p.role, p.department,
+               m.org_id, m.role as org_role
+        from public.profiles p
+        left join public.org_members m
+          on m.user_id = p.id and m.status = 'active'
+        where p.id = $1
+        """,
+        user_id,
     )
     return dict(row) if row else None
 
@@ -239,10 +259,11 @@ async def insert_audit(entry: dict[str, Any]) -> None:
     await pool().execute(
         """
         insert into public.audit_log
-          (prev_hash, entry_hash, actor_id, actor_role, action, resource_type,
-           resource_id, outcome, ip_hash, detail, created_at)
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11::timestamptz)
+          (org_id, prev_hash, entry_hash, actor_id, actor_role, action,
+           resource_type, resource_id, outcome, ip_hash, detail, created_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::timestamptz)
         """,
+        entry["org_id"],
         entry["prev_hash"],
         entry["entry_hash"],
         entry.get("actor_id"),
@@ -362,7 +383,7 @@ async def save_audit_checkpoint(
     )
 
 
-async def audit_page(limit: int = 100) -> list[dict[str, Any]]:
+async def audit_page(org_id: str, limit: int = 100) -> list[dict[str, Any]]:
     rows = await pool().fetch(
         """
         -- Every column the hash covers must be selected, or verification
@@ -370,15 +391,19 @@ async def audit_page(limit: int = 100) -> list[dict[str, Any]]:
         select id, prev_hash, entry_hash, actor_id, actor_role, action,
                resource_type, resource_id, outcome, ip_hash, created_at, detail
         from public.audit_log
+        where org_id = $1
         order by id desc
-        limit $1
+        limit $2
         """,
+        org_id,
         limit,
     )
     return [dict(row) for row in rows]
 
 
-async def list_documents(role: str, department: str | None) -> list[dict[str, Any]]:
+async def list_documents(
+    org_id: str, role: str, department: str | None
+) -> list[dict[str, Any]]:
     """Admin/inventory listing that still applies the access predicate."""
     rows = await pool().fetch(
         """
@@ -387,6 +412,7 @@ async def list_documents(role: str, department: str | None) -> list[dict[str, An
                (select count(*) from public.chunks c where c.document_id = d.id) as chunk_count
         from public.documents d
         where status = 'active'
+          and org_id = $3
           and (
             $1 = 'admin'
             or ($1 = 'guest' and access_level = 'public')
@@ -399,19 +425,23 @@ async def list_documents(role: str, department: str | None) -> list[dict[str, An
         """,
         role,
         department or "",
+        org_id,
     )
     return [dict(row) for row in rows]
 
 
-async def set_document_access(document_id: str, access_level: str, department: str | None) -> bool:
+async def set_document_access(
+    document_id: str, org_id: str, access_level: str, department: str | None
+) -> bool:
     row = await pool().fetchrow(
         """
         update public.documents
-        set access_level = $2, department = $3, updated_at = now()
-        where id = $1
+        set access_level = $3, department = $4, updated_at = now()
+        where id = $1 and org_id = $2
         returning id
         """,
         document_id,
+        org_id,
         access_level,
         department,
     )
@@ -483,14 +513,22 @@ async def cache_put(cache_key: str, access_scope: str, answer: dict[str, Any]) -
 
 
 async def record_unanswered(
-    *, user_id: str, role: str, question: str, reason: str, closest: list[dict[str, Any]]
+    *,
+    org_id: str,
+    user_id: str,
+    role: str,
+    question: str,
+    reason: str,
+    closest: list[dict[str, Any]],
 ) -> None:
     """Queue a refused question so an admin can close the knowledge gap."""
     await pool().execute(
         """
-        insert into public.unanswered_questions (user_id, role, question, reason, closest)
-        values ($1::uuid, $2, $3, $4, $5::jsonb)
+        insert into public.unanswered_questions
+          (org_id, user_id, role, question, reason, closest)
+        values ($1, $2::uuid, $3, $4, $5, $6::jsonb)
         """,
+        org_id,
         user_id,
         role,
         question[:2000],
@@ -499,29 +537,55 @@ async def record_unanswered(
     )
 
 
-async def list_unanswered(limit: int = 50) -> list[dict[str, Any]]:
+async def record_feedback(
+    message_id: str, org_id: str, user_id: str, rating: int, reason: str | None
+) -> bool:
+    """Record feedback only when the message belongs to this user and tenant."""
+    row = await pool().fetchrow(
+        """
+        insert into public.feedback (message_id, user_id, rating, reason, org_id)
+        select m.id, $2::uuid, $3, $4, c.org_id
+        from public.messages m
+        join public.conversations c on c.id = m.conversation_id
+        where m.id = $1::uuid and c.org_id = $5 and c.user_id = $2::uuid
+        on conflict (message_id, user_id) do update set
+          rating = excluded.rating, reason = excluded.reason
+        returning id
+        """,
+        message_id,
+        user_id,
+        rating,
+        reason,
+        org_id,
+    )
+    return row is not None
+
+
+async def list_unanswered(org_id: str, limit: int = 50) -> list[dict[str, Any]]:
     rows = await pool().fetch(
         """
         select id, role, question, reason, closest, created_at
         from public.unanswered_questions
-        where resolved_at is null
+        where org_id = $1 and resolved_at is null
         order by created_at desc
-        limit $1
+        limit $2
         """,
+        org_id,
         limit,
     )
     return [dict(row) for row in rows]
 
 
-async def resolve_unanswered(question_id: str, actor_id: str) -> bool:
+async def resolve_unanswered(question_id: str, org_id: str, actor_id: str) -> bool:
     row = await pool().fetchrow(
         """
         update public.unanswered_questions
-        set resolved_at = now(), resolved_by = $2::uuid
-        where id = $1::uuid and resolved_at is null
+        set resolved_at = now(), resolved_by = $3::uuid
+        where id = $1::uuid and org_id = $2 and resolved_at is null
         returning id
         """,
         question_id,
+        org_id,
         actor_id,
     )
     return bool(row)

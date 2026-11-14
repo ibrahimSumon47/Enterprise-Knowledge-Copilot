@@ -23,6 +23,7 @@ class AuthUser:
     email: str
     role: str
     department: str | None
+    org_id: str
     raw_token: str
 
 
@@ -69,21 +70,20 @@ async def current_user(request: Request, settings: Settings = Depends(get_settin
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="token has no subject")
 
     profile = await db.profile_for(user_id)
-    if profile is None:
-        # A signed-up user without a profile row is a guest until an admin assigns a role.
-        return AuthUser(
-            id=user_id,
-            email=str(claims.get("email", "")),
-            role="guest",
-            department=None,
-            raw_token=token,
+    if profile is None or profile.get("org_id") is None:
+        # The organisation never comes from the request: without a verified
+        # membership row the caller has no workspace to read from.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="no active workspace membership",
         )
 
     return AuthUser(
         id=user_id,
         email=str(profile["email"]),
-        role=str(profile["role"]),
+        role=str(profile.get("org_role") or profile["role"]),
         department=profile["department"],
+        org_id=str(profile["org_id"]),
         raw_token=token,
     )
 

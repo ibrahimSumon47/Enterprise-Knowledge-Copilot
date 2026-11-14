@@ -93,25 +93,39 @@ messages/feedback/audit_log/unanswered_questions, membership RLS, and
 zero documents and zero chunks of a second organisation while its own documents
 remain readable.
 
-Next slice, 2a-2 retrieval, in this order:
+### 2a-2 retrieval and API (finished, 2026-11-14)
 
-1. `api/app/auth.py`: after verifying the JWT, read `org_members` for the user
-   (active row, one org per user for now), put `org_id`, `role` and `department`
-   into `AuthUser`, and reject a user with no active membership except the
-   onboarding route.
-2. `api/app/db.py`: `search_chunks(org_id, ...)` must call
-   `public.search_chunks_org`; update every caller in `retrieval.py` and
-   `main.py` (`/admin/retrieval`, `/admin/recall`).
-3. Scope every read: documents/library, conversations/messages, feedback,
-   audit_log, unanswered_questions, answer_cache and ingest_jobs by the member's
-   org. Never read an org from the request body or an unverified header.
-4. Add `api/tests/test_org_scope.py` with two orgs and a swapped-org case for
-   chat, library, search, feedback, audit and unanswered; the expected result is
-   exactly zero rows for the foreign org.
-5. Mark `P2a` done in `docs/PHASES.json` only after that test runs in CI.
+`AuthUser` now carries `org_id` from the verified `org_members` row, and a user
+without active membership gets 403. `db.search_chunks` calls
+`search_chunks_org` with that org first; retrieval, chat, streaming chat,
+library, audit, the unanswered queue, feedback, document access changes and
+conversation reads/writes all pass the same server-derived org. Feedback goes
+through `db.record_feedback`, which only inserts when the message belongs to the
+caller's conversation and tenant. Guessed conversation ids and foreign message
+ids return 404. `api/tests/test_org_scope.py` covers a forged token org claim, a
+swapped `X-Org-Id` header, guessed ids and two org identifiers at the API layer;
+`supabase/tests/cross_tenant.sql` covers the database layer.
 
-Remaining after 2a: 2a-3 onboarding and sign-up organisation creation, 2a-4
-red-team gate, then 2b upload, 2c invites, 2d auth, 2e analytics, 3 design,
+### Next: 2a-3 onboarding
+
+1. `POST /onboarding` (authenticated): create `organizations` (slug from name +
+   random suffix), insert `org_members` with role `owner`, and link the caller.
+   Today the role check constraint has no `owner`; either add it in a migration
+   or store `admin` plus an `is_owner` flag. Prefer a migration that adds
+   `owner` and updates `current_org_role`/RLS to treat owner as admin.
+2. A signed-up user currently gets 403 from `current_user`; allow `/onboarding`
+   and `/onboarding/status` without membership while every other route keeps the
+   403.
+3. Web: `/onboarding` wizard — name the workspace, upload the first document
+   (can reuse 2b's ingest path once it exists; until then accept a pasted title
+   and text), then ask the first question and land in `/chat`.
+4. Playwright against the deployed site: sign up a fresh account, finish the
+   wizard, assert the workspace name and the first answer/refusal. Add the spec
+   to `.github/workflows/e2e-auth.yml` with `EKC_DEMO_PASSWORD`.
+5. Then 2a-4 red-team suite wired into CI and `check-done`, and only after that
+   mark `P2a` done in `docs/PHASES.json`.
+
+Remaining: 2a-3, 2a-4, 2b upload, 2c invites, 2d auth, 2e analytics, 3 design,
 4 buyer flow, 5 docs. `node scripts/check-done.mjs` stays red until then and
 names the open phases.
 

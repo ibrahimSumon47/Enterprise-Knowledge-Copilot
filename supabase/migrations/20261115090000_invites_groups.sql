@@ -90,7 +90,7 @@ language sql stable as $$
     from public.documents d
     where d.status = 'active'
       and d.org_id = caller_org
-      and (d.group_id is null or d.group_id = caller_group)
+      and (caller_role = 'owner' or d.group_id is null or d.group_id = caller_group)
       and (
         caller_role in ('admin', 'owner')
         or (caller_role = 'guest' and d.access_level = 'public')

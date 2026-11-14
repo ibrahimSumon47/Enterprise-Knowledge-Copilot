@@ -1109,7 +1109,7 @@ async def retrieval_debug(
     result = await retrieve(
         question,
         _.org_id,
-        role if _.role in ("admin", "owner") else _.role,
+        "owner" if _.role == "owner" else (role if _.role == "admin" else _.role),
         department,
         _.group_id,
         settings,
@@ -1155,7 +1155,7 @@ async def recall_debug(
         embedding=embedding,
         query_text=question,
         org_id=_.org_id,
-        role=role if _.role in ("admin", "owner") else _.role,
+        role="owner" if _.role == "owner" else (role if _.role == "admin" else _.role),
         department=department,
         group_id=_.group_id,
         limit=max(1, min(k, 100)),

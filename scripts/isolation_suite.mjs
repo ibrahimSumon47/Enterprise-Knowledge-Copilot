@@ -104,7 +104,7 @@ async function workspace(token, title) {
   if (!response.ok) {
     throw new Error(`first document ${response.status}: ${(await response.text()).slice(0, 200)}`);
   }
-  return { orgId, ...me, ...(await json(response)) };
+  return { title, orgId, ...me, ...(await json(response)) };
 }
 
 async function cleanup(state) {

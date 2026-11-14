@@ -1,6 +1,6 @@
 # PROJECT STATE
 
-**Last updated:** 2026-11-13 (product reframe)
+**Last updated:** 2026-11-14 (answer-quality evaluation)
 
 ## Where it runs
 
@@ -34,14 +34,27 @@
 
 ## Answer quality
 
-Test split, `--cache-tag product-v5`: retrieval hit@5 1.0,
-recall@50 1.0, MRR 0.907; citation
-precision 0.294; wrong refusals 13 of
-21; unanswerable refused 13 of
-13; p50/p95 4278/7353 ms;
-leakage 0. All wrong refusals are Gemini replies that judge present evidence
-insufficient; Groq answers pass. Retrieval is perfect on the split, so the next
-change is provider routing and answerability prompting, not search.
+Initial full runs with `--cache-tag quality-v5`, five seconds between questions:
+
+| Metric | Dev (50) | Test (34) |
+| --- | --- | --- |
+| retrieval hit@5 | 0.885 | 1.0 |
+| retrieval recall@50 | 1.0 | 1.0 |
+| retrieval MRR | 0.845 | 0.907 |
+| citation hit@k | 0.562 | 0.476 |
+| citation precision | 0.360 | 0.294 |
+| refusal accuracy | 0.660 | 0.588 |
+| wrong refusals | 16 of 32 | 12 of 21 |
+| unanswerable refused | 17 of 18 | 11 of 13 |
+| p50 / p95 latency | 4236 / 5999 ms | 4314 / 5415 ms |
+| permission leakage | 0 | 0 |
+
+Provider errors were 0 in both runs. The largest wrong-refusal group is empty
+evidence from the grounded call: 13 of 16 dev wrong refusals returned the
+49-character refusal with no citations while the gold passage was at rank 1. The
+1400-token completion budget was shared with the reasoning model's hidden work;
+the fix raises it to 2600 and asks for low reasoning effort. These numbers are
+from before that fix.
 
 ## Known limits
 

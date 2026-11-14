@@ -41,6 +41,9 @@ TEMPORARY_UNAVAILABLE = (
     "The answer service is temporarily unavailable. Please try again shortly."
 )
 REFUSAL = "I don't know based on the documents I can access."
+# Reasoning models spend part of the budget before the JSON. 1400 truncated the
+# grounded object on short questions; the extraction is still bounded.
+GROUNDED_MAX_TOKENS = 2600
 
 TRANSLATE_PROMPT = (
     "Translate the user's question into English. Reply with the translation only, "
@@ -448,7 +451,9 @@ def build_graph(router: ProviderRouter, settings: Settings):
         traces: list[str] = []
         try:
             for attempt in range(2):
-                completion = await router.complete(SYSTEM_PROMPT, prompt, max_tokens=1400)
+                completion = await router.complete(
+                    SYSTEM_PROMPT, prompt, max_tokens=GROUNDED_MAX_TOKENS
+                )
                 traces.extend(completion.trace)
                 payload = parse_grounded_reply(completion.text)
                 if payload is not None:

@@ -328,6 +328,42 @@ def test_router_fails_over_without_waiting_for_the_timer() -> None:
     assert time.monotonic() - started < 1.0
 
 
+def test_groq_grounded_call_leaves_room_for_reasoning(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The JSON was truncated when reasoning shared the old 1400-token budget."""
+    from app import providers
+    from app.pipeline import GROUNDED_MAX_TOKENS
+
+    captured: dict[str, Any] = {}
+
+    class FakeResponse:
+        status_code = 200
+
+        def json(self) -> dict[str, Any]:
+            return {
+                "choices": [{"message": {"content": '{"answer": "x", "evidence": []}'}}],
+                "usage": {"total_tokens": 12},
+            }
+
+    class FakeClient:
+        async def __aenter__(self) -> "FakeClient":
+            return self
+
+        async def __aexit__(self, *args: object) -> None:
+            return None
+
+        async def post(self, url: str, json: dict[str, Any], headers: dict[str, str]) -> FakeResponse:
+            captured.update(json)
+            return FakeResponse()
+
+    monkeypatch.setattr(providers.httpx, "AsyncClient", lambda timeout: FakeClient())
+    provider = providers.GroqProvider(Settings(groq_api_key="test"))
+    asyncio.run(
+        provider.complete("system", "prompt", max_tokens=GROUNDED_MAX_TOKENS)
+    )
+    assert captured["reasoning_effort"] == "low"
+    assert captured["max_tokens"] == GROUNDED_MAX_TOKENS >= 2400
+
+
 def test_router_reports_when_every_provider_fails() -> None:
     import pytest
 

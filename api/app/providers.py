@@ -55,6 +55,10 @@ class GroqProvider:
             "model": self._model,
             "temperature": 0.1,
             "max_tokens": max_tokens,
+            # gpt-oss spends completion tokens on hidden reasoning. Left at the
+            # default effort it truncated the grounded JSON on simple questions,
+            # which the pipeline could only score as an empty-evidence refusal.
+            "reasoning_effort": "low",
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt},

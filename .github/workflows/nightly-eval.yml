@@ -77,4 +77,5 @@ jobs:
           path: |
             docs/reports/eval.json
             docs/reports/eval_dev.json
+            docs/reports/eval_test.json
           if-no-files-found: ignore

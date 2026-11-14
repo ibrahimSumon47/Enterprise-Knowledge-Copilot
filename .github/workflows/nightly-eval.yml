@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   llm-eval:
-    name: sampled LLM eval
+    name: LLM eval
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -50,14 +50,14 @@ jobs:
           path: .cache
           key: eval-answers-v1
           restore-keys: eval-answers-
-      - name: Sampled LLM eval (12 questions, retries on quota)
+      - name: LLM eval (dispatch input, retries on quota)
         env:
           EKC_API_URL: https://enterprise-knowledge-copilot-2u57.onrender.com
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
           SPLIT: ${{ inputs.split || 'dev' }}
-          SUBSET: ${{ inputs.subset == false && '' || '--subset' }}
+          SUBSET: ${{ (github.event_name == 'schedule' || inputs.subset) && '--subset' || '' }}
           CACHE_TAG: ${{ inputs.cache_tag || 'nightly' }}
           THROTTLE: ${{ inputs.throttle || 2 }}
           RETRY_OUTAGE: ${{ inputs.retry_outage || 3 }}

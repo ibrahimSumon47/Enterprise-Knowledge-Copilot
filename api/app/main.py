@@ -49,6 +49,7 @@ from .schemas import (
     ReadyResponse,
     SignupRequest,
     WorkspaceNameRequest,
+    WorkspaceSettingsRequest,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -307,6 +308,107 @@ async def delete_workspace(user: AuthUser = Depends(require_owner)) -> dict[str,
     if not await db.delete_workspace(user.org_id):
         raise HTTPException(status_code=404, detail="workspace not found")
     return {"status": "deleted"}
+
+
+def _csv_cell(value: Any) -> str:
+    text = "" if value is None else str(value)
+    if text.startswith(("=", "+", "-", "@", chr(9), chr(13))):
+        text = "'" + text
+    return '"' + text.replace('"', '""') + '"'
+
+
+@app.get("/workspace/settings", tags=["auth"])
+async def workspace_settings(user: AuthUser = Depends(current_user)) -> dict[str, Any]:
+    settings = await db.org_settings(user.org_id)
+    if settings is None:
+        raise HTTPException(status_code=404, detail="workspace not found")
+    settings["allowed_domains"] = list(settings.get("allowed_domains") or [])
+    settings["id"] = str(settings["id"])
+    return settings
+
+
+@app.patch("/workspace/settings", tags=["auth"])
+async def update_workspace_settings(
+    payload: WorkspaceSettingsRequest, user: AuthUser = Depends(require_owner)
+) -> dict[str, str]:
+    if payload.logo_url and not payload.logo_url.startswith(("https://", "http://")):
+        raise HTTPException(status_code=422, detail="logo_url must be an http(s) URL")
+    updated = await db.update_org_settings(
+        user.org_id,
+        payload.name,
+        payload.logo_url,
+        payload.accent_color,
+        payload.allowed_domains,
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="workspace not found")
+    await audit.record(
+        org_id=user.org_id,
+        action="workspace.settings_changed",
+        resource_type="organization",
+        resource_id=user.org_id,
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"fields": [key for key, value in payload.model_dump().items() if value is not None]},
+    )
+    return {"status": "updated"}
+
+
+@app.get("/admin/analytics", tags=["admin"])
+async def admin_analytics(user: AuthUser = Depends(require_admin)) -> dict[str, Any]:
+    return await db.analytics(user.org_id)
+
+
+@app.delete("/admin/unanswered/{question_id}", tags=["admin"])
+async def delete_unanswered(
+    question_id: str, user: AuthUser = Depends(require_admin)
+) -> dict[str, str]:
+    if not await db.delete_unanswered(question_id, user.org_id):
+        raise HTTPException(status_code=404, detail="question not found")
+    await audit.record(
+        org_id=user.org_id,
+        action="knowledge.gap_deleted",
+        resource_type="unanswered_question",
+        resource_id=question_id,
+        actor_id=user.id,
+        actor_role=user.role,
+    )
+    return {"status": "deleted"}
+
+
+@app.get("/audit/export", tags=["admin"])
+async def audit_export(
+    limit: int = 10_000, user: AuthUser = Depends(require_admin)
+) -> Response:
+    """CSV download with formula-injection neutralised in every cell."""
+    rows = await db.audit_for_export(user.org_id, max(1, min(limit, 50_000)))
+    header = [
+        "id", "created_at", "actor_id", "actor_role", "action",
+        "resource_type", "resource_id", "outcome", "ip_hash", "detail",
+    ]
+    lines = [",".join(header)]
+    for row in rows:
+        values = [
+            row["id"],
+            row["created_at"].isoformat() if hasattr(row["created_at"], "isoformat") else row["created_at"],
+            row["actor_id"],
+            row["actor_role"],
+            row["action"],
+            row["resource_type"],
+            row["resource_id"],
+            row["outcome"],
+            row["ip_hash"],
+            row["detail"],
+        ]
+        lines.append(",".join(_csv_cell(value) for value in values))
+    return Response(
+        content="\n".join(lines),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": 'attachment; filename="audit-log.csv"',
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 @app.get("/admin/groups", tags=["admin"])

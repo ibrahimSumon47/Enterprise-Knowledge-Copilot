@@ -132,6 +132,27 @@ class MemberUpdate(BaseModel):
     group_id: str | None = None
 
 
+class WorkspaceSettingsRequest(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=80)
+    logo_url: str | None = Field(default=None, max_length=500)
+    accent_color: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
+    allowed_domains: list[str] | None = Field(default=None, max_length=20)
+
+    @field_validator("allowed_domains")
+    @classmethod
+    def clean_domains(cls, value: list[str] | None) -> list[str] | None:
+        if value is None:
+            return None
+        cleaned: list[str] = []
+        for item in value:
+            domain = item.strip().lower().lstrip("@")
+            if not domain or "." not in domain or "/" in domain or " " in domain:
+                raise ValueError(f"invalid email domain: {item}")
+            if domain not in cleaned:
+                cleaned.append(domain)
+        return cleaned
+
+
 class FirstDocumentRequest(BaseModel):
     title: str = Field(min_length=2, max_length=160)
     text: str = Field(min_length=40, max_length=50_000)

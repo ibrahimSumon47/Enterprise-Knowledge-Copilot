@@ -16,6 +16,24 @@ type Invite = {
   use_count: number;
   revoked_at: string | null;
 };
+type Workspace = {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  accent_color: string;
+  allowed_domains: string[];
+};
+type Analytics = {
+  documents: number;
+  failed_documents: number;
+  storage_bytes: number;
+  conversations: number;
+  answers: number;
+  refusals: number;
+  unanswered_open: number;
+  unanswered_resolved: number;
+};
+type Gap = { id: string; question: string; reason: string; created_at: string };
 type Member = {
   user_id: string;
   email: string | null;
@@ -32,6 +50,13 @@ export default function SettingsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [gaps, setGaps] = useState<Gap[]>([]);
+  const [workspace, setWorkspace] = useState<Workspace | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [logo, setLogo] = useState("");
+  const [accent, setAccent] = useState("#2563eb");
+  const [domains, setDomains] = useState("");
+  const [wsName, setWsName] = useState("");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [role, setRole] = useState("employee");
   const [groupId, setGroupId] = useState("");
@@ -71,13 +96,23 @@ export default function SettingsPage() {
       apiFetch<{ groups: Group[] }>("/admin/groups", token),
       apiFetch<{ members: Member[] }>("/admin/members", token),
       apiFetch<{ invites: Invite[] }>("/admin/invites", token),
+      apiFetch<Gap[]>("/admin/unanswered", token).then((d) => (d as unknown as { questions: Gap[] }).questions ?? []),
+      apiFetch<Workspace>("/workspace/settings", token),
+      apiFetch<Analytics>("/admin/analytics", token),
     ])
-      .then(([profile, groupData, memberData, inviteData]) => {
+      .then(([profile, groupData, memberData, inviteData, gapData, ws, stats]) => {
         if (!active) return;
         setMe(profile);
         setGroups(groupData.groups ?? []);
         setMembers(memberData.members ?? []);
         setInvites(inviteData.invites ?? []);
+        setGaps(gapData ?? []);
+        setWorkspace(ws);
+        setWsName(ws.name);
+        setLogo(ws.logo_url ?? "");
+        setAccent(ws.accent_color);
+        setDomains(ws.allowed_domains.join(", "));
+        setAnalytics(stats);
       })
       .catch((caught) => {
         if (active) setError(caught instanceof Error ? caught.message : "Could not load settings");
@@ -86,6 +121,52 @@ export default function SettingsPage() {
       active = false;
     };
   }, [token, load]);
+
+  async function saveWorkspace(event: React.FormEvent) {
+    event.preventDefault();
+    if (!token) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await apiFetch("/workspace/settings", token, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: wsName,
+          logo_url: logo || null,
+          accent_color: accent,
+          allowed_domains: domains.split(/[\s,]+/).filter(Boolean),
+        }),
+      });
+      await load();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not save settings");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function downloadAudit() {
+    if (!token) return;
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://enterprise-knowledge-copilot-2u57.onrender.com"}/audit/export`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const blob = await response.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "audit-log.csv";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  async function gapAction(id: string, action: "resolve" | "delete") {
+    if (!token) return;
+    await apiFetch(
+      action === "resolve" ? `/admin/unanswered/${id}/resolve` : `/admin/unanswered/${id}`,
+      token,
+      { method: action === "resolve" ? "POST" : "DELETE" },
+    );
+    await load();
+  }
 
   async function createGroup(event: React.FormEvent) {
     event.preventDefault();
@@ -176,6 +257,61 @@ export default function SettingsPage() {
           {error}
         </p>
       ) : null}
+
+      <section className="panel p-5">
+        <h2 className="text-sm font-semibold">Workspace settings</h2>
+        <form className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={saveWorkspace}>
+          <label className="text-xs">
+            Name
+            <input aria-label="Workspace name" className="input mt-1" onChange={(e) => setWsName(e.target.value)} value={wsName} />
+          </label>
+          <label className="text-xs">
+            Logo URL
+            <input aria-label="Logo URL" className="input mt-1" onChange={(e) => setLogo(e.target.value)} value={logo} />
+          </label>
+          <label className="text-xs">
+            Accent colour
+            <input aria-label="Accent colour" className="input mt-1" onChange={(e) => setAccent(e.target.value)} value={accent} />
+          </label>
+          <label className="text-xs">
+            Allowed email domains
+            <input aria-label="Allowed email domains" className="input mt-1" onChange={(e) => setDomains(e.target.value)} placeholder="company.com, example.org" value={domains} />
+          </label>
+          <button className="btn btn-primary" disabled={busy} type="submit">Save settings</button>
+        </form>
+        <p className="mt-2 text-xs text-[var(--text-muted)]">Current: {workspace?.name ?? "…"}</p>
+      </section>
+
+      <section className="panel p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Analytics</h2>
+          <button className="btn" onClick={downloadAudit} type="button">Download audit CSV</button>
+        </div>
+        <dl className="mt-3 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
+          {analytics
+            ? Object.entries(analytics).map(([key, value]) => (
+                <div key={key} className="panel-2 p-3">
+                  <dt className="text-[var(--text-muted)]">{key.replaceAll("_", " ")}</dt>
+                  <dd className="mt-1 text-lg font-semibold">{String(value)}</dd>
+                </div>
+              ))
+            : null}
+        </dl>
+      </section>
+
+      <section className="panel p-5">
+        <h2 className="text-sm font-semibold">Unanswered questions</h2>
+        <ul className="mt-3 divide-y divide-[var(--border)] text-xs">
+          {gaps.length === 0 ? <li className="py-2 text-[var(--text-muted)]">Queue is empty.</li> : null}
+          {gaps.map((gap) => (
+            <li className="flex flex-wrap items-center gap-2 py-2" key={gap.id}>
+              <span className="min-w-48 flex-1">{gap.question}</span>
+              <button className="underline decoration-dotted" onClick={() => gapAction(gap.id, "resolve")}>Resolve</button>
+              <button className="text-[var(--danger)] underline decoration-dotted" onClick={() => gapAction(gap.id, "delete")}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="panel p-5">
         <h2 className="text-sm font-semibold">Groups</h2>

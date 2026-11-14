@@ -990,6 +990,95 @@ async def update_member(
     return row is not None
 
 
+async def org_settings(org_id: str) -> dict[str, Any] | None:
+    row = await pool().fetchrow(
+        """
+        select id, name, logo_url, accent_color, allowed_domains
+        from public.organizations where id = $1
+        """,
+        org_id,
+    )
+    return dict(row) if row else None
+
+
+async def update_org_settings(
+    org_id: str,
+    name: str | None,
+    logo_url: str | None,
+    accent_color: str | None,
+    allowed_domains: list[str] | None,
+) -> bool:
+    row = await pool().fetchrow(
+        """
+        update public.organizations
+        set name = coalesce($2, name),
+            logo_url = coalesce($3, logo_url),
+            accent_color = coalesce($4, accent_color),
+            allowed_domains = coalesce($5, allowed_domains)
+        where id = $1
+        returning id
+        """,
+        org_id,
+        name,
+        logo_url,
+        accent_color,
+        allowed_domains,
+    )
+    return row is not None
+
+
+async def allowed_domains(org_id: str) -> list[str]:
+    row = await pool().fetchrow(
+        "select allowed_domains from public.organizations where id = $1", org_id
+    )
+    return list(row["allowed_domains"] or []) if row else []
+
+
+async def delete_unanswered(question_id: str, org_id: str) -> bool:
+    row = await pool().fetchrow(
+        """
+        delete from public.unanswered_questions
+        where id = $1::uuid and org_id = $2
+        returning id
+        """,
+        question_id,
+        org_id,
+    )
+    return row is not None
+
+
+async def analytics(org_id: str) -> dict[str, Any]:
+    row = await pool().fetchrow(
+        """
+        select
+          (select count(*) from public.documents where org_id = $1) as documents,
+          (select count(*) from public.documents where org_id = $1 and status = 'failed') as failed_documents,
+          (select coalesce(sum(file_size),0) from public.documents where org_id = $1) as storage_bytes,
+          (select count(*) from public.conversations where org_id = $1) as conversations,
+          (select count(*) from public.messages where org_id = $1 and role = 'assistant') as answers,
+          (select count(*) from public.messages where org_id = $1 and refused) as refusals,
+          (select count(*) from public.feedback where org_id = $1) as feedback,
+          (select count(*) from public.unanswered_questions where org_id = $1 and resolved_at is null) as unanswered_open,
+          (select count(*) from public.unanswered_questions where org_id = $1 and resolved_at is not null) as unanswered_resolved
+        """,
+        org_id,
+    )
+    return dict(row) if row else {}
+
+
+async def audit_for_export(org_id: str, limit: int = 10_000) -> list[dict[str, Any]]:
+    rows = await pool().fetch(
+        """
+        select id, created_at, actor_id, actor_role, action, resource_type,
+               resource_id, outcome, ip_hash, detail
+        from public.audit_log where org_id = $1 order by id desc limit $2
+        """,
+        org_id,
+        limit,
+    )
+    return [dict(row) for row in rows]
+
+
 async def ready_checks() -> dict[str, Any]:
     """Readiness probe used by the Space and the check-done script."""
     row = await pool().fetchrow(

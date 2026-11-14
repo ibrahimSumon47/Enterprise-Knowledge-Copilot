@@ -201,7 +201,13 @@ async function main() {
     async function upload(token, filename, bytes, type) {
       const body = new FormData();
       body.set("file", new Blob([bytes], { type }), filename);
-      return call("/documents/upload", token, { method: "POST", body });
+      // No explicit Content-Type: fetch must add the multipart boundary.
+      const response = await fetch(`${apiBase}/documents/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      });
+      return response;
     }
 
     const renamed = await upload(

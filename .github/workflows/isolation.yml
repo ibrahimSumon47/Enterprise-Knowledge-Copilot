@@ -23,6 +23,7 @@ jobs:
       - name: Create two real workspaces and attack the boundary
         env:
           API_URL: https://enterprise-knowledge-copilot-2u57.onrender.com
+          COMMIT_SHA: ${{ github.sha }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

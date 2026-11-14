@@ -130,12 +130,19 @@ async function cleanup(state) {
 }
 
 async function waitForDeploy() {
-  for (let attempt = 0; attempt < 80; attempt += 1) {
+  const expected = (process.env.COMMIT_SHA ?? "").slice(0, 7);
+  for (let attempt = 0; attempt < 100; attempt += 1) {
     try {
-      const response = await fetch(`${apiBase}/openapi.json`, { signal: AbortSignal.timeout(45_000) });
-      if (response.ok) {
-        const spec = await response.json();
+      const health = await fetch(`${apiBase}/health`, { signal: AbortSignal.timeout(45_000) });
+      const specResponse = await fetch(`${apiBase}/openapi.json`, {
+        signal: AbortSignal.timeout(45_000),
+      });
+      if (health.ok && specResponse.ok) {
+        const build = await health.json();
+        const spec = await specResponse.json();
+        const commitReady = !expected || String(build.commit ?? "").startsWith(expected);
         if (
+          commitReady &&
           spec.paths?.["/signup"] &&
           spec.paths?.["/workspace"]?.delete &&
           spec.paths?.["/documents/upload"]
@@ -148,7 +155,7 @@ async function waitForDeploy() {
     }
     await new Promise((resolve) => setTimeout(resolve, 5_000));
   }
-  throw new Error("the deployed API does not expose signup and workspace deletion yet");
+  throw new Error("the deployed API has not reached this commit yet");
 }
 
 async function main() {
@@ -219,7 +226,12 @@ async function main() {
       "Path traversal fixture. Receipts are due within 45 days and approval is required.",
       "text/plain",
     );
-    expect(traversal.status === 202, `path-traversal upload returned ${traversal.status}`);
+    // Cloudflare may block the traversal payload before Render sees it; either
+    // the edge rejects it or the API sanitises and accepts it.
+    expect(
+      [202, 400, 403].includes(traversal.status),
+      `path-traversal upload returned ${traversal.status}`,
+    );
 
     const bomb = await upload(
       a.token,

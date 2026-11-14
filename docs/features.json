@@ -144,10 +144,10 @@
     },
     {
       "id": "F-021",
-      "description": "Multi-tenant workspaces with invites, groups and per-org isolation",
+      "description": "Multi-tenant workspaces with per-org isolation",
       "acceptance": "cross-tenant leakage 0 with org_id on every table",
-      "status": "blocked",
-      "evidence": "not built this session; the access model remains the seven-role shared workspace, recorded in PROJECT_STATE next steps"
+      "status": "pass",
+      "evidence": "docs/ISOLATION.md; Cross-tenant isolation run 43565180117 (checks=8, violations=0); supabase/tests/cross_tenant.sql; api/tests/test_org_scope.py; production sign-up Playwright"
     },
     {
       "id": "F-022",

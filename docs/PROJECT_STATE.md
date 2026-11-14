@@ -57,9 +57,10 @@ change is provider routing and answerability prompting, not search.
 
 1. Re-measure the test split with the 0.0 floor and publish whether the refusal
    target is met.
-2. Multi-tenant workspaces (organisation, members, invites) are not built; the
-   access model is the seven-role shared workspace. This is the largest gap
-   against the reframe brief and is recorded, not hidden.
+2. Multi-tenant workspaces are built: owner > admin > member, signup creates an
+   empty workspace, onboarding adds the first document, and the real two-workspace
+   red-team suite reports zero leakage (`docs/ISOLATION.md`). Invites, deactivation,
+   analytics and workspace settings remain.
 3. Document upload from the browser (PDF/DOCX/HTML) is still the CLI ingestion
-   workflow; `/library` lists and searches what is indexed.
+   workflow; onboarding accepts pasted text.
 4. Google OAuth and password reset are not wired.

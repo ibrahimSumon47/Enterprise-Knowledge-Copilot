@@ -7,8 +7,8 @@
   },
   "P2a": {
     "title": "Multi-tenant workspaces",
-    "status": "not_built",
-    "evidence": "Not built. Organisations, org_id, RLS scoping and the cross-tenant test are not built. The access model remains the seven-role shared workspace."
+    "status": "done",
+    "evidence": "2a-1 schema and membership RLS at 51a2da3; 2a-2 membership-derived org on every API path and search_chunks_org at d5949c8; 2a-3 owner role, signup-created workspace and onboarding at 53d7308 with production Playwright sign-up; 2a-4 real two-workspace red-team suite at 078eab1, run 43565180117: checks=8 violations=0 across guessed ids, swapped headers, tampered token, retrieval, audit and unanswered. Evidence in docs/ISOLATION.md."
   },
   "P2b": {
     "title": "Browser upload",

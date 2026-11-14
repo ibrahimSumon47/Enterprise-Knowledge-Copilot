@@ -34,3 +34,11 @@ push to `main`. The suite:
 `DELETE /workspace` removes documents, chunks, conversations, messages, feedback,
 unanswered questions, groups and memberships. Audit rows are kept with a null
 organisation so the global hash chain stays verifiable.
+
+## Evidence
+
+- Run [43565180117](https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot/actions/runs/43565180117):
+  `checks=8 violations=0` on commit `078eab1`.
+- Production sign-up and onboarding: Sign-in e2e run on `53d7308`.
+- Database policies and owner constraint: DB migrate run on `3721dc6`.
+

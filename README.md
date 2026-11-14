@@ -48,28 +48,32 @@ A post-filter would be a bug.
 
 ## Answer quality, measured on both splits
 
-`eval/run_eval.py --split dev|test --cache-tag quality-v5`, full splits, five
-seconds between live questions, run 43572849666 (dev) and 43574067184 (test).
+`eval/run_eval.py --split dev|test --cache-tag quality-v6`, full splits, five
+seconds between live questions. Final runs: 43575136979 (dev), 43576319480 (test);
+initial runs: 43572849666 (dev), 43574067184 (test).
 
-| Metric | Dev (50) | Test (34) |
-| --- | --- | --- |
-| retrieval hit@5 | 0.885 | 1.0 |
-| retrieval recall@50 | 1.0 | 1.0 |
-| retrieval MRR | 0.845 | 0.907 |
-| citation hit@k | 0.562 | 0.476 |
-| citation precision | 0.360 | 0.294 |
-| refusal accuracy | 0.660 | 0.588 |
-| wrong refusals | 16 of 32 | 12 of 21 |
-| unanswerable refused | 17 of 18 | 11 of 13 |
-| p50 / p95 latency | 4236 / 5999 ms | 4314 / 5415 ms |
-| Permission leakage | **0** | **0** (hard gate) |
+| Metric | Dev initial | Dev final | Test initial | Test final |
+| --- | --- | --- | --- | --- |
+| retrieval hit@5 | 0.885 | 0.885 | 1.0 | 1.0 |
+| retrieval recall@50 | 1.0 | 1.0 | 1.0 | 1.0 |
+| retrieval MRR | 0.845 | 0.845 | 0.907 | 0.907 |
+| citation hit@k | 0.562 | 0.375 | 0.476 | 0.429 |
+| citation precision | 0.360 | 0.240 | 0.294 | 0.265 |
+| refusal accuracy | 0.660 | 0.560 | 0.588 | 0.588 |
+| wrong refusals | 16 of 32 | 21 of 32 | 12 of 21 | 13 of 21 |
+| unanswerable refused | 17 of 18 | 17 of 18 | 11 of 13 | 12 of 13 |
+| p50 / p95 latency | 4236 / 5999 ms | 4185 / 6502 ms | 4314 / 5415 ms | 4331 / 5672 ms |
+| Permission leakage | **0** | **0** | **0** | **0** (hard gate) |
 
-Provider errors were 0 of 50 and 0 of 34, so both runs are valid. Retrieval finds
-the gold passage at rank 1 for most wrong refusals. The largest group, 13 of the
-16 dev wrong refusals, returned the 49-character refusal with no citations while
-the gold passage was retrieved: the grounded call produced no usable JSON inside
-the 1400-token budget. The fix gives it 2600 tokens and low reasoning effort. The
-numbers above are the initial run, before that fix.
+Provider errors were 0 of 50 and 0 of 34 in both rounds, so all four runs are
+valid. Retrieval did not change. The largest initial group was the 49-character
+refusal with no citations while the gold passage ranked first; the grounded call
+was given 2600 tokens and low reasoning effort to stop the JSON being truncated.
+The final numbers do not improve: dev wrong refusals rose from 16 to 21 and test
+from 12 to 13. The fix was not kept as a success, and no second change was made in
+this slice. The remaining refusal is model-side, after retrieval, not search or
+permissions; the next diagnosis needs the refusal reason and raw reply retained
+for each wrong refusal.
 
 ## Security controls## Security controls## Security controls
 

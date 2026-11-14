@@ -9,24 +9,35 @@
     "citation_precision": 0.265,
     "faithfulness": 1.0,
     "refusal_accuracy": 0.588,
-    "p50_latency_ms": 5076,
-    "p95_latency_ms": 10811,
+    "p50_latency_ms": 4331,
+    "p95_latency_ms": 5672,
     "permission_leakage": 0,
     "answerable_questions": 21,
     "unanswerable_questions": 13,
-    "wrong_refusals": 14,
-    "unanswerable_refused": 13,
+    "wrong_refusals": 13,
+    "unanswerable_refused": 12,
     "scored_questions": 34,
-    "excluded_no_model": 0
+    "excluded_no_model": 0,
+    "provider_errors": 0,
+    "provider_error_rate": 0.0,
+    "run_valid": true
   },
   "by_provider": {
     "gemini": {
-      "questions": 34,
+      "questions": 33,
       "citation_hit@k": 0.429,
-      "citation_precision": 0.265,
-      "refusal_accuracy": 0.588,
-      "p50_latency_ms": 5076,
-      "p95_latency_ms": 10811
+      "citation_precision": 0.273,
+      "refusal_accuracy": 0.576,
+      "p50_latency_ms": 4331,
+      "p95_latency_ms": 5672
+    },
+    "groq": {
+      "questions": 1,
+      "citation_hit@k": 0.0,
+      "citation_precision": 0.0,
+      "refusal_accuracy": 1.0,
+      "p50_latency_ms": 3328,
+      "p95_latency_ms": 3328
     }
   },
   "results": [
@@ -37,6 +48,7 @@
       "role": "security",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -45,8 +57,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4479,
-      "answer_len": 537,
+      "latency_ms": 7553,
+      "answer_len": 541,
       "retrieval_rank": 1
     },
     {
@@ -56,6 +68,7 @@
       "role": "security",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -64,8 +77,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5354,
-      "answer_len": 477,
+      "latency_ms": 4576,
+      "answer_len": 389,
       "retrieval_rank": 1
     },
     {
@@ -75,6 +88,7 @@
       "role": "hr",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -83,7 +97,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4743,
+      "latency_ms": 4899,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -94,6 +108,7 @@
       "role": "finance",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -102,7 +117,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5679,
+      "latency_ms": 4910,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -113,16 +128,17 @@
       "role": "finance",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
-      "hit": 1,
-      "rr": 1.0,
-      "precision": 1.0,
+      "hit": 0,
+      "rr": 0.0,
+      "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5512,
-      "answer_len": 285,
+      "latency_ms": 4492,
+      "answer_len": 49,
       "retrieval_rank": 1
     },
     {
@@ -132,6 +148,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -140,7 +157,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4828,
+      "latency_ms": 4921,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -151,6 +168,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -159,8 +177,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 8556,
-      "answer_len": 195,
+      "latency_ms": 5672,
+      "answer_len": 138,
       "retrieval_rank": 1
     },
     {
@@ -170,6 +188,7 @@
       "role": "engineering",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -178,8 +197,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5324,
-      "answer_len": 114,
+      "latency_ms": 3541,
+      "answer_len": 108,
       "retrieval_rank": 1
     },
     {
@@ -189,6 +208,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -197,7 +217,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4862,
+      "latency_ms": 4311,
       "answer_len": 49,
       "retrieval_rank": 2
     },
@@ -208,6 +228,7 @@
       "role": "security",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -216,7 +237,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 12822,
+      "latency_ms": 4849,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -227,6 +248,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -235,7 +257,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 9562,
+      "latency_ms": 4569,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -246,6 +268,7 @@
       "role": "engineering",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -254,7 +277,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4241,
+      "latency_ms": 4468,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -265,16 +288,17 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
       "rr": 0.0,
       "precision": 0.0,
       "faithful": 1,
-      "refusal_ok": 1,
+      "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 10811,
-      "answer_len": 49
+      "latency_ms": 4737,
+      "answer_len": 322
     },
     {
       "id": "u11",
@@ -283,6 +307,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -291,7 +316,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4596,
+      "latency_ms": 3651,
       "answer_len": 49
     },
     {
@@ -301,6 +326,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -309,7 +335,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 15128,
+      "latency_ms": 4690,
       "answer_len": 49
     },
     {
@@ -317,8 +343,9 @@
       "category": "unanswerable",
       "answerable": false,
       "role": "guest",
-      "provider": "gemini",
+      "provider": "groq",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -327,7 +354,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4280,
+      "latency_ms": 3328,
       "answer_len": 49
     },
     {
@@ -337,6 +364,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -345,7 +373,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 7867,
+      "latency_ms": 4235,
       "answer_len": 49
     },
     {
@@ -355,6 +383,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -363,7 +392,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5076,
+      "latency_ms": 4566,
       "answer_len": 49
     },
     {
@@ -373,16 +402,17 @@
       "role": "finance",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
-      "hit": 0,
-      "rr": 0.0,
-      "precision": 0.0,
+      "hit": 1,
+      "rr": 1.0,
+      "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5762,
-      "answer_len": 49,
+      "latency_ms": 7630,
+      "answer_len": 166,
       "retrieval_rank": null
     },
     {
@@ -392,6 +422,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -400,8 +431,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 8564,
-      "answer_len": 179,
+      "latency_ms": 4895,
+      "answer_len": 422,
       "retrieval_rank": null
     },
     {
@@ -411,6 +442,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -419,8 +451,8 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 5096,
-      "answer_len": 328,
+      "latency_ms": 3978,
+      "answer_len": 341,
       "retrieval_rank": 3
     },
     {
@@ -430,6 +462,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -438,7 +471,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 9378,
+      "latency_ms": 2894,
       "answer_len": 49,
       "retrieval_rank": null
     },
@@ -449,6 +482,7 @@
       "role": "guest",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -457,7 +491,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 8938,
+      "latency_ms": 5458,
       "answer_len": 49
     },
     {
@@ -467,6 +501,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -475,7 +510,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4041,
+      "latency_ms": 4257,
       "answer_len": 49,
       "retrieval_rank": 2
     },
@@ -486,6 +521,7 @@
       "role": "engineering",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
@@ -494,8 +530,8 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 4117,
-      "answer_len": 270,
+      "latency_ms": 3624,
+      "answer_len": 138,
       "retrieval_rank": 1
     },
     {
@@ -505,6 +541,7 @@
       "role": "security",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -513,7 +550,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 5206,
+      "latency_ms": 3463,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -524,16 +561,17 @@
       "role": "hr",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 1,
       "rr": 1.0,
       "precision": 1.0,
       "faithful": 1,
-      "refusal_ok": 0,
+      "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4274,
-      "answer_len": 268,
+      "latency_ms": 3777,
+      "answer_len": 325,
       "retrieval_rank": 1
     },
     {
@@ -543,6 +581,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -551,7 +590,7 @@
       "faithful": 1,
       "refusal_ok": 0,
       "leaks": 0,
-      "latency_ms": 3886,
+      "latency_ms": 3755,
       "answer_len": 49,
       "retrieval_rank": 1
     },
@@ -562,6 +601,7 @@
       "role": "guest",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -570,7 +610,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4238,
+      "latency_ms": 4075,
       "answer_len": 49
     },
     {
@@ -580,6 +620,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -588,7 +629,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3162,
+      "latency_ms": 3446,
       "answer_len": 49
     },
     {
@@ -598,6 +639,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -606,7 +648,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4043,
+      "latency_ms": 4331,
       "answer_len": 49
     },
     {
@@ -616,6 +658,7 @@
       "role": "engineering",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -624,7 +667,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 3457,
+      "latency_ms": 2353,
       "answer_len": 49
     },
     {
@@ -634,6 +677,7 @@
       "role": "hr",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -642,7 +686,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4024,
+      "latency_ms": 3422,
       "answer_len": 49
     },
     {
@@ -652,6 +696,7 @@
       "role": "employee",
       "provider": "gemini",
       "provider_outage": false,
+      "provider_error": false,
       "reason": null,
       "provider_trace": null,
       "hit": 0,
@@ -660,7 +705,7 @@
       "faithful": 1,
       "refusal_ok": 1,
       "leaks": 0,
-      "latency_ms": 4319,
+      "latency_ms": 2930,
       "answer_len": 49
     }
   ]

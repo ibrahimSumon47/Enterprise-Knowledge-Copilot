@@ -34,27 +34,29 @@
 
 ## Answer quality
 
-Initial full runs with `--cache-tag quality-v5`, five seconds between questions:
+Final full runs with `--cache-tag quality-v6`, five seconds between questions:
+43575136979 (dev) and 43576319480 (test). Reports: `docs/reports/eval_dev.json`
+and `docs/reports/eval_test.json`.
 
 | Metric | Dev (50) | Test (34) |
 | --- | --- | --- |
 | retrieval hit@5 | 0.885 | 1.0 |
 | retrieval recall@50 | 1.0 | 1.0 |
 | retrieval MRR | 0.845 | 0.907 |
-| citation hit@k | 0.562 | 0.476 |
-| citation precision | 0.360 | 0.294 |
-| refusal accuracy | 0.660 | 0.588 |
-| wrong refusals | 16 of 32 | 12 of 21 |
-| unanswerable refused | 17 of 18 | 11 of 13 |
-| p50 / p95 latency | 4236 / 5999 ms | 4314 / 5415 ms |
+| citation hit@k | 0.375 | 0.429 |
+| citation precision | 0.240 | 0.265 |
+| refusal accuracy | 0.560 | 0.588 |
+| wrong refusals | 21 of 32 | 13 of 21 |
+| unanswerable refused | 17 of 18 | 12 of 13 |
+| p50 / p95 latency | 4185 / 6502 ms | 4331 / 5672 ms |
 | permission leakage | 0 | 0 |
 
-Provider errors were 0 in both runs. The largest wrong-refusal group is empty
-evidence from the grounded call: 13 of 16 dev wrong refusals returned the
-49-character refusal with no citations while the gold passage was at rank 1. The
-1400-token completion budget was shared with the reasoning model's hidden work;
-the fix raises it to 2600 and asks for low reasoning effort. These numbers are
-from before that fix.
+Provider errors were 0 in both final runs. Initial runs with `quality-v5` had 16
+and 12 wrong refusals. The attempted fix gave the grounded call 2600 tokens and
+low reasoning effort; it made both splits worse, so it is recorded as a failed
+experiment, not a success. Retrieval is unchanged and the remaining refusals are
+model-side after retrieval. The next step is to retain the refusal reason and raw
+reply for each wrong refusal before changing the prompt again.
 
 ## Known limits
 

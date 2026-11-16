@@ -75,6 +75,15 @@ The application code is present; these console settings enable the flows.
 3. Supabase's built-in sender is rate-limited. For more than a few resets per
    hour, connect a free SMTP sender under Authentication → SMTP.
 
+### Demo account passwords
+
+`@ekc.local` addresses cannot receive recovery email. Set
+`EKC_DEMO_PASSWORD` in GitHub → Settings → Secrets and variables → Actions, then
+run **Actions → Reset demo passwords**. The workflow uses the Supabase Admin API
+to write that password to the seven existing demo users and never prints the
+value. Changing the secret without running the workflow does not reset an
+existing account.
+
 ### Google sign-in
 
 1. Google Cloud Console → APIs & Services → OAuth consent screen: external,

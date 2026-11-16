@@ -48,6 +48,24 @@ def test_diagnostics_parse_jsonb_returned_as_text() -> None:
     assert found["message-2"]["raw_reply"] == "{}"
 
 
+def test_retrieval_rank_soft_fails_when_the_admin_endpoint_is_down(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    def broken(*args, **kwargs):
+        raise OSError("502")
+
+    monkeypatch.setattr(run_eval, "http_json", broken)
+    monkeypatch.setattr(run_eval.time, "sleep", lambda seconds: None)
+    rank = run_eval.retrieval_rank(
+        SimpleNamespace(api_url="https://example.test"),
+        "question",
+        "employee",
+        "token",
+        ["keyword"],
+    )
+    assert rank is None
+
+
 def test_diagnostics_ignore_non_object_details() -> None:
     assert run_eval.diagnostics_by_message(
         [{"action": "chat.question", "detail": ["not", "an", "object"]}]

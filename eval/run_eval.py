@@ -110,12 +110,23 @@ def retrieval_rank(args, question: str, role: str, token: str, keywords: list[st
     this is a property of retrieval, not of what the model chose to cite.
     """
     query = urllib.parse.quote(question)
-    body = http_json(
-        f"{args.api_url.rstrip('/')}/admin/retrieval?question={query}&role={role}&all_candidates=true",
-        "GET",
-        None,
-        {"Authorization": f"Bearer {token}"},
-    )
+    body = None
+    for attempt in range(3):
+        try:
+            body = http_json(
+                f"{args.api_url.rstrip('/')}/admin/retrieval?question={query}&role={role}&all_candidates=true",
+                "GET",
+                None,
+                {"Authorization": f"Bearer {token}"},
+                timeout=45,
+            )
+            break
+        except Exception:  # noqa: BLE001 - an optional rank must not kill the run
+            if attempt == 2:
+                return None
+            time.sleep(2 * (attempt + 1))
+    if body is None:
+        return None
     for index, candidate in enumerate(body.get("candidates") or [], start=1):
         haystack = " ".join(
             str(candidate.get(key, "")) for key in ("title", "heading", "snippet")
@@ -172,13 +183,22 @@ def diagnostics_by_message(entries: list[dict]) -> dict[str, dict]:
 
 def audit_diagnostics(args, token: str) -> dict[str, dict]:
     """Read one page of the admin audit and index its answer diagnostics."""
-    body = http_json(
-        f"{args.api_url.rstrip('/')}/audit?limit=200",
-        "GET",
-        None,
-        {"Authorization": f"Bearer {token}"},
-    )
-    return diagnostics_by_message(body.get("entries") or [])
+    body = None
+    for attempt in range(3):
+        try:
+            body = http_json(
+                f"{args.api_url.rstrip('/')}/audit?limit=200",
+                "GET",
+                None,
+                {"Authorization": f"Bearer {token}"},
+                timeout=45,
+            )
+            break
+        except Exception:  # noqa: BLE001 - a transient read must not fake a score
+            if attempt == 2:
+                raise
+            time.sleep(2 * (attempt + 1))
+    return diagnostics_by_message((body or {}).get("entries") or [])
 
 
 def score(item: dict, response: dict) -> dict:

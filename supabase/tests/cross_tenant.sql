@@ -4,7 +4,7 @@
 \set ON_ERROR_STOP on
 begin;
 
-select count(*) as owner_constraint
+select case when count(*) > 0 then 'true' else 'false' end as owner_constraint
 from pg_constraint
 where conrelid = 'public.org_members'::regclass
   and conname = 'org_members_role_check'
@@ -12,30 +12,30 @@ where conrelid = 'public.org_members'::regclass
 \gset
 \if :owner_constraint
 \else
-  \echo 'owner role constraint is missing'
-  \quit 1
+  \echo 'FAIL: owner role constraint is missing'
+  \quit
 \endif
 
-select count(*) as owner_index
+select case when count(*) > 0 then 'true' else 'false' end as owner_index
 from pg_indexes
 where schemaname = 'public'
   and indexname = 'organizations_one_owner_idx'
 \gset
 \if :owner_index
 \else
-  \echo 'single-owner index is missing'
-  \quit 1
+  \echo 'FAIL: single-owner index is missing'
+  \quit
 \endif
 
-select count(*) as policy_count
+select case when count(*) = 2 then 'true' else 'false' end as policy_count
 from pg_policies
 where schemaname = 'public'
   and policyname in ('documents_read', 'chunks_read')
 \gset
 \if :policy_count
 \else
-  \echo 'membership policies are missing'
-  \quit 1
+  \echo 'FAIL: membership policies are missing'
+  \quit
 \endif
 
 insert into public.organizations (name, slug)
@@ -62,21 +62,21 @@ select set_config('request.jwt.claims', json_build_object('sub', :'admin_id')::t
 
 set local role authenticated;
 
-select count(*) as leaked_documents from public.documents where org_id = :'other_org'
+select case when count(*) > 0 then 'true' else 'false' end as leaked_documents from public.documents where org_id = :'other_org'
 \gset
 \if :leaked_documents
   \echo 'FAIL: cross-tenant documents are visible'
-  \quit 1
+  \quit
 \endif
 
-select count(*) as leaked_chunks from public.chunks where org_id = :'other_org'
+select case when count(*) > 0 then 'true' else 'false' end as leaked_chunks from public.chunks where org_id = :'other_org'
 \gset
 \if :leaked_chunks
   \echo 'FAIL: cross-tenant chunks are visible'
-  \quit 1
+  \quit
 \endif
 
-select count(*) as own_documents
+select case when count(*) > 0 then 'true' else 'false' end as own_documents
 from public.documents
 where org_id = (select id from public.organizations where slug = 'sample-workspace')
 \gset
@@ -84,7 +84,7 @@ where org_id = (select id from public.organizations where slug = 'sample-workspa
   \echo 'sample workspace still readable'
 \else
   \echo 'FAIL: sample workspace is unreadable to its member'
-  \quit 1
+  \quit
 \endif
 
 rollback;

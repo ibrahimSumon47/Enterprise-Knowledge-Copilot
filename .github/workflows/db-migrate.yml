@@ -46,6 +46,11 @@ jobs:
           set -euo pipefail
           for file in supabase/tests/cross_tenant.sql supabase/tests/demo_library.sql; do
             echo "running $file"
-            psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$file"
+            log=$(mktemp)
+            psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$file" 2>&1 | tee "$log"
+            if grep -q 'FAIL:' "$log"; then
+              echo "$file reported a failure"
+              exit 1
+            fi
           done
 

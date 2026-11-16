@@ -19,10 +19,12 @@ values (:'target_org', :'admin_id', 'owner');
 select public.copy_demo_library(:'target_org', :'admin_id') as copied
 \gset
 
-\if :copied
+select case when :copied > 0 then 'true' else 'false' end as copied_ok \gset
+
+\if :copied_ok
 \else
   \echo 'FAIL: the demo library copy returned no documents'
-  \quit 1
+  \quit
 \endif
 
 select count(*) as copied_documents
@@ -36,24 +38,30 @@ from public.chunks
 where org_id = :'target_org'
 \gset
 
-\if :copied_documents
+select case when :copied_documents > 0 then 'true' else 'false' end as documents_ok \gset
+select case when :copied_chunks > 0 then 'true' else 'false' end as chunks_ok \gset
+
+\if :documents_ok
 \else
   \echo 'FAIL: the copied documents are missing'
-  \quit 1
+  \quit
 \endif
 
-\if :copied_chunks
+\if :chunks_ok
 \else
   \echo 'FAIL: the copied chunks are missing'
-  \quit 1
+  \quit
 \endif
 
 select public.copy_demo_library(:'target_org', :'admin_id') as second_copy
 \gset
 
-\if :second_copy
+select case when :second_copy = 0 then 'true' else 'false' end as second_ok \gset
+
+\if :second_ok
+\else
   \echo 'FAIL: a second copy duplicated the demo library'
-  \quit 1
+  \quit
 \endif
 
 rollback;

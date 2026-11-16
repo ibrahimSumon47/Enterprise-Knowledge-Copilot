@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { site } from "@/lib/site";
 
@@ -10,6 +10,10 @@ import { site } from "@/lib/site";
 const subscribeToHydration = () => () => {};
 const hydrated = () => true;
 const serverSnapshot = () => false;
+const subscribeToQuery = () => () => {};
+const sampleUnavailable = () =>
+  new URLSearchParams(window.location.search).get("sample") === "unavailable";
+const serverSampleUnavailable = () => false;
 
 /** Only same-site paths are accepted so `next` cannot become an open redirect. */
 function safeNext(value: string | null) {
@@ -21,12 +25,16 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("sample") === "unavailable") {
-      setError("The sample workspace is temporarily unavailable. Try again, or sign in to your own workspace.");
-    }
-  }, []);
+  const sampleFailed = useSyncExternalStore(
+    subscribeToQuery,
+    sampleUnavailable,
+    serverSampleUnavailable,
+  );
+  const notice =
+    error ??
+    (sampleFailed
+      ? "The sample workspace is temporarily unavailable. Try again, or sign in to your own workspace."
+      : null);
   // The form is inert until React has hydrated. Without this, a browser that
   // autofills and submits before the bundle runs performs a native GET submit,
   // which reloads /login and puts the password in the URL.
@@ -117,12 +125,12 @@ export default function LoginPage() {
           required
           type="password"
         />
-        {error ? (
+        {notice ? (
           <p
             className="mt-4 rounded-lg border border-[var(--danger)] px-3 py-2 text-xs text-[var(--danger)]"
             role="alert"
           >
-            {error}
+            {notice}
           </p>
         ) : null}
         <button

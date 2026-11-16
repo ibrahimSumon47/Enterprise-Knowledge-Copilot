@@ -1,6 +1,9 @@
 # PROJECT STATE
 
-**Last updated:** 2026-11-14 (answer-quality evaluation)
+**Last updated:** 2026-11-14 (working guide and Scorecard registry fix)
+
+How to set up, verify, change and operate the project — including the detailed
+strengths, limitations and non-limitations — is in `docs/WORKING_ON_THIS.md`.
 
 ## Where it runs
 
@@ -60,23 +63,32 @@ reply for each wrong refusal before changing the prompt again.
 
 ## Known limits
 
-- The 512 MB free instance cannot hold a larger cross-encoder.
-- The free instance sleeps; keep-warm runs every ten minutes.
-- Free LLM quotas throttle and provider outages surface as honest refusals.
+- Answer generation is the weak point: 21/32 dev and 13/21 test answerable
+  questions are wrong refusals, while retrieval hit@5 is 0.885/1.0.
+- Citation precision is 0.240 dev and 0.265 test.
+- The 512 MB free instance cannot hold a larger cross-encoder; the free instance
+  sleeps, so a cold start can take about a minute.
+- Free LLM quotas throttle, retire model ids and can return empty or truncated
+  content; provider outages are explicit, not counted as document refusals.
 - The answer cache in `eval/run_eval.py` is keyed by `--cache-tag`; forgetting to
   change it re-scores old answers.
-- Local `pytest` cannot run on this machine (Python 3.14 has no asyncpg wheel for
-  0.30.0); API tests run in CI.
+- Uploads are parsed and embedded synchronously and accept only Markdown, text,
+  HTML, PDF and DOCX; there is no connector sync, OCR or background queue.
+- Password reset and Google sign-in need the owner console steps in
+  `docs/OWNER_TODO.md` before those flows work on a fresh deployment.
+- The golden set is 84 questions (50 dev, 34 test), so small score differences are
+  noisy; both splits have been inspected during diagnosis.
+
+The full impact, mitigation and removal condition for each limit is in
+`docs/WORKING_ON_THIS.md`.
 
 ## Next steps
 
-1. Re-measure the test split with the 0.0 floor and publish whether the refusal
-   target is met.
-2. Multi-tenant workspaces are built: owner > admin > member, signup creates an
-   empty workspace, onboarding adds the first document, and the real two-workspace
-   red-team suite reports zero leakage (`docs/ISOLATION.md`). Invites, deactivation,
-   analytics and workspace settings remain.
-3. Browser upload is built with type/magic checks, size and rate caps, private
-   Storage originals, progress, re-index and delete; the remaining gap is
-   group-scoped documents, which arrives with invites in 2c.
-4. Google OAuth and password reset are not wired.
+1. Retain the refusal reason and raw reply for every wrong refusal, then fix the
+   largest cause and re-measure dev once before touching test.
+2. Improve citation precision without weakening quote verification, the relevance
+   guard or the unanswerable-refusal rate.
+3. Enable password reset and Google sign-in in Supabase/Google using
+   `docs/OWNER_TODO.md`; the code paths already exist.
+4. Keep the SQL permission predicate and the two-workspace isolation gate at zero
+   leakage on every schema or retrieval change.

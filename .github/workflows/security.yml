@@ -95,11 +95,8 @@ jobs:
     name: openssf scorecard
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
-    # scorecard-action is a Docker action published on gcr.io, and gcr.io pulls
-    # currently fail on hosted runners with Google's "billing" registry error.
-    # The job stays so the check appears, but it must not fail the whole run for
-    # a registry outage the repository cannot fix.
-    continue-on-error: true
+    # v2.5.0 is the first release whose Docker action pulls from ghcr.io. v2.4.0
+    # pulled from gcr.io, which now rejects anonymous pulls with a billing error.
     permissions:
       security-events: write
       id-token: write
@@ -109,7 +106,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: ossf/scorecard-action@62b2cac7ed8198b15735ed49ab1e5cf35480ba46 # v2.4.0
+      - uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
         with:
           results_file: scorecard.sarif
           results_format: sarif

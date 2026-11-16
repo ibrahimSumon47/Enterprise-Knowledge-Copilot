@@ -6,6 +6,7 @@ Administrators see where the documents fall short and can close the gap.
 
 **Live product:** https://enterprise-knowledge-copilot-wine.vercel.app
 **Repository:** https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot
+**Working on it:** [setup, verification, strengths and detailed limits](docs/WORKING_ON_THIS.md)
 
 ## What a visitor can do
 
@@ -75,7 +76,7 @@ this slice. The remaining refusal is model-side, after retrieval, not search or
 permissions; the next diagnosis needs the refusal reason and raw reply retained
 for each wrong refusal.
 
-## Security controls## Security controls## Security controls
+## Security controls
 
 Client-facing summary: `/security`. Engineering evidence lives here and in
 `docs/reports/security.md`.
@@ -123,10 +124,14 @@ Deployment, including the free-tier limits: `docs/DEPLOY.md`. Demo walkthrough:
   take a minute.
 - Free model quotas throttle. A refused answer caused by a provider outage says
   so in the admin detail instead of pretending the documents lack the answer.
-- Retrieval recall, not generation, is the weak point: the test split's hit@k is
-  in the table above, and `docs/reports/retrieval_refusals.md` analyses why.
+- Generation and refusal, not retrieval, are the current weak point: retrieval
+  finds the gold passage at rank 1 for most wrong refusals, while citation
+  precision is 0.240 dev / 0.265 test.
 - The 84-question set is small; the numbers move by a few points between runs of
-  the same configuration.
+  the same configuration. The per-question evidence is retained in
+  `docs/reports/eval_dev.json` and `docs/reports/eval_test.json`.
+- The full engineering limits, mitigations and non-limitations are in
+  `docs/WORKING_ON_THIS.md`.
 
 ## Credits and licences
 

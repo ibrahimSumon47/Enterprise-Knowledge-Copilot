@@ -6,6 +6,10 @@ Administrators see where the documents fall short and can close the gap.
 
 **Live product:** https://enterprise-knowledge-copilot-wine.vercel.app
 
+**New here?** Follow the [step-by-step tutorial](docs/TUTORIAL.md) to open the
+sample workspace, create your own workspace, load the demo library, upload
+documents, ask questions and invite your team.
+
 ## What a visitor can do
 
 - Open the **sample workspace** from the home page without an account: one click

@@ -36,7 +36,22 @@ def test_diagnostics_are_indexed_by_message_id() -> None:
     }
 
 
+def test_diagnostics_parse_jsonb_returned_as_text() -> None:
+    entries = [
+        {
+            "action": "chat.question",
+            "detail": '{"message_id": "message-2", "reason": "empty evidence", "raw_reply": "{}"}',
+        }
+    ]
+    found = run_eval.diagnostics_by_message(entries)
+    assert found["message-2"]["reason"] == "empty evidence"
+    assert found["message-2"]["raw_reply"] == "{}"
+
+
 def test_diagnostics_ignore_non_object_details() -> None:
     assert run_eval.diagnostics_by_message(
         [{"action": "chat.question", "detail": ["not", "an", "object"]}]
+    ) == {}
+    assert run_eval.diagnostics_by_message(
+        [{"action": "chat.question", "detail": "not json"}]
     ) == {}

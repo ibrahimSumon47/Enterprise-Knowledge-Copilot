@@ -149,6 +149,14 @@ def diagnostics_by_message(entries: list[dict]) -> dict[str, dict]:
         if entry.get("action") != "chat.question":
             continue
         detail = entry.get("detail") or {}
+        # asyncpg returns a jsonb column as text; the audit verifier parses it for
+        # the same reason. A dict is accepted too, for unit fixtures and a driver
+        # that decodes jsonb itself.
+        if isinstance(detail, str):
+            try:
+                detail = json.loads(detail)
+            except json.JSONDecodeError:
+                continue
         if not isinstance(detail, dict):
             continue
         message_id = str(detail.get("message_id") or "").strip()

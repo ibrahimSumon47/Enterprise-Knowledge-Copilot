@@ -1,6 +1,6 @@
 # PROJECT STATE
 
-**Last updated:** 2026-11-14 (working guide and Scorecard registry fix)
+**Last updated:** 2026-11-16 (refusal diagnostics)
 
 How to set up, verify, change and operate the project — including the detailed
 strengths, limitations and non-limitations — is in `docs/WORKING_ON_THIS.md`.
@@ -37,9 +37,10 @@ strengths, limitations and non-limitations — is in `docs/WORKING_ON_THIS.md`.
 
 ## Answer quality
 
-Final full runs with `--cache-tag quality-v6`, five seconds between questions:
-43575136979 (dev) and 43576319480 (test). Reports: `docs/reports/eval_dev.json`
-and `docs/reports/eval_test.json`.
+Matched full runs with `--cache-tag quality-v6`, five seconds between questions:
+43575136979 (dev) and 43576319480 (test). Dev was then re-run once with the
+diagnostic build (`quality-v7`); that result is noted below. Reports:
+`docs/reports/eval_dev.json` and `docs/reports/eval_test.json`.
 
 | Metric | Dev (50) | Test (34) |
 | --- | --- | --- |
@@ -58,13 +59,16 @@ Provider errors were 0 in both final runs. Initial runs with `quality-v5` had 16
 and 12 wrong refusals. The attempted fix gave the grounded call 2600 tokens and
 low reasoning effort; it made both splits worse, so it is recorded as a failed
 experiment, not a success. Retrieval is unchanged and the remaining refusals are
-model-side after retrieval. The next step is to retain the refusal reason and raw
-reply for each wrong refusal before changing the prompt again.
+model-side after retrieval. The latest dev diagnostic run (43820194910) recorded 19 wrong refusals:
+8 relevance guard, 8 empty evidence, 0 quote verification, 0 provider errors,
+and 3 accepted answers below the required citation count. The per-question
+reason and raw reply are now retained; the prompt is unchanged.
 
 ## Known limits
 
 - Answer generation is the weak point: 21/32 dev and 13/21 test answerable
-  questions are wrong refusals, while retrieval hit@5 is 0.885/1.0.
+  questions are wrong refusals in the matched `quality-v6` runs, and 19/32 in
+  the `quality-v7` dev diagnostic, while retrieval hit@5 is 0.885/1.0.
 - Citation precision is 0.240 dev and 0.265 test.
 - The 512 MB free instance cannot hold a larger cross-encoder; the free instance
   sleeps, so a cold start can take about a minute.
@@ -84,8 +88,9 @@ The full impact, mitigation and removal condition for each limit is in
 
 ## Next steps
 
-1. Retain the refusal reason and raw reply for every wrong refusal, then fix the
-   largest cause and re-measure dev once before touching test.
+1. Pick one of the two tied largest causes (relevance guard or empty evidence),
+   fix only that, and re-measure dev once before touching test. The refusal reason
+   and raw reply are now retained for every wrong refusal.
 2. Improve citation precision without weakening quote verification, the relevance
    guard or the unanswerable-refusal rate.
 3. Enable password reset and Google sign-in in Supabase/Google using the

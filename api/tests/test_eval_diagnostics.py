@@ -48,6 +48,25 @@ def test_diagnostics_parse_jsonb_returned_as_text() -> None:
     assert found["message-2"]["raw_reply"] == "{}"
 
 
+def test_wrong_refusal_report_escapes_table_cells() -> None:
+    table = run_eval.wrong_refusal_table(
+        [
+            {
+                "id": "a01",
+                "provider": "groq",
+                "answerable": True,
+                "refusal_ok": False,
+                "reason": "no quote | verified",
+                "raw_reply": '{"answer": "one\ntwo"}',
+            },
+            {"id": "u01", "answerable": False, "refusal_ok": True},
+        ]
+    )
+    assert "no quote \\| verified" in table
+    assert "one two" in table
+    assert "u01" not in table
+
+
 def test_retrieval_rank_soft_fails_when_the_admin_endpoint_is_down(monkeypatch) -> None:
     from types import SimpleNamespace
 

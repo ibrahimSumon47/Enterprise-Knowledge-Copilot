@@ -119,3 +119,39 @@ target: 13 wrong refusals, all Gemini answerability refusals, 13/13 unanswerable
 refused, leakage 0, p95 7.4 s. The push budget ended before the prompt/routing
 change could be measured, so it is recorded as the next step rather than claimed.
 
+
+## Slice 3: the diagnostic is now in the per-question table
+
+The missing evidence was structural, not a new model result. `/chat` already had
+the refusal reason and raw reply, but only exposed them to an admin. The audit row
+now carries `message_id` and `raw_reply`; the evaluation reads one admin audit
+page after a run and joins those fields onto each scored question. Ordinary users
+still receive neither field. The helper parses the `jsonb` audit detail as text,
+which is how asyncpg returns it, and treats a transient admin-endpoint failure as
+missing optional evidence rather than aborting the run.
+
+Run 43820194910 replayed the cached answers from the throttled dev run
+43817973040; the metrics are identical to the live run because the replay did not
+call a model.
+
+| Dev run | Wrong refusals | Relevance guard | Empty evidence | Quote verification | Provider error | Under-cited answer |
+| --- | --- | --- | --- | --- | --- | --- |
+| `quality-v7`, 50 questions | 19 | 8 | 8 | 0 | 0 | 3 |
+
+Every wrong refusal has a raw reply. Three of the nineteen are not refusals at
+all: the answer was accepted with one citation while the question's
+`min_citations` was two. They are recorded separately instead of being forced into
+one of the refusal buckets.
+
+Examples from the per-question table:
+
+- `a03`: raw `{"answer": "", "evidence": []}`, reason `no quote verified against a
+  retrieved passage` — empty evidence from the model, gold passage at rank 2.
+- `a02`: answer and one evidence quote present, reason `verified quotes share fewer
+  than two question terms` — relevance guard, gold passage at rank 1.
+- `m01`: answer present with one citation, no refusal reason — accepted but below
+  the benchmark's two-citation requirement.
+
+The two largest causes are tied at eight. The prompt is unchanged in this slice;
+the next change should target one of those groups and be measured on dev before a
+test run.

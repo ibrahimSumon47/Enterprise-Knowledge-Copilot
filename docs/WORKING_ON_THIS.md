@@ -362,7 +362,8 @@ rate, demonstrated on dev and then test.
 
 ### 10.2 Citation precision is low
 
-**What:** citation precision is 0.240 dev and 0.265 test. An answer may cite a
+**What:** citation precision is 0.240 dev and 0.265 test in the matched
+`quality-v6` runs (0.32 in the later `quality-v7` dev run). An answer may cite a
 passage that contains some query terms but is not the single best passage.
 
 **Impact:** the reader may have to open more than one source, and the citation

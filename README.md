@@ -65,7 +65,9 @@ initial runs: 43572849666 (dev), 43574067184 (test).
 | Permission leakage | **0** | **0** | **0** | **0** (hard gate) |
 
 Provider errors were 0 of 50 and 0 of 34 in both rounds, so all four runs are
-valid. Retrieval did not change. The largest initial group was the 49-character
+valid. A later dev diagnostic run (`quality-v7`, 50 questions) scored 19/32 wrong
+refusals with 0.58 refusal accuracy; test has not been re-run since `quality-v6`.
+Retrieval did not change. The largest initial group was the 49-character
 refusal with no citations while the gold passage ranked first; the grounded call
 was given 2600 tokens and low reasoning effort to stop the JSON being truncated.
 The final numbers do not improve: dev wrong refusals rose from 16 to 21 and test

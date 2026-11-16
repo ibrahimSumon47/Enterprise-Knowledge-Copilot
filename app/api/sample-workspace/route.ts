@@ -39,6 +39,9 @@ export async function POST(request: Request) {
     password,
   });
   if (error) {
+    // The password and tokens are never logged; the code is enough to tell a
+    // stale guest credential from an auth-service outage.
+    console.error("sample guest sign-in failed", error.status, error.code, error.message);
     return NextResponse.redirect(new URL("/login?sample=unavailable", origin), 303);
   }
   return NextResponse.redirect(new URL("/chat", origin), 303);

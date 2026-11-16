@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { site } from "@/lib/site";
 
@@ -21,6 +21,12 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("sample") === "unavailable") {
+      setError("The sample workspace is temporarily unavailable. Try again, or sign in to your own workspace.");
+    }
+  }, []);
   // The form is inert until React has hydrated. Without this, a browser that
   // autofills and submits before the bundle runs performs a native GET submit,
   // which reloads /login and puts the password in the URL.

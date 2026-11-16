@@ -17,6 +17,59 @@ Administrators see where the documents fall short and can close the gap.
 - Sign in with a role account to see the library and, as an administrator, the
   unanswered queue, answer quality, performance and activity log.
 
+## Who can do what
+
+There are eight roles. **Owner** and **Admin** carry management powers; the other
+six decide which documents a person may read. Every role is scoped to one
+workspace; no role can read another tenant's data.
+
+| Role | Documents it may read | Management it may do |
+| --- | --- | --- |
+| `guest` | public | none |
+| `employee` | public + employee | none |
+| `engineering` | public + employee + engineering department | none |
+| `security` | public + employee + security department | none |
+| `hr` | public + employee + people/HR department | none |
+| `finance` | public + employee + finance department | none |
+| `admin` | every access level in the workspace, limited to its own groups | groups, invites (not admins), members below admin, documents, analytics, unanswered queue, audit log, diagnostics |
+| **owner** | every document in every group | everything an admin can do, plus workspace settings, workspace deletion, and inviting or changing admins |
+
+**Owner** is created by signing up at `/register`; an owner cannot be invited.
+Ownership transfer is not implemented. **Admin** can see confidential material
+but does not bypass groups, cannot change workspace settings or delete the
+workspace, and cannot invite, grant or modify an admin. All signed-in roles can
+ask questions, open citations and upload documents where the workspace allows it;
+the sample workspace is read-only.
+
+The access rule is enforced in the SQL that selects passages, not by hiding a
+button in the browser. `docs/WORKING_ON_THIS.md` records the full model.
+
+## What you can ask
+
+The copilot answers from the documents the signed-in account may read. It does not
+browse the web, use general knowledge, run code, or answer from another workspace.
+When the documents do not contain the answer, it refuses and shows the closest
+sources instead of inventing one.
+
+In the sample workspace the corpus is a public slice of the GitLab Handbook. Typical
+answerable questions include:
+
+- expenses, receipts and when to use a company credit card;
+- onboarding, leave notice, laptops and company values;
+- incidents, post-mortems, on-call duties and change freezes;
+- code review, test coverage and handling confidential material in a merge request;
+- production access, credential rotation, access reviews and vendor access;
+- reporting a vulnerability and the security severity matrix.
+
+Department roles add their department's material; admins and owners can ask across
+all access levels. Questions work in Bangla or English, and every answer cites the
+passage it used.
+
+A newly created workspace starts empty. Upload PDF, DOCX, HTML, Markdown or text
+files in the library, wait for indexing to finish, then ask about them. Before that,
+the honest answer is a refusal. Questions about live news, personal data, medical
+or legal advice, or anything absent from the uploaded documents are outside scope.
+
 ## Screenshots
 
 Captured by Playwright from the live deployment on 13 November 2026.

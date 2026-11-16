@@ -39,10 +39,13 @@ jobs:
             "select table_name from information_schema.tables where table_schema='public' order by 1;"
           psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c \
             "select extname from pg_extension where extname in ('vector','pg_trgm');"
-      - name: Cross-tenant isolation test
+      - name: Database behaviour tests
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/cross_tenant.sql
+          for file in supabase/tests/cross_tenant.sql supabase/tests/demo_library.sql; do
+            echo "running $file"
+            psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
 

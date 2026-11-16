@@ -36,7 +36,9 @@ async def init_pool(settings: Settings) -> asyncpg.Pool:
             dsn=dsn,
             min_size=1,
             max_size=4,
-            command_timeout=30,
+            # Normal queries are bounded in SQL; the one-off demo-library copy
+            # inserts the sample document/chunk set and can take about 40 s.
+            command_timeout=120,
             statement_cache_size=0,  # Supavisor transaction pooler is not compatible
         )
     return _pool

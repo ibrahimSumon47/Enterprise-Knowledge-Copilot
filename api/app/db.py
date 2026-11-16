@@ -461,6 +461,7 @@ async def list_documents(
         """
         select id, slug, title, access_level, department, is_synthetic, status,
                error, file_size, mime_type, progress, source_url, version, updated_at,
+               coalesce((metadata->>'demo_copy')::boolean, false) as demo_copy,
                (select count(*) from public.chunks c where c.document_id = d.id) as chunk_count
         from public.documents d
         where status in ('active', 'processing', 'failed')
@@ -474,7 +475,7 @@ async def list_documents(
                  or (access_level = 'department' and department = $2)))
           )
         order by access_level, title
-        limit 500
+        limit 1000
         """,
         role,
         department or "",
@@ -778,6 +779,14 @@ async def delete_workspace(org_id: str) -> bool:
                 "delete from public.organizations where id = $1", org_id
             )
             return True
+
+
+async def copy_demo_library(org_id: str, user_id: str) -> int:
+    """Copy the sample corpus into an owner's workspace, once."""
+    value = await pool().fetchval(
+        "select public.copy_demo_library($1::uuid, $2::uuid)", org_id, user_id
+    )
+    return int(value or 0)
 
 
 async def org_name(org_id: str) -> str | None:

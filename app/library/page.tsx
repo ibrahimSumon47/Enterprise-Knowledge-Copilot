@@ -14,6 +14,7 @@ type DocumentRow = {
   license: string;
   attribution: string;
   is_synthetic?: boolean;
+  demo_copy?: boolean;
   status?: string;
   error?: string | null;
   progress?: number;
@@ -40,6 +41,8 @@ export default function LibraryPage() {
   const [role, setRole] = useState<string>("employee");
   const [uploading, setUploading] = useState(false);
   const [uploadNote, setUploadNote] = useState<string | null>(null);
+  const [demoBusy, setDemoBusy] = useState(false);
+  const [demoNote, setDemoNote] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = supabaseBrowser();
@@ -132,6 +135,26 @@ export default function LibraryPage() {
     }
   }
 
+  async function loadDemoLibrary() {
+    if (!token) return;
+    if (!window.confirm("Add the sample handbook and demo policy documents to this workspace? Existing documents are kept.")) return;
+    setDemoBusy(true);
+    setDemoNote("Copying the demo library…");
+    try {
+      const result = await apiFetch<{ documents: number }>("/admin/demo-library", token, { method: "POST" });
+      setDemoNote(
+        result.documents
+          ? `${result.documents} demo documents added.`
+          : "The demo library is already loaded.",
+      );
+      await refresh();
+    } catch (caught) {
+      setDemoNote(caught instanceof Error ? caught.message : "The demo library could not be loaded");
+    } finally {
+      setDemoBusy(false);
+    }
+  }
+
   async function remove(document: DocumentRow) {
     if (!token || !window.confirm(`Delete ${document.title} and its stored original?`)) return;
     try {
@@ -167,8 +190,14 @@ export default function LibraryPage() {
               : "Everything the copilot can answer from, filtered to the permissions of your role and department."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {sample ? <span className="chip text-[11px]">Read only</span> : null}
+          {!sample && role === "owner" ? (
+            <button className="btn" disabled={demoBusy} onClick={loadDemoLibrary} type="button">
+              {demoBusy ? <Loader2 className="animate-spin" size={14} /> : null}
+              Load demo library
+            </button>
+          ) : null}
           <span className="text-xs text-[var(--text-muted)]">
             {documents.length} {documents.length === 1 ? "document" : "documents"}
           </span>
@@ -197,6 +226,12 @@ export default function LibraryPage() {
       {error ? (
         <p className="mt-4 rounded-lg border border-[var(--warn)] px-3 py-2 text-xs text-[var(--warn)]">
           {error}
+        </p>
+      ) : null}
+
+      {demoNote ? (
+        <p className="mt-4 text-xs text-[var(--text-muted)]" role="status">
+          {demoNote}
         </p>
       ) : null}
 
@@ -279,7 +314,7 @@ export default function LibraryPage() {
                 <span className="chip text-[10px]">
                   {LEVEL_LABEL[document.access_level] ?? document.access_level}
                 </span>
-                {canManage && !document.is_synthetic ? (
+                {canManage && !document.is_synthetic && !document.demo_copy ? (
                   <div className="flex gap-2">
                     <button
                       className="text-xs underline decoration-dotted"

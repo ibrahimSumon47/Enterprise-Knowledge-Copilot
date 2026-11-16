@@ -104,6 +104,19 @@ def test_self_deactivation_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.status_code == 400
 
 
+def test_only_an_owner_can_load_the_demo_library(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def copy(org_id: str, user_id: str) -> int:
+        assert org_id == ORG
+        return 754
+
+    monkeypatch.setattr(db, "copy_demo_library", copy)
+    denied = client_for(user("admin")).post("/admin/demo-library")
+    assert denied.status_code == 403
+    allowed = client_for(user("owner")).post("/admin/demo-library")
+    assert allowed.status_code == 200
+    assert allowed.json() == {"status": "copied", "documents": 754}
+
+
 def test_owner_membership_cannot_be_changed(monkeypatch: pytest.MonkeyPatch) -> None:
     async def target(org_id: str, member_id: str) -> str:
         return "owner"

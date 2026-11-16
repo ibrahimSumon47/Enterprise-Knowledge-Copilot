@@ -70,10 +70,14 @@ Department roles add their department's material; admins and owners can ask acro
 all access levels. Questions work in Bangla or English, and every answer cites the
 passage it used.
 
-A newly created workspace starts empty. Upload PDF, DOCX, HTML, Markdown or text
-files in the library, wait for indexing to finish, then ask about them. Before that,
-the honest answer is a refusal. Questions about live news, personal data, medical
-or legal advice, or anything absent from the uploaded documents are outside scope.
+A newly created workspace starts empty. An owner can open **Library → Load demo
+library** to copy the sample handbook, department documents and synthetic
+confidential documents into their own workspace. The copy is idempotent, labelled
+as a demo copy and leaves the shared sample workspace unchanged; any later owner
+can use the same button. Owners can also upload PDF, DOCX, HTML, Markdown or text
+files, wait for indexing to finish, then ask about them. Before that, the honest
+answer is a refusal. Questions about live news, personal data, medical or legal
+advice, or anything absent from the workspace are outside scope.
 
 ## Screenshots
 

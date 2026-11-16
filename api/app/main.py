@@ -1048,6 +1048,24 @@ async def documents(user: AuthUser = Depends(current_user)) -> dict[str, Any]:
     return {"documents": rows, "role": user.role}
 
 
+@app.post("/admin/demo-library", tags=["admin"])
+async def load_demo_library(
+    user: AuthUser = Depends(require_owner),
+) -> dict[str, Any]:
+    """Copy the shared sample corpus into this owner's own workspace."""
+    copied = await db.copy_demo_library(user.org_id, user.id)
+    await audit.record(
+        org_id=user.org_id,
+        action="demo.library_copied",
+        resource_type="organization",
+        resource_id=user.org_id,
+        actor_id=user.id,
+        actor_role=user.role,
+        detail={"documents": copied},
+    )
+    return {"status": "copied" if copied else "already_loaded", "documents": copied}
+
+
 @app.patch("/documents/{document_id}", tags=["documents"])
 async def update_document(
     document_id: str,

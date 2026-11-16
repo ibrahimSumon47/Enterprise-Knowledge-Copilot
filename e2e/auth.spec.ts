@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const password = process.env.EKC_DEMO_PASSWORD ?? "";
+const guestPassword = process.env.EKC_GUEST_PASSWORD ?? "";
 const apiBase =
   process.env.EKC_API_URL ?? "https://enterprise-knowledge-copilot-2u57.onrender.com";
 
@@ -15,9 +16,9 @@ const roles = [
 ];
 
 test.beforeAll(async () => {
-  if (!password) {
+  if (!password || !guestPassword) {
     throw new Error(
-      "EKC_DEMO_PASSWORD is required: these tests sign in as the real role accounts.",
+      "EKC_DEMO_PASSWORD and EKC_GUEST_PASSWORD are required: these tests sign in as the real role accounts.",
     );
   }
   // The API sleeps on the free tier. Wake it once so role lookups do not time out.
@@ -34,11 +35,15 @@ test.beforeAll(async () => {
   }
 });
 
+function passwordFor(email: string) {
+  return email === "guest@ekc.local" ? guestPassword : password;
+}
+
 async function signIn(page: Page, email: string) {
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   await expect(page.locator("form[data-auth-version='3'][data-ready='true']")).toBeVisible();
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Password").fill(passwordFor(email));
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/chat$/, { timeout: 45_000 });
 }

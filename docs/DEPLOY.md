@@ -80,9 +80,14 @@ The application code is present; these console settings enable the flows.
 `@ekc.local` addresses cannot receive recovery email. Set
 `EKC_DEMO_PASSWORD` in GitHub → Settings → Secrets and variables → Actions, then
 run **Actions → Reset demo passwords**. The workflow uses the Supabase Admin API
-to write that password to the seven existing demo users and never prints the
-value. Changing the secret without running the workflow does not reset an
-existing account.
+to write that password to the six login demo users and never prints the value.
+Changing the secret without running the workflow does not reset an existing
+account.
+
+The sample workspace uses the separate `EKC_GUEST_PASSWORD` secret and the same
+name in Vercel Production. Keep the two values equal, then run the same workflow;
+it updates `guest@ekc.local` from that secret instead of the demo password. This
+keeps the one-click sample working after a demo reset.
 
 ### Google sign-in
 

@@ -201,10 +201,11 @@ Current numbers and their history are in `README.md` and
 ### Browser tests
 
 ```bash
-EKC_DEMO_PASSWORD=... pnpm exec playwright test
+EKC_DEMO_PASSWORD=... EKC_GUEST_PASSWORD=... pnpm exec playwright test
 ```
 
-The upload spec needs a fresh signup and can take several minutes on the free
+The sign-in spec uses the guest secret for `guest@ekc.local` and the demo secret
+for the other role accounts. The upload spec needs a fresh signup and can take several minutes on the free
 host; it waits for the document to reach `ready`, asks a question, then deletes
 the document. The sign-in spec covers all seven roles, session reload, the admin
 gate and sign-out.

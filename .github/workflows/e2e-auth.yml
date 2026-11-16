@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       EKC_DEMO_PASSWORD: ${{ secrets.EKC_DEMO_PASSWORD }}
+      EKC_GUEST_PASSWORD: ${{ secrets.EKC_GUEST_PASSWORD }}
       EKC_SIGNUP_E2E: "1"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

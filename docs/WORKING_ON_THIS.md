@@ -9,8 +9,7 @@ Read this with:
 
 1. `AGENTS.md` — the contract and access model.
 2. `docs/PROJECT_STATE.md` — what is done, what is measured, what is next.
-3. `docs/HANDOFF.md` — how to resume from zero context.
-4. `docs/DEPLOY.md` — every environment variable and where it belongs.
+3. `docs/DEPLOY.md` — every environment variable, identity-provider step and where it belongs.
 
 ## 1. The mental model
 
@@ -477,7 +476,7 @@ email sender for volume; Google sign-in needs a Google OAuth client and Supabase
 provider configuration. The code paths exist, but the owner must enable them.
 
 **Impact:** a fresh deployment cannot use those flows until the console steps in
-`docs/OWNER_TODO.md` are completed.
+`docs/DEPLOY.md` are completed.
 
 **Mitigation:** the steps are written down, the app shows the normal Supabase
 error instead of pretending success, and invite links work without an email

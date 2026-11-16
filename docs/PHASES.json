@@ -23,7 +23,7 @@
   "P2d": {
     "title": "Password reset and Google sign-in",
     "status": "done",
-    "evidence": "app/forgot-password and app/reset-password use Supabase one-time recovery links; login adds Google OAuth. Owner-side Supabase and Google console steps are in docs/OWNER_TODO.md. Console enablement remains an owner step, not code."
+    "evidence": "app/forgot-password and app/reset-password use Supabase one-time recovery links; login adds Google OAuth. Supabase and Google console steps are in docs/DEPLOY.md. Console enablement remains an owner step, not code."
   },
   "P2e": {
     "title": "Admin analytics, queue actions, audit export, settings",
@@ -43,6 +43,6 @@
   "P5": {
     "title": "Docs",
     "status": "done",
-    "evidence": "README, PROJECT_STATE, HANDOFF, ISOLATION, OWNER_TODO, DEMO_SCRIPT, llms.txt and ADRs are current; answer quality remains the only measured quota limit in P1."
+    "evidence": "README, PROJECT_STATE, DEPLOY, ISOLATION, DEMO_SCRIPT, llms.txt and ADRs are current; answer quality remains the only measured quota limit in P1."
   }
 }

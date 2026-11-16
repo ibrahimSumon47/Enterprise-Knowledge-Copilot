@@ -663,6 +663,10 @@ async def chat(
             "latency_ms": result.latency_ms,
             "reason": result.reason,
             "provider_trace": result.provider_trace,
+            # Admin-only diagnosis: join an evaluation row to the exact answer
+            # that was refused, without exposing raw model output to end users.
+            "message_id": message_id,
+            "raw_reply": result.raw_reply,
         },
     )
 

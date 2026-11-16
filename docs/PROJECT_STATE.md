@@ -74,8 +74,8 @@ reply for each wrong refusal before changing the prompt again.
   change it re-scores old answers.
 - Uploads are parsed and embedded synchronously and accept only Markdown, text,
   HTML, PDF and DOCX; there is no connector sync, OCR or background queue.
-- Password reset and Google sign-in need the owner console steps in
-  `docs/OWNER_TODO.md` before those flows work on a fresh deployment.
+- Password reset and Google sign-in need the console steps in `docs/DEPLOY.md`
+  before those flows work on a fresh deployment.
 - The golden set is 84 questions (50 dev, 34 test), so small score differences are
   noisy; both splits have been inspected during diagnosis.
 
@@ -88,7 +88,7 @@ The full impact, mitigation and removal condition for each limit is in
    largest cause and re-measure dev once before touching test.
 2. Improve citation precision without weakening quote verification, the relevance
    guard or the unanswerable-refusal rate.
-3. Enable password reset and Google sign-in in Supabase/Google using
-   `docs/OWNER_TODO.md`; the code paths already exist.
+3. Enable password reset and Google sign-in in Supabase/Google using the
+   identity section of `docs/DEPLOY.md`; the code paths already exist.
 4. Keep the SQL permission predicate and the two-workspace isolation gate at zero
    leakage on every schema or retrieval change.

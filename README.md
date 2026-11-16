@@ -5,8 +5,6 @@ with the passage it came from, and see only the documents their role may read.
 Administrators see where the documents fall short and can close the gap.
 
 **Live product:** https://enterprise-knowledge-copilot-wine.vercel.app
-**Repository:** https://github.com/ibrahimSumon47/Enterprise-Knowledge-Copilot
-**Working on it:** [setup, verification, strengths and detailed limits](docs/WORKING_ON_THIS.md)
 
 ## What a visitor can do
 
@@ -26,9 +24,9 @@ Captured by Playwright from the live deployment on 13 November 2026.
 | | |
 | --- | --- |
 | ![Landing](docs/screenshots/01-landing.png) | ![Chat with citations](docs/screenshots/04-chat-citations.png) |
-| ![Library](docs/screenshots/03-library.png) | ![Admin quality](docs/screenshots/05-admin-quality.png) |
+| ![Admin quality](docs/screenshots/05-admin-quality.png) | |
 
-More: `docs/screenshots/` (mobile, dark theme, product tour).
+More: `docs/screenshots/` (sign-in, dark theme, admin, mobile, product tour).
 
 ## Architecture
 
@@ -130,8 +128,8 @@ Deployment, including the free-tier limits: `docs/DEPLOY.md`. Demo walkthrough:
 - The 84-question set is small; the numbers move by a few points between runs of
   the same configuration. The per-question evidence is retained in
   `docs/reports/eval_dev.json` and `docs/reports/eval_test.json`.
-- The full engineering limits, mitigations and non-limitations are in
-  `docs/WORKING_ON_THIS.md`.
+- The free model quotas, cold starts and corpus scope are measured limits, not
+  hidden behaviour; the reports name the run behind each number.
 
 ## Credits and licences
 

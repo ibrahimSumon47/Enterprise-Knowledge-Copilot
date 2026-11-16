@@ -136,6 +136,43 @@ def sign_in(supabase_url: str, anon_key: str, email: str, password: str) -> str:
     return str(body["access_token"])
 
 
+def diagnostics_by_message(entries: list[dict]) -> dict[str, dict]:
+    """Index the admin audit's chat diagnostics by assistant message id.
+
+    The chat response intentionally hides the refusal reason and raw provider
+    reply from non-admins. The evaluation already has an admin token for
+    retrieval ranks, so it reads the same detail from the audit log instead of
+    widening the user-facing response.
+    """
+    found: dict[str, dict] = {}
+    for entry in entries:
+        if entry.get("action") != "chat.question":
+            continue
+        detail = entry.get("detail") or {}
+        if not isinstance(detail, dict):
+            continue
+        message_id = str(detail.get("message_id") or "").strip()
+        if not message_id:
+            continue
+        found[message_id] = {
+            "reason": detail.get("reason"),
+            "raw_reply": detail.get("raw_reply"),
+            "provider_trace": detail.get("provider_trace"),
+        }
+    return found
+
+
+def audit_diagnostics(args, token: str) -> dict[str, dict]:
+    """Read one page of the admin audit and index its answer diagnostics."""
+    body = http_json(
+        f"{args.api_url.rstrip('/')}/audit?limit=200",
+        "GET",
+        None,
+        {"Authorization": f"Bearer {token}"},
+    )
+    return diagnostics_by_message(body.get("entries") or [])
+
+
 def score(item: dict, response: dict) -> dict:
     """Score one answer against its expectation."""
     citations = response.get("citations") or []
@@ -340,6 +377,7 @@ def main() -> int:
                 "category": item["category"],
                 "answerable": bool(item.get("expect", {}).get("answerable")),
                 "role": role,
+                "message_id": response.get("message_id"),
                 # A throttled provider refuses without citations, which scores
                 # exactly like a retrieval miss. Keep the evidence to tell them
                 # apart, and let the summary count them.
@@ -351,6 +389,28 @@ def main() -> int:
                 **scored,
             }
         )
+
+    # Join each row to the admin-audited reason and raw provider reply. This is
+    # the missing diagnostic: a wrong refusal is only actionable when the trace
+    # distinguishes verification, empty evidence, relevance guard and provider
+    # failure. Cached answers carry their original message id, so this also works
+    # when a run resumes from the cache.
+    diagnostics: dict[str, dict] = {}
+    try:
+        if admin_token is None:
+            admin_token = sign_in(
+                args.supabase_url, args.anon_key, ROLE_EMAILS["admin"], args.password
+            )
+        diagnostics = audit_diagnostics(args, admin_token)
+    except Exception as exc:  # noqa: BLE001 - a diagnostic failure must not fake a score
+        print(f"warning: could not read refusal diagnostics: {exc}", file=sys.stderr)
+    for result in results:
+        detail = diagnostics.get(str(result.get("message_id") or ""))
+        if detail:
+            result["reason"] = detail.get("reason")
+            result["raw_reply"] = detail.get("raw_reply")
+            if detail.get("provider_trace") is not None:
+                result["provider_trace"] = detail["provider_trace"]
 
     outages = [result for result in results if result["provider_outage"]]
     scored = [result for result in results if not result["provider_outage"]]

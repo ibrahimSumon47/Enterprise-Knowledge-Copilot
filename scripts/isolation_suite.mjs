@@ -321,6 +321,21 @@ async function main() {
       "the owner could not retrieve the group document",
     );
 
+    // The library must apply the same group rule as retrieval: owner sees every
+    // group, a group-less admin does not.
+    const cLibrary = await json(await call("/documents", cSession.token));
+    const cLibraryTitles = (cLibrary.documents ?? []).map((doc) => doc.title);
+    expect(
+      !cLibraryTitles.includes(groupTitle),
+      "a non-member of the group saw its document in the library",
+    );
+    const ownerLibrary = await json(await call("/documents", a.token));
+    const ownerLibraryTitles = (ownerLibrary.documents ?? []).map((doc) => doc.title);
+    expect(
+      ownerLibraryTitles.includes(groupTitle),
+      "the owner could not see the group document in the library",
+    );
+
     // A shared answer link guessed by B is not found.
     const [conversation] = await service("/conversations", {
       method: "POST",

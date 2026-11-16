@@ -41,6 +41,11 @@ workspace, and cannot invite, grant or modify an admin. All signed-in roles can
 ask questions, open citations and upload documents where the workspace allows it;
 the sample workspace is read-only.
 
+`public` is an access level **inside one workspace**, not the open internet. A
+guest sees the public documents of the workspace they belong to; another owner's
+workspace is a different tenant and is never searched. Answers come from those
+documents, not from other users' past questions or from other workspaces.
+
 The access rule is enforced in the SQL that selects passages, not by hiding a
 button in the browser. `docs/WORKING_ON_THIS.md` records the full model.
 

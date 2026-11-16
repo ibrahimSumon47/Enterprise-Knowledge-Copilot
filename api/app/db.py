@@ -456,7 +456,7 @@ async def audit_page(org_id: str, limit: int = 100) -> list[dict[str, Any]]:
 async def list_documents(
     org_id: str, role: str, department: str | None, group_id: str | None = None
 ) -> list[dict[str, Any]]:
-    """Admin/inventory listing that still applies the access predicate."""
+    """Library listing with the same owner, group and access rules as search."""
     rows = await pool().fetch(
         """
         select id, slug, title, access_level, department, is_synthetic, status,
@@ -465,9 +465,9 @@ async def list_documents(
         from public.documents d
         where status in ('active', 'processing', 'failed')
           and org_id = $3
-          and (group_id is null or group_id = $4)
+          and ($1 = 'owner' or group_id is null or group_id = $4)
           and (
-            $1 = 'admin'
+            $1 in ('admin', 'owner')
             or ($1 = 'guest' and access_level = 'public')
             or ($1 <> 'guest' and (
                  access_level in ('public','employee')

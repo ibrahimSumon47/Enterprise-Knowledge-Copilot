@@ -111,6 +111,10 @@ flowchart LR
 The permission predicate is part of the SQL that selects chunks, mirrored by RLS.
 A post-filter would be a bug.
 
+How the AI path is layered — corpus, ingestion, retrieval, orchestration,
+verification, evaluation and serving — with the code, the decision and the
+measured evidence for each layer: [AI Engineering layer map](docs/AI_ENGINEERING_LAYERS.md).
+
 ## Answer quality, measured on both splits
 
 `eval/run_eval.py --split dev|test --cache-tag quality-v6`, full splits, five

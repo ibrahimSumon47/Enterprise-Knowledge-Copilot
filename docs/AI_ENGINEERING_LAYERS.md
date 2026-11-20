@@ -12,58 +12,47 @@ not in the call itself.
 ## The map
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 18, "rankSpacing": 28, "padding": 6}}}%%
 flowchart TB
-  subgraph L0["L0 · Corpus and fixtures"]
-    C1[data/corpus.jsonl<br/>GitLab Handbook + labelled synthetic docs]
+  subgraph L0["L0 · Corpus"]
+    direction LR
+    C1["data/corpus.jsonl<br/>handbook + synthetic docs"]
   end
   subgraph L1["L1 · Ingestion"]
-    I1[chunk_markdown<br/>heading-aware chunks]
-    I2[embed_documents<br/>bge-small-en-v1.5 ONNX, 384 dims]
-    I3[uploads + private Storage<br/>PDF / DOCX / HTML / MD / TXT]
+    direction LR
+    I3["uploads + private Storage"] --> I1["chunk_markdown"] --> I2["bge-small 384d"]
   end
   subgraph L2["L2 · Retrieval"]
-    R1[SQL: tenant + role + department + group predicate]
-    R2[pgvector + full-text, RRF fusion]
-    R3[TinyBERT cross-encoder rerank]
+    direction LR
+    R1["SQL permission predicate"] --> R2["pgvector + text, RRF"] --> R3["TinyBERT rerank"]
   end
-  subgraph L3["L3 · Orchestration and generation"]
-    G1[route: unclear / compensation / security / policy / handbook]
-    G2[provider router: Groq primary, Gemini backup]
-    G3[grounded JSON call: answer + verbatim quotes]
+  subgraph L3["L3 · Orchestration"]
+    direction LR
+    G1["question route"] --> G3["grounded JSON"]
+    G2["Groq + Gemini backup"] --> G3
   end
-  subgraph L4["L4 · Verification and refusal"]
-    V1[quote matches cited passage]
-    V2[relevance guard: shares question terms]
-    V3[verified citations, otherwise refusal<br/>outage is not a refusal]
+  subgraph L4["L4 · Verification"]
+    direction LR
+    V1["quote vs passage"] --> V2["relevance guard"] --> V3["cite, else refuse"]
+  end
+  subgraph L6["L6 · Serving and operations"]
+    direction LR
+    S3["JWT + org_members"] --> S1["FastAPI on Render"] --> S2["Next.js + CI gates"]
   end
   subgraph L5["L5 · Evaluation"]
-    E1[84 golden questions, dev / test split]
-    E2[retrieval, citation, refusal, latency, leakage]
-    E3[hard gate: permission leakage must be 0]
+    direction LR
+    E1["84 golden questions"] --> E2["citation, refusal, latency"] --> E3["leakage gate = 0"]
   end
-  subgraph L6["L6 · Serving, security and operations"]
-    S1[FastAPI on Render, 512 MB]
-    S2[Next.js on Vercel]
-    S3[JWT + org_members, hash-chained audit]
-    S4[CI: tests, isolation, eval, e2e, scans]
-  end
-
-  C1 --> I1 --> I2 --> R1
-  I3 --> I1
-  R1 --> R2 --> R3 --> G1
-  G1 --> G3
-  G2 --> G3
-  G3 --> V1 --> V2 --> V3
-  V3 --> S1
-  E1 --> E2 --> E3
-  S1 -. measured by .-> E2
-  S3 -. constrains .-> R1
+  L0 --> L1 --> L2 --> L3 --> L4 --> L6
+  L6 -. measured by .-> L5
 ```
 
-Read it top to bottom as the life of a document, and right to left at L2–L4 as the
-life of a question. The dotted lines are the two loops that make it engineering
-instead of a demo: security constrains retrieval, and evaluation measures the
-served system.
+Read it top to bottom as the life of a document. Each layer is one row, and the
+arrows inside a row are the work that layer does. The dotted arrow is the loop
+that makes it engineering instead of a demo: L5 measures what L6 serves. The
+security constraint is structural rather than an extra arrow — the permission
+predicate sits inside L2's SQL, so retrieval cannot return a document the caller
+may not read.
 
 ## Layer by layer
 

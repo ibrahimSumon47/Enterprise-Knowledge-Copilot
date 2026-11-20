@@ -31,7 +31,7 @@ strengths, limitations and non-limitations — is in `docs/WORKING_ON_THIS.md`.
 | --- | --- |
 | Sign-in on production, all seven roles | `.github/workflows/e2e-auth.yml` green on `48f4c22`; 9 Playwright tests, form sign-in, session reload, admin gate, sign out |
 | Sign-in bug cause | pre-hydration native GET submit put the password in the URL; inputs are uncontrolled and the submit is inert until hydration |
-| Cross-tenant / cross-role leakage | 0 in the evaluation and in `api/tests/test_retrieval_access.py` |
+| Cross-tenant / cross-role leakage | 0 in the evaluation and in `api/tests/test_org_scope.py` |
 | Activity log | checkpoint verification every six hours, weekly full pass, 24 h stale escalation, issue on failure |
 | API build identity | `/health.commit` (Render's `RENDER_GIT_COMMIT`) |
 

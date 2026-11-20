@@ -153,7 +153,7 @@ Client-facing summary: `/security`. Engineering evidence lives here and in
 
 | Control | Where it runs | Proof |
 | --- | --- | --- |
-| Permission leakage | `api/tests/test_retrieval_access.py` | cross-role probes, zero leaked passages |
+| Permission leakage | `api/tests/test_org_scope.py`, `eval/run_eval.py` | forged-claim and foreign-tenant probes; per-role citation leakage gate, zero leaked passages |
 | Sign-in on production | `.github/workflows/e2e-auth.yml` | Playwright signs in as all seven roles through the form and keeps the session |
 | Secret scanning | `.github/workflows/ci.yml` | gitleaks over the full history |
 | Code scanning | `.github/workflows/codeql.yml` | CodeQL, TypeScript and Python |

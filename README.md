@@ -97,15 +97,14 @@ More: `docs/screenshots/` (sign-in, dark theme, admin, mobile, product tour).
 ## Architecture
 
 ```mermaid
-flowchart LR
-  U[Browser] -->|Supabase session| W[Next.js 16 on Vercel]
-  W -->|Bearer JWT| A[FastAPI on Render]
-  A -->|JWKS verify| S[(Supabase Auth)]
-  A -->|SQL with the access predicate| P[(Postgres + pgvector)]
-  A --> R[Hybrid retrieval + TinyBERT rerank]
-  R --> L[Grounded answer call]
-  A -->|hash chain| AUD[(audit_log)]
-  A --> Q[(unanswered_questions)]
+%%{init: {"flowchart": {"nodeSpacing": 14, "rankSpacing": 26, "padding": 6}}}%%
+flowchart TB
+  U["browser<br/>session"] -->|session| W["Next.js<br/>Vercel"]
+  W -->|JWT| A["FastAPI<br/>Render"]
+  A -->|JWKS| S["Supabase<br/>Auth"]
+  A -->|SQL| D["Postgres<br/>pgvector"]
+  A --> R["retrieval<br/>+ rerank"] --> L["answer<br/>+ citations"]
+  A --> M["audit +<br/>unanswered"]
 ```
 
 The permission predicate is part of the SQL that selects chunks, mirrored by RLS.

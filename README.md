@@ -101,8 +101,7 @@ More: `docs/screenshots/` (sign-in, dark theme, admin, mobile, product tour).
 flowchart TB
   U["browser<br/>session"] -->|session| W["Next.js<br/>Vercel"]
   W -->|JWT| A["FastAPI<br/>Render"]
-  A -->|JWKS| S["Supabase<br/>Auth"]
-  A -->|SQL| D["Postgres<br/>pgvector"]
+  A --> S["Supabase<br/>Auth + DB"]
   A --> R["retrieval<br/>+ rerank"] --> L["answer<br/>+ citations"]
   A --> M["audit +<br/>unanswered"]
 ```

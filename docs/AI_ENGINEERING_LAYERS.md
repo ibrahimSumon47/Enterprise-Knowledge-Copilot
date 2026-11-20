@@ -12,36 +12,36 @@ not in the call itself.
 ## The map
 
 ```mermaid
-%%{init: {"flowchart": {"nodeSpacing": 18, "rankSpacing": 28, "padding": 6}}}%%
+%%{init: {"flowchart": {"nodeSpacing": 14, "rankSpacing": 24, "padding": 6}}}%%
 flowchart TB
   subgraph L0["L0 · Corpus"]
     direction LR
-    C1["data/corpus.jsonl<br/>handbook + synthetic docs"]
+    C1["handbook<br/>+ synthetic docs"]
   end
   subgraph L1["L1 · Ingestion"]
     direction LR
-    I3["uploads + private Storage"] --> I1["chunk_markdown"] --> I2["bge-small 384d"]
+    I1["upload"] --> I2["chunk"] --> I3["embed"]
   end
   subgraph L2["L2 · Retrieval"]
     direction LR
-    R1["SQL permission predicate"] --> R2["pgvector + text, RRF"] --> R3["TinyBERT rerank"]
+    R1["SQL<br/>permission"] --> R2["hybrid + rerank"]
   end
   subgraph L3["L3 · Orchestration"]
     direction LR
-    G1["question route"] --> G3["grounded JSON"]
-    G2["Groq + Gemini backup"] --> G3
+    G1["route"] --> G2["grounded<br/>JSON"]
+    G3["Groq / Gemini"] --> G2
   end
   subgraph L4["L4 · Verification"]
     direction LR
-    V1["quote vs passage"] --> V2["relevance guard"] --> V3["cite, else refuse"]
+    V1["quote<br/>check"] --> V2["cite or<br/>refuse"]
   end
-  subgraph L6["L6 · Serving and operations"]
+  subgraph L6["L6 · Serving"]
     direction LR
-    S3["JWT + org_members"] --> S1["FastAPI on Render"] --> S2["Next.js + CI gates"]
+    S1["JWT +<br/>role"] --> S2["FastAPI"] --> S3["Next.js<br/>+ CI"]
   end
   subgraph L5["L5 · Evaluation"]
     direction LR
-    E1["84 golden questions"] --> E2["citation, refusal, latency"] --> E3["leakage gate = 0"]
+    E1["84<br/>questions"] --> E2["metrics"] --> E3["leak<br/>gate"]
   end
   L0 --> L1 --> L2 --> L3 --> L4 --> L6
   L6 -. measured by .-> L5
@@ -53,6 +53,10 @@ that makes it engineering instead of a demo: L5 measures what L6 serves. The
 security constraint is structural rather than an extra arrow — the permission
 predicate sits inside L2's SQL, so retrieval cannot return a document the caller
 may not read.
+
+Node labels are kept short on purpose: GitHub scales the diagram down to fit a
+phone, so a narrow map stays readable instead of shrinking to unreadable text.
+The table below gives each step its full name.
 
 ## Layer by layer
 
